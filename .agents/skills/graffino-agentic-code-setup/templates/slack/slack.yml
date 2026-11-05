@@ -1,0 +1,59 @@
+# .github/workflows/slack.yml · Graffino agentic Slack addon
+# PR ready for review → "<PR> Ready for review." · Tag vX.Y.Z → release notice (tickets, open manual tests).
+# Dry run (prints the message) until the repository variable AUTOMATION_LIVE is "true".
+# Logic: .github/scripts/slack-notify.py (in this repo). Skips quietly without the secret.
+# Secrets: variant A (one repository secret) or B (a 1Password service account); setup keeps one.
+name: slack
+
+on:
+  pull_request:
+    branches: [{{BASE_BRANCH}}]
+    types: [opened, ready_for_review]
+  push:
+    tags: ['v[0-9]+.[0-9]+.[0-9]+']
+
+permissions:
+  contents: read
+
+jobs:
+  slack:
+    runs-on: {{RUNNER}}
+    timeout-minutes: 5
+    env:
+      # Secrets, variant A (repository secret): keep this line. Variant B: delete it.
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+      AUTOMATION_LIVE: ${{ vars.AUTOMATION_LIVE }}
+      PREFIX: {{PREFIX}}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # Secrets, variant B (1Password service account): keep these two steps and delete
+      # the SLACK_WEBHOOK_URL line under env above. Variant A: delete these two steps.
+      - id: op
+        name: Check the 1Password service account
+        env:
+          OP_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+        run: |
+          if [ -z "$OP_TOKEN" ]; then
+            echo "::notice::OP_SERVICE_ACCOUNT_TOKEN is not set in this repository: slack skipped."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Load the secrets from 1Password
+        if: steps.op.outputs.ready == 'true'
+        uses: 1password/load-secrets-action@v2
+        with:
+          export-env: true
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          SLACK_WEBHOOK_URL: {{OP_REF}}
+      - name: Ready for review
+        if: >-
+          github.event_name == 'pull_request' && (github.event.action == 'ready_for_review' ||
+          (github.event.action == 'opened' && !github.event.pull_request.draft))
+        run: python3 .github/scripts/slack-notify.py pr-ready
+      - name: Release notice
+        if: github.event_name == 'push'
+        run: python3 .github/scripts/slack-notify.py release "${GITHUB_REF_NAME}"

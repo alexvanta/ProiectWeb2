@@ -1,0 +1,14 @@
+# Claude / Agent local config and worktrees
+.claude/*
+!.claude/skills/
+!.claude/agents/
+.claude/worktrees/
+
+# OS / Editor
+Thumbs.db
+Desktop.ini
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.log

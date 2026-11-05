@@ -1,0 +1,7 @@
+{
+  "workspace_id": "{{CLICKUP_WORKSPACE_ID}}",
+  "doc_id": "{{CLICKUP_DOC_ID}}",
+  "ready_status": "{{READY_STATUS}}",
+  "status_order": {{STATUS_ORDER}},
+  "pages": {}
+}

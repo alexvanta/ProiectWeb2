@@ -1,0 +1,36 @@
+# .github/workflows/team-checks.yml · Graffino agentic team addon
+# PRs to {{BASE_BRANCH}}: ledger lint, branch name, commit titles, PR description, manual-test paths.
+# Tags vX.Y.Z: ledger lint + a release report (tickets, manual tests still open).
+# Self-contained: the logic is .github/scripts/team-checks.py in this repo.
+name: team-checks
+
+on:
+  pull_request:
+    branches: [{{BASE_BRANCH}}]
+    types: [opened, reopened, edited, synchronize, ready_for_review]
+  push:
+    tags: ['v[0-9]+.[0-9]+.[0-9]+']
+
+permissions:
+  contents: read
+
+jobs:
+  team-checks:
+    runs-on: {{RUNNER}}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Ledger lint
+        run: python3 docs/agents/tools/ledger-lint.py
+      - name: Branch, commits, PR description, manual tests
+        if: github.event_name == 'pull_request'
+        run: python3 .github/scripts/team-checks.py
+        env:
+          PREFIX: {{PREFIX}}
+      - name: Release report (tickets, open manual tests)
+        if: github.event_name == 'push'
+        run: python3 .github/scripts/team-checks.py --release "${GITHUB_REF_NAME}"
+        env:
+          PREFIX: {{PREFIX}}

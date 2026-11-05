@@ -1,0 +1,63 @@
+# .github/workflows/clickup.yml · Graffino agentic ClickUp addon
+# PR opened or edited → branch + PR links on every ticket it covers (Fixes / Part of lines) · PR ready → comment + ticket to the ready status
+# Tag vX.Y.Z → "released in" comment on every ticket in the release.
+# Dry run (log only) until the repository variable AUTOMATION_LIVE is "true".
+# Logic: .github/scripts/clickup-sync.py (in this repo). Skips quietly without the secret.
+# Secrets: variant A (one repository secret) or B (a 1Password service account); setup keeps one.
+name: clickup
+
+on:
+  pull_request:
+    branches: [{{BASE_BRANCH}}]
+    types: [opened, reopened, edited, ready_for_review]
+  push:
+    tags: ['v[0-9]+.[0-9]+.[0-9]+']
+
+permissions:
+  contents: read
+
+jobs:
+  clickup:
+    runs-on: {{RUNNER}}
+    timeout-minutes: 5
+    env:
+      # Secrets, variant A (repository secret): keep this line. Variant B: delete it.
+      CLICKUP_API_TOKEN: ${{ secrets.CLICKUP_API_TOKEN }}
+      AUTOMATION_LIVE: ${{ vars.AUTOMATION_LIVE }}
+      PREFIX: {{PREFIX}}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # Secrets, variant B (1Password service account): keep these two steps and delete
+      # the CLICKUP_API_TOKEN line under env above. Variant A: delete these two steps.
+      - id: op
+        name: Check the 1Password service account
+        env:
+          OP_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+        run: |
+          if [ -z "$OP_TOKEN" ]; then
+            echo "::notice::OP_SERVICE_ACCOUNT_TOKEN is not set in this repository: clickup skipped."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Load the secrets from 1Password
+        if: steps.op.outputs.ready == 'true'
+        uses: 1password/load-secrets-action@v2
+        with:
+          export-env: true
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          CLICKUP_API_TOKEN: {{OP_REF}}
+      - name: Link branch and PR on the ticket
+        if: github.event_name == 'pull_request' && (github.event.action == 'opened' || github.event.action == 'reopened' || github.event.action == 'edited')
+        run: python3 .github/scripts/clickup-sync.py pr-link
+      - name: Ready for review
+        if: >-
+          github.event_name == 'pull_request' && (github.event.action == 'ready_for_review' ||
+          (github.event.action == 'opened' && !github.event.pull_request.draft))
+        run: python3 .github/scripts/clickup-sync.py pr-ready
+      - name: Release comments
+        if: github.event_name == 'push'
+        run: python3 .github/scripts/clickup-sync.py release "${GITHUB_REF_NAME}"

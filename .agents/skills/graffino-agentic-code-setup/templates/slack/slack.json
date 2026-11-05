@@ -1,0 +1,5 @@
+{
+  "channel_label": "{{SLACK_CHANNEL}}",
+  "ticket_url": "{{TICKET_URL — use {ticket} where the ID goes}}",
+  "notify": {"pr_ready": {{NOTIFY_PR_READY}}, "release": {{NOTIFY_RELEASE}}}
+}
