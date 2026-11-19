@@ -75,6 +75,7 @@ Regulamentul oficial al competiției (SuperLiga României — sezon regular) est
 ## Documentație repo
 - [AGENTS.md](AGENTS.md) — reguli de lucru și definiția de „done”
 - [CONTEXT.md](CONTEXT.md) — vocabularul aprobat al proiectului
+- [INTERVIEW.md](INTERVIEW.md) — interviul de analiză a cerințelor cu reprezentantul Departamentului Competiții (SuperLiga României)
 - [RULES.md](RULES.md) — regulamentul oficial al competiției (SuperLiga României — sezon regular, ROAF FRF 2018 & RD FRF 2017)
 - [docs/agents/README.md](docs/agents/README.md) — ghid rapid pentru ledger-ul de cunoștințe
 - [docs/agents/ARCHITECTURE.md](docs/agents/ARCHITECTURE.md) — arhitectura planificată și fluxuri de date
