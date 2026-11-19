@@ -77,36 +77,42 @@ without new evidence. A rejected proposal is added there with the reason.
 <!-- graffino-agentic:end -->
 
 ## 1. What this repo is
-New visual application repository (`p19-liga-amatori`).
-Purpose, target users, and runtime environment are not defined yet (see Q-001).
+P19 amateur football league platform (single league, multiple seasons): round-robin
+fixtures with pitch constraints, audited result entry, live standings with configurable
+tie-breakers, suspensions enforced on match sheets, stats, iCal export, and in-app
+reschedule notifications. Real league rules and seed data are open (Q-007–Q-012).
 
 ## 2. Stack and commands
-Stack not chosen yet (see Q-002).
+Next.js (App Router), TypeScript (strict), Tailwind CSS, Prisma, PostgreSQL, Vitest, Playwright.
 
 ```bash
 # Ledger check (verified)
 python3 docs/agents/tools/ledger-lint.py
 
-# Install, build, run, test, lint/type-check — not run: empty repo, stack TBD (Q-002)
-# Screenshot command — not run: empty repo, screenshot method TBD (Q-006)
+# Install, dev, build, lint, type-check, Vitest — not run: app not scaffolded yet
+# Playwright screenshots (light & dark) — not run: app not scaffolded yet (Q-006)
 ```
 
 ## 3. Layout
 - `.claude/` — repo-local agent skills (`/plan`, `/build`) and subagents (`planner`, `builder`).
-- `docs/agents/` — knowledge ledger (decisions, patterns, contracts, open questions, architecture) and `ledger-lint.py`.
+- `docs/agents/` — knowledge ledger, architecture, and `ledger-lint.py`.
 - `docs/design/` — design guardrails, token tables, `registry.yaml`, `mocks/`, and `screens/`.
-- Application source folders are not created yet (see Q-003).
+- `README.md` — project scope, stack, roles, and open league variables.
+- Planned app folders (`src/app/`, `src/domain/`, `src/server/`, `prisma/`, `tests/`) — not scaffolded yet.
 
 ## 4. Rules for this repo
-- None beyond the base rules yet. Add day-to-day mechanics here as the codebase grows.
+- UI copy is in Romanian; code, tests, and `docs/agents/` stay in English.
+- Never invent real-league rules, thresholds, pitch schedules, or seed data (see Q-007–Q-012).
+- Keep standings and schedule generation as pure, unit-tested TypeScript functions.
 
 ## 5. Release
-- Default branch: `main`. No remote, version source, changelog, tags, or deploy flow yet (see Q-004).
+- Default branch: `main`. Remote `origin`: `https://github.com/alexvanta/ProiectWeb2.git`.
+- Local-first runtime; deployment and release flow remain open (see Q-004).
 - Never push, tag, release, or deploy without the user's go.
 
 ## 6. Definition of done
 - `python3 docs/agents/tools/ledger-lint.py` passes.
-- Test command passes (once configured; see Q-002).
-- Build and type-check commands pass (once configured; see Q-002).
-- Screenshots of every changed screen, light and dark, compared with `docs/design/DESIGN.md` (once configured; see Q-006).
+- Vitest suite passes (once scaffolded).
+- Next.js build, lint, and TypeScript type-check pass (once scaffolded).
+- Playwright light and dark screenshots of every changed screen compared with `docs/design/DESIGN.md` (once scaffolded).
 - New practices recorded as candidate patterns; open points recorded as Q- entries.

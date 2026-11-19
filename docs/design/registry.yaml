@@ -1,4 +1,65 @@
 # docs/design/registry.yaml — every screen and shared component, by DS- ID.
 # Plans, commits, mocks and board files use the ID (tickets don't). kind: foundation | component | screen
 # status: draft (mock drawn) | approved (confirmed on the board) | implemented | deprecated (never delete an entry)
-designs: []
+# Note: Mocks are not drawn yet; waiting on Q-005 design tokens before creating docs/design/mocks/<DS-id>.html.
+designs:
+  - id: DS-p19-home-standings
+    kind: screen
+    source: TBD (planned route /)
+    screenshots: []
+    design_ref: none
+    status: draft
+  - id: DS-p19-fixtures
+    kind: screen
+    source: TBD (planned route /program)
+    screenshots: []
+    design_ref: none
+    status: draft
+  - id: DS-p19-match-detail
+    kind: screen
+    source: TBD (planned route /meciuri/[id])
+    screenshots: []
+    design_ref: none
+    status: draft
+  - id: DS-p19-stats-suspensions
+    kind: screen
+    source: TBD (planned route /statistici)
+    screenshots: []
+    design_ref: none
+    status: draft
+  - id: DS-p19-team-profile
+    kind: screen
+    source: TBD (planned route /echipe/[id])
+    screenshots: []
+    design_ref: none
+    status: draft
+  - id: DS-p19-player-profile
+    kind: screen
+    source: TBD (planned route /jucatori/[id])
+    screenshots: []
+    design_ref: none
+    status: draft
+  - id: DS-p19-auth-notifications
+    kind: screen
+    source: TBD (planned routes /login, /notificari)
+    screenshots: []
+    design_ref: none
+    status: draft
+  - id: DS-p19-match-sheet
+    kind: screen
+    source: TBD (planned route /capitan/foaie-meci/[matchId])
+    screenshots: []
+    design_ref: none
+    status: draft
+  - id: DS-p19-referee-panel
+    kind: screen
+    source: TBD (planned route /arbitru)
+    screenshots: []
+    design_ref: none
+    status: draft
+  - id: DS-p19-admin-panel
+    kind: screen
+    source: TBD (planned route /admin)
+    screenshots: []
+    design_ref: none
+    status: draft
