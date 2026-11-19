@@ -1,6 +1,6 @@
-# P19 — Liga de amatori: fixtures, clasament, suspendări
+# P19 — SuperLiga României (sezon regular): fixtures, clasament, suspendări
 
-Platformă web pentru o ligă reală de fotbal de amatori (o singură ligă, mai multe sezoane): sezoane, echipe, jucători cu transferuri între sezoane, terenuri cu disponibilitate, generare program tur-retur cu constrângeri, introducere și corecție rezultate cu istoric, clasament live cu lanț de departajare configurabil, suspendări automate/disciplinare cu validare pe server la foaia de meci și alertare la modificări retroactive, statistici, export iCal per echipă și notificări in-app la reprogramare.
+Platformă web pentru competiția **SuperLiga României — sezon regular** (o singură ligă, mai multe sezoane, regulament oficial extras din ROAF FRF 2018 și Regulamentul Disciplinar FRF 2017): sezoane, echipe (16 echipe, 30 etape tur–retur), jucători cu transferuri între sezoane, terenuri cu disponibilitate, generare program tur–retur cu constrângeri (configurabil și pentru număr impar cu `bye`), introducere și corecție rezultate cu istoric, clasament live cu lanț de departajare configurabil, suspendări automate/disciplinare cu validare pe server la foaia de meci și alertare la modificări retroactive, statistici, export iCal per echipă și notificări in-app la reprogramare.
 
 - **Limbă UI:** română (Light + Dark mode, responsive)
 - **Limbă cod & ledger:** engleză (`AGENTS.md`, `docs/agents/`)
@@ -16,7 +16,7 @@ Platformă web pentru o ligă reală de fotbal de amatori (o singură ligă, mai
 - **Clasament live & departajare („la trei”):** funcție pură, testată determinist, cu lanț de departajare configurabil ca listă ordonată de criterii (inclusiv mini-clasament pentru 3+ echipe cu circularitate `A > B > C > A` și reluarea lanțului pentru echipele încă egale).
 - **Suspendări & foaie de meci:** suspendări automate după regulamentul ligii (cumul galbene + decizie comisie la roșu), consumate pe **următoarele etape jucate efectiv de echipă** (nu calendaristic; o etapă amânată nu consumă suspendarea), raportabile în sezonul următor; respingere obligatorie **pe server** a jucătorilor suspendați la trimiterea foii de meci; **alerte de suspendare retroactivă** către `arbitru / organizator` și `admin` la corecții care afectează meciuri deja jucate (fără anulare automată a scorului).
 - **Statistici, iCal și notificări:** top marcatori, cartonașe, forma ultimelor 5 meciuri, pagini publice echipe și jucători, program public cu filtre, export iCal (`.ics`) per echipă și notificări **in-app** (PostgreSQL) la reprogramare.
-- **Livrabile de input uman:** `INTERVIEW.md` (interviul cu organizatorul), `RULES.md` (regulamentul real citat) și datele de seed ale unui sezon trecut (în așteptarea confirmării ligii reale — vezi secțiunea „Variabilele proiectului”).
+- **Regulament oficial & date:** [RULES.md](RULES.md) (regulamentul SuperLigii României — sezon regular, cu citarea articolelor din ROAF FRF 2018 și RD FRF 2017, aprobat de profesor) și datele reale ale unui sezon regular în `prisma/seed.ts`.
 
 ### Ecrane (10 ecrane — Light & Dark)
 **Publice:**
@@ -64,23 +64,18 @@ Platformă web pentru o ligă reală de fotbal de amatori (o singură ligă, mai
 
 ## Variabilele proiectului (încă deschise — `Q-`)
 
-Nu a fost inventat niciun detaliu despre liga reală sau organizator. Toate variabilele care depind de alegerea ligii finale, interviul cu organizatorul (`INTERVIEW.md`), regulamentul real (`RULES.md`) și sistemul de design sunt urmărite în [docs/agents/OPEN-QUESTIONS.md](docs/agents/OPEN-QUESTIONS.md):
+Regulamentul oficial al competiției (SuperLiga României — sezon regular) este documentat în [RULES.md](RULES.md), iar întrebările `Q-007`–`Q-012` au fost închise în [docs/agents/OPEN-QUESTIONS.md](docs/agents/OPEN-QUESTIONS.md). Singura variabilă rămasă deschisă:
 
 | ID | Variabilă deschisă | Ce blochează |
 |---|---|---|
 | `Q-004` | Deploy / release la predare (local-only vs deploy public) | Secțiunea 5 din `AGENTS.md` |
-| `Q-007` | Liga reală aleasă și concluziile interviului cu organizatorul | `INTERVIEW.md`, `RULES.md`, identitatea ligii |
-| `Q-008` | Datele reale ale unui sezon trecut (echipe, loturi, rezultate) | `prisma/seed.ts` cu date reale |
-| `Q-009` | Parametrii exacți ai formatului ligii (tururi, puncte, limite foaie de meci) | Configurația implicită de sezon |
-| `Q-010` | Lanțul exact de departajare și varianta exactă de mini-clasament „la trei” | Ordinea implicită a criteriilor în motorul de clasament |
-| `Q-011` | Regulile exacte de suspendări (prag galbene, roșu, raportare între sezoane) | Parametrii impliciți ai motorului de suspendări |
-| `Q-012` | Constrângerile reale de terenuri, zile, intervale și obiceiuri de programare | Datele inițiale de terenuri și constrângeri suplimentare |
 
 ---
 
 ## Documentație repo
 - [AGENTS.md](AGENTS.md) — reguli de lucru și definiția de „done”
 - [CONTEXT.md](CONTEXT.md) — vocabularul aprobat al proiectului
+- [RULES.md](RULES.md) — regulamentul oficial al competiției (SuperLiga României — sezon regular, ROAF FRF 2018 & RD FRF 2017)
 - [docs/agents/README.md](docs/agents/README.md) — ghid rapid pentru ledger-ul de cunoștințe
 - [docs/agents/ARCHITECTURE.md](docs/agents/ARCHITECTURE.md) — arhitectura planificată și fluxuri de date
 - [docs/agents/OPEN-QUESTIONS.md](docs/agents/OPEN-QUESTIONS.md) — întrebări deschise (`Q-`)
