@@ -107,7 +107,7 @@ python3 docs/agents/tools/ledger-lint.py
 
 ## 5. Release
 - Default branch: `main`. Remote `origin`: `https://github.com/alexvanta/ProiectWeb2.git`.
-- Local-first runtime; deployment and release flow remain open (see Q-004).
+- Local-only runtime with PostgreSQL; no public production deploy and no mandatory CI/CD pipeline (Q-004).
 - Never push, tag, release, or deploy without the user's go.
 
 ## 6. Definition of done

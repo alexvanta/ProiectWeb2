@@ -12,7 +12,7 @@
 - Q-001 · What is the purpose, audience, runtime, and domain vocabulary of p19-liga-amatori? · _answered_
 - Q-002 · What tech stack and dev/build/test/lint commands does this repo use? · _answered_
 - Q-003 · What is the top-level repository layout and high-level architecture? · _answered_
-- Q-004 · What is the git remote, branching, versioning, and release workflow?
+- Q-004 · What is the git remote, branching, versioning, and release workflow? · _answered_
 - Q-005 · What are the design tokens, token source, and design board / Figma links? · _answered_
 - Q-006 · How do we screenshot this app? · _answered_
 - Q-007 · Which real league is selected, and what is the official rule source? · _answered_
@@ -46,10 +46,11 @@
 - **Recorded as:** D-001, D-002, D-003, D-004, D-005, `docs/agents/ARCHITECTURE.md`, `AGENTS.md`, `README.md`
 
 ## Q-004 · What is the git remote, branching, versioning, and release workflow?
-- **Status:** open
-- **Blocks:** AGENTS.md section 5 deployment and release details (if a public deploy is needed for grading)
+- **Status:** answered 2026-11-20
+- **Blocks:** AGENTS.md section 5 deployment and release details
 - **Who answers:** project owner
-- **Proposed answer:** Remote `origin` is `https://github.com/alexvanta/ProiectWeb2.git` with default branch `main`; application runs locally with PostgreSQL, with no production deploy or CI/CD pipeline unless needed later.
+- **Answer:** Remote `origin` is `https://github.com/alexvanta/ProiectWeb2.git` with default branch `main`; the application runs local-only with PostgreSQL, with no public production deploy and no mandatory CI/CD pipeline.
+- **Recorded as:** `AGENTS.md` section 5
 
 ## Q-005 · What are the design tokens, token source, and design board / Figma links?
 - **Status:** answered 2026-11-19
