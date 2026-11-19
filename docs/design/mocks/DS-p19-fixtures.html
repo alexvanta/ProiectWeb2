@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="ro" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Program meciuri — Liga de Amatori P19</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-canvas: #F7F8F6;
+      --bg-surface: #FFFFFF;
+      --bg-subtle: #EEF1EE;
+      --bg-header-glass: rgba(255, 255, 255, 0.84);
+      --surface-highlight: rgba(255, 255, 255, 0.80);
+      --text-primary: #0F172A;
+      --text-secondary: #334155;
+      --text-muted: #526071;
+      --border-subtle: #DCE2E8;
+      --border-strong: #768596;
+      --accent-primary: #156842;
+      --accent-primary-hover: #0F5132;
+      --accent-primary-fg: #FFFFFF;
+      --focus-ring: #156842;
+
+      --status-win-bg: #DCFCE7;
+      --status-win-fg: #14532D;
+      --status-draw-bg: #E2E8F0;
+      --status-draw-fg: #334155;
+      --status-loss-bg: #FEE2E2;
+      --status-loss-fg: #991B1B;
+
+      --card-yellow-fill: #FACC15;
+      --card-yellow-border: #A16207;
+      --card-yellow-bg: #FEF3C7;
+      --card-yellow-fg: #713F12;
+      --card-red-fill: #DC2626;
+      --card-red-bg: #FEE2E2;
+      --card-red-fg: #991B1B;
+
+      --alert-retro-bg: #FFEDD5;
+      --alert-retro-fg: #7C2D12;
+      --alert-retro-border: #C2410C;
+      --info-bg: #DBEAFE;
+      --info-fg: #1E3A8A;
+
+      --font-display: 'Barlow Semi Condensed', system-ui, -apple-system, sans-serif;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 20px;
+      --space-6: 24px;
+      --space-8: 32px;
+      --space-12: 48px;
+      --container-max: 1200px;
+
+      --radius-sm: 4px;
+      --radius-md: 6px;
+      --radius-lg: 12px;
+      --radius-full: 9999px;
+
+      --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 10px 26px rgba(15, 23, 42, 0.12);
+      --motion-fast: 140ms cubic-bezier(0.22, 1, 0.36, 1);
+      --motion-base: 240ms cubic-bezier(0.22, 1, 0.36, 1);
+      --motion-enter: 360ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    [data-theme="dark"] {
+      --bg-canvas: #0C1116;
+      --bg-surface: #141B22;
+      --bg-subtle: #1C2630;
+      --bg-header-glass: rgba(20, 27, 34, 0.80);
+      --surface-highlight: rgba(255, 255, 255, 0.06);
+      --text-primary: #F1F5F9;
+      --text-secondary: #CBD5E1;
+      --text-muted: #94A3B8;
+      --border-subtle: #24303C;
+      --border-strong: #5E7083;
+      --accent-primary: #34D399;
+      --accent-primary-hover: #6EE7B7;
+      --accent-primary-fg: #062315;
+      --focus-ring: #34D399;
+
+      --status-win-bg: #102E20;
+      --status-win-fg: #86EFAC;
+      --status-draw-bg: #25313E;
+      --status-draw-fg: #CBD5E1;
+      --status-loss-bg: #3B1519;
+      --status-loss-fg: #FCA5A5;
+
+      --card-yellow-fill: #FACC15;
+      --card-yellow-border: #FDE047;
+      --card-yellow-bg: #332609;
+      --card-yellow-fg: #FDE047;
+      --card-red-fill: #F87171;
+      --card-red-bg: #3B1519;
+      --card-red-fg: #FCA5A5;
+
+      --alert-retro-bg: #3B1F0B;
+      --alert-retro-fg: #FDBA74;
+      --alert-retro-border: #FB923C;
+      --info-bg: #13294B;
+      --info-fg: #93C5FD;
+
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.40);
+      --shadow-md: 0 10px 28px rgba(0, 0, 0, 0.52);
+    }
+
+    @keyframes enterUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition-duration: 0ms !important;
+        animation-duration: 0ms !important;
+        animation-iteration-count: 1 !important;
+      }
+      .animate-enter { opacity: 1 !important; transform: none !important; }
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg-canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      line-height: 20px;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color var(--motion-base), color var(--motion-base);
+    }
+
+    a { color: inherit; text-decoration: none; }
+    :focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+    .tabular { font-variant-numeric: tabular-nums lining-nums; }
+    .animate-enter { animation: enterUp var(--motion-enter) both; }
+
+    /* Distinct Club Crests */
+    .crest-vn { background: linear-gradient(135deg, #156842 0%, #0D4A2E 100%); }
+    .crest-as { background: linear-gradient(135deg, #1D4ED8 0%, #1E3A8A 100%); }
+    .crest-vp { background: linear-gradient(135deg, #B91C1C 0%, #7F1D1D 100%); }
+    .crest-ar { background: linear-gradient(135deg, #7E22CE 0%, #581C87 100%); }
+    .crest-ud { background: linear-gradient(135deg, #B45309 0%, #78350F 100%); }
+    .crest-sc { background: linear-gradient(135deg, #0F766E 0%, #134E4A 100%); }
+    .crest-ps { background: linear-gradient(135deg, #334155 0%, #0F172A 100%); }
+    .crest-rv { background: linear-gradient(135deg, #C2410C 0%, #7C2D12 100%); }
+    .crest-gn { background: linear-gradient(135deg, #4338CA 0%, #312E81 100%); }
+
+    .team-crest {
+      width: 22px;
+      height: 22px;
+      border-radius: var(--radius-sm);
+      color: #FFFFFF;
+      font-family: var(--font-display);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24), 0 1px 2px rgba(0, 0, 0, 0.16);
+    }
+
+    /* Header (Glassmorphism + Active Indicator) */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: var(--bg-header-glass);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-sm);
+      transition: background-color var(--motion-base), border-color var(--motion-base);
+    }
+
+    .header-inner {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: var(--space-2) var(--space-4);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-4);
+      flex-wrap: wrap;
+    }
+
+    .brand-group { display: flex; align-items: center; gap: var(--space-3); }
+    .brand-mark {
+      width: 34px; height: 34px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-primary-hover) 100%);
+      color: var(--accent-primary-fg);
+      font-family: var(--font-display);
+      font-weight: 700; font-size: 16px;
+      display: inline-flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+    .brand-title { font-family: var(--font-display); font-size: 18px; line-height: 20px; font-weight: 700; }
+    .brand-sub { font-size: 12px; line-height: 16px; color: var(--text-muted); display: block; }
+
+    .main-nav { display: flex; align-items: center; gap: var(--space-1); flex-wrap: wrap; }
+    .nav-link {
+      position: relative;
+      display: inline-flex; align-items: center; gap: 5px; min-height: 36px;
+      padding: 0 var(--space-3); border-radius: var(--radius-md);
+      font-size: 14px; font-weight: 500; color: var(--text-secondary);
+      transition: background var(--motion-fast), color var(--motion-fast);
+    }
+    .nav-link:hover { background: var(--bg-subtle); color: var(--text-primary); }
+    .nav-link.active {
+      background: color-mix(in srgb, var(--accent-primary) 11%, transparent);
+      color: var(--accent-primary);
+      font-weight: 600;
+    }
+    .nav-link.active::after {
+      content: "";
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      bottom: -9px;
+      height: 2px;
+      border-radius: var(--radius-full);
+      background: var(--accent-primary);
+    }
+    .nav-dropdown { position: relative; display: inline-flex; align-items: center; }
+    .nav-dropdown::after { content: ""; position: absolute; left: 0; right: 0; top: 100%; height: 10px; }
+    .nav-chevron { width: 14px; height: 14px; flex-shrink: 0; transition: transform var(--motion-fast); }
+    .nav-dropdown:hover .nav-chevron,
+    .nav-dropdown:focus-within .nav-chevron { transform: rotate(180deg); }
+    .nav-dropdown-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      min-width: 172px;
+      padding: var(--space-1);
+      border-radius: var(--radius-lg);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      box-shadow: inset 0 1px 0 var(--surface-highlight), var(--shadow-md);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateY(-4px);
+      transition: opacity var(--motion-base), transform var(--motion-base), visibility var(--motion-base);
+      z-index: 50;
+    }
+    .nav-dropdown:hover .nav-dropdown-menu,
+    .nav-dropdown:focus-within .nav-dropdown-menu {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+    .nav-dropdown-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 36px;
+      padding: 0 var(--space-3);
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      transition: background var(--motion-fast), color var(--motion-fast);
+    }
+    .nav-dropdown-item:hover,
+    .nav-dropdown-item:focus-visible { background: var(--bg-subtle); color: var(--text-primary); }
+
+    .header-actions { display: flex; align-items: center; gap: var(--space-2); }
+
+    .select-control {
+      min-height: 36px; padding: 0 var(--space-3);
+      border-radius: var(--radius-md); border: 1px solid var(--border-strong);
+      background: var(--bg-surface); color: var(--text-primary);
+      font-family: var(--font-sans); font-size: 13px; font-weight: 500;
+      transition: background-color var(--motion-base), border-color var(--motion-fast), color var(--motion-base);
+    }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+      min-height: 36px; padding: 0 var(--space-3);
+      border-radius: var(--radius-md); border: 1px solid transparent;
+      font-family: var(--font-sans); font-size: 13px; font-weight: 600; cursor: pointer;
+      transition: background var(--motion-fast), border-color var(--motion-fast), color var(--motion-fast), transform var(--motion-fast);
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-secondary { background: var(--bg-surface); border-color: var(--border-strong); color: var(--text-primary); }
+    .btn-secondary:hover { background: var(--bg-subtle); }
+    .btn-primary { background: var(--accent-primary); color: var(--accent-primary-fg); }
+    .btn-primary:hover { background: var(--accent-primary-hover); }
+    .btn-ghost { background: transparent; color: var(--text-secondary); }
+    .btn-ghost:hover { background: var(--bg-subtle); color: var(--text-primary); }
+    .icon-sm { width: 16px; height: 16px; flex-shrink: 0; }
+    .theme-icon { transition: transform var(--motion-base); }
+
+    /* Container & Heading */
+    .container {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: var(--space-6) var(--space-4) var(--space-12);
+    }
+
+    .page-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: var(--space-4);
+      flex-wrap: wrap;
+      margin-bottom: var(--space-5);
+      padding-bottom: var(--space-4);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    h1 {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: 30px;
+      line-height: 34px;
+      font-weight: 700;
+    }
+
+    .page-meta { margin: var(--space-1) 0 0; font-size: 13px; color: var(--text-muted); }
+
+    /* Info banner (DS-p19-alert-banner) */
+    .alert-banner {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-lg);
+      margin-bottom: var(--space-5);
+      border: 1px solid var(--border-subtle);
+      box-shadow: inset 0 1px 0 var(--surface-highlight), var(--shadow-sm);
+      transition: background-color var(--motion-base), border-color var(--motion-base);
+    }
+
+    .alert-info {
+      background: var(--info-bg);
+      color: var(--info-fg);
+      border-left: 4px solid var(--info-fg);
+    }
+
+    .alert-body { display: flex; align-items: flex-start; gap: var(--space-3); font-size: 13px; line-height: 19px; }
+    .alert-title { font-weight: 700; display: block; margin-bottom: 2px; }
+
+    /* DS-p19-filter-bar */
+    .filter-bar {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4);
+      margin-bottom: var(--space-5);
+      box-shadow: inset 0 1px 0 var(--surface-highlight), var(--shadow-sm);
+      transition: background-color var(--motion-base), border-color var(--motion-base);
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+      gap: var(--space-3);
+      align-items: end;
+    }
+
+    .field { display: flex; flex-direction: column; gap: 4px; }
+    .field label { font-size: 12px; line-height: 16px; font-weight: 600; color: var(--text-secondary); }
+    .field select { width: 100%; }
+
+    .filter-summary {
+      margin-top: var(--space-3);
+      padding-top: var(--space-3);
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Round groups & DS-p19-match-card */
+    .rounds-stack { display: flex; flex-direction: column; gap: var(--space-5); }
+
+    .round-panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      box-shadow: inset 0 1px 0 var(--surface-highlight), var(--shadow-sm);
+      overflow: hidden;
+      transition: background-color var(--motion-base), border-color var(--motion-base);
+    }
+
+    .round-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+      padding: var(--space-3) var(--space-4);
+      background: var(--bg-subtle);
+      border-bottom: 1px solid var(--border-subtle);
+      transition: background-color var(--motion-base);
+    }
+
+    .round-title {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: 20px;
+      line-height: 24px;
+      font-weight: 600;
+      color: var(--accent-primary);
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      transition: color var(--motion-base);
+    }
+
+    .round-tag {
+      font-family: var(--font-sans);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: var(--radius-full);
+      background: color-mix(in srgb, var(--accent-primary) 14%, transparent);
+      color: var(--accent-primary);
+    }
+
+    .round-dates {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-family: var(--font-sans);
+      font-weight: 400;
+    }
+
+    .match-row {
+      display: grid;
+      grid-template-columns: 146px 164px minmax(0, 1fr) 76px minmax(0, 1fr) 178px;
+      align-items: center;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--border-subtle);
+      transition: background-color var(--motion-fast);
+    }
+
+    .match-row:last-child { border-bottom: none; }
+    .match-row:hover { background: var(--bg-subtle); }
+
+    .cell-dt { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+    .cell-pitch { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+
+    .team-side {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      min-width: 0;
+    }
+
+    .cell-home { justify-content: flex-end; text-align: right; }
+    .cell-away { justify-content: flex-start; text-align: left; }
+
+    .team-text {
+      font-weight: 600;
+      color: var(--text-primary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* Discreet winner highlighting on played fixtures */
+    .team-side.is-winner .team-text {
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .win-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: var(--radius-full);
+      background: var(--accent-primary);
+      flex-shrink: 0;
+    }
+
+    .team-side.is-loser .team-text {
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .score-box {
+      padding: 4px var(--space-2);
+      border-radius: var(--radius-md);
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+      text-align: center;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .score-num-lose {
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .score-sep {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .score-box.upcoming { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+
+    .cell-status {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: var(--space-2);
+      flex-wrap: wrap;
+    }
+
+    .status-badge {
+      display: inline-flex; align-items: center; gap: var(--space-1);
+      padding: 2px var(--space-2); border-radius: var(--radius-md);
+      font-size: 12px; line-height: 16px; font-weight: 600; white-space: nowrap;
+    }
+    .status-played { background: var(--status-win-bg); color: var(--status-win-fg); }
+    .status-scheduled { background: var(--bg-subtle); color: var(--text-secondary); border: 1px solid var(--border-subtle); }
+    .status-postponed { background: var(--status-draw-bg); color: var(--status-draw-fg); }
+    .status-bye { background: var(--bg-surface); color: var(--text-muted); border: 1px dashed var(--border-strong); }
+    .status-corrected { background: var(--info-bg); color: var(--info-fg); }
+
+    .detail-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent-primary);
+    }
+
+    .detail-link:hover { color: var(--accent-primary-hover); }
+
+    .arrow-glide {
+      display: inline-block;
+      transition: transform var(--motion-fast);
+    }
+
+    .match-row:hover .arrow-glide,
+    .detail-link:hover .arrow-glide {
+      transform: translateX(3px);
+    }
+
+    /* Empty state */
+    .empty-state {
+      display: none;
+      text-align: center;
+      padding: var(--space-8) var(--space-4);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      box-shadow: inset 0 1px 0 var(--surface-highlight), var(--shadow-sm);
+    }
+    .empty-state.visible { display: block; }
+    .empty-state h2 { margin: 0 0 var(--space-2); font-family: var(--font-display); font-size: 20px; }
+    .empty-state p { margin: 0 0 var(--space-4); color: var(--text-muted); font-size: 13px; }
+
+    /* Animated Floating Toast for #ical-feedback (never pushes layout) */
+    .toast-region {
+      position: fixed;
+      right: var(--space-5);
+      bottom: var(--space-5);
+      z-index: 60;
+      pointer-events: none;
+      max-width: min(400px, calc(100vw - 32px));
+    }
+
+    .toast {
+      pointer-events: auto;
+      display: flex;
+      align-items: flex-start;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      border-radius: var(--radius-lg);
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      border-left: 4px solid var(--accent-primary);
+      box-shadow: inset 0 1px 0 var(--surface-highlight), var(--shadow-md);
+      font-size: 13px;
+      line-height: 19px;
+      opacity: 0;
+      transform: translateY(14px) scale(0.98);
+      visibility: hidden;
+      transition: opacity var(--motion-base), transform var(--motion-base), visibility var(--motion-base);
+    }
+
+    .toast.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      visibility: visible;
+    }
+
+    .toast-icon {
+      color: var(--accent-primary);
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .toast-title {
+      font-weight: 700;
+      display: block;
+      margin-bottom: 2px;
+      color: var(--text-primary);
+    }
+
+    .toast-close {
+      margin-left: auto;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: var(--radius-sm);
+      min-width: 28px;
+      min-height: 28px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--motion-fast), color var(--motion-fast);
+    }
+
+    .toast-close:hover {
+      background: var(--bg-subtle);
+      color: var(--text-primary);
+    }
+
+    /* Responsive */
+    @media (max-width: 1023px) {
+      .filter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+      .match-row {
+        grid-template-columns: 1fr auto 1fr;
+        gap: var(--space-2);
+      }
+
+      .cell-dt { grid-column: 1 / 2; font-size: 12px; }
+      .cell-pitch { grid-column: 2 / 4; justify-content: flex-end; }
+      .cell-home { grid-column: 1 / 2; }
+      .score-box { grid-column: 2 / 3; min-width: 62px; }
+      .cell-away { grid-column: 3 / 4; }
+      .cell-status { grid-column: 1 / 4; justify-content: space-between; padding-top: var(--space-1); }
+    }
+
+    @media (max-width: 767px) {
+      .header-inner { padding: var(--space-2) var(--space-3); }
+      .nav-link, .btn, .select-control { min-height: 44px; }
+      .nav-dropdown-item { min-height: 44px; }
+      .nav-link.active::after { bottom: 2px; }
+      .container { padding: var(--space-4) var(--space-3) var(--space-8); }
+      .filter-grid { grid-template-columns: 1fr; }
+      .toast-region { right: var(--space-3); bottom: var(--space-3); left: var(--space-3); max-width: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand-group">
+        <a href="DS-p19-home-standings.html" class="brand-group" aria-label="Liga de Amatori P19 — Acasă">
+          <span class="brand-mark" aria-hidden="true">P19</span>
+          <span>
+            <span class="brand-title">Liga de Amatori</span>
+            <span class="brand-sub">Mock design · DS-p19-fixtures</span>
+          </span>
+        </a>
+      </div>
+
+      <nav class="main-nav" aria-label="Navigație principală">
+        <a class="nav-link" href="DS-p19-home-standings.html">Clasament</a>
+        <a class="nav-link active" href="DS-p19-fixtures.html" aria-current="page">Program</a>
+        <a class="nav-link" href="DS-p19-match-detail.html">Detaliu meci</a>
+        <div class="nav-dropdown">
+          <a class="nav-link nav-dropdown-trigger" href="DS-p19-team-profile.html" aria-haspopup="true">
+            <span>Echipe</span>
+            <svg class="nav-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 6l4 4 4-4"/>
+            </svg>
+          </a>
+          <div class="nav-dropdown-menu" role="menu" aria-label="Subcategorii Echipe">
+            <a class="nav-dropdown-item" role="menuitem" href="DS-p19-team-profile.html?tab=rezultate">Rezultate</a>
+            <a class="nav-dropdown-item" role="menuitem" href="DS-p19-team-profile.html?tab=lot">Lot</a>
+            <a class="nav-dropdown-item" role="menuitem" href="DS-p19-team-profile.html?tab=transferuri">Transferuri</a>
+          </div>
+        </div>
+      </nav>
+
+      <div class="header-actions">
+        <select class="select-control" aria-label="Selectează sezon">
+          <option selected>Sezon 2025–2026</option>
+          <option>Sezon 2024–2025</option>
+        </select>
+        <button id="theme-toggle" type="button" class="btn btn-secondary" aria-pressed="false" aria-label="Comută între modul luminos și modul întunecat">
+          <svg id="theme-icon" class="icon-sm theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+          <span id="theme-label">Dark</span>
+        </button>
+        <a href="#autentificare" class="btn btn-primary">Autentificare</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="page-head animate-enter">
+      <div>
+        <h1>Program meciuri</h1>
+        <p class="page-meta">Sezon 2025–2026 · Etape în ordine crescătoare, filtre după etapă, echipă, teren sau status și export iCal per echipă.</p>
+      </div>
+      <button id="ical-btn" type="button" class="btn btn-secondary">
+        <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/>
+          <line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        <span id="ical-label">Export iCal (.ics)</span>
+      </button>
+    </div>
+
+    <!-- Banner notificare reprogramare (D-004) -->
+    <div class="alert-banner alert-info animate-enter" style="animation-delay:40ms;" role="status">
+      <div class="alert-body">
+        <svg class="icon-sm" style="margin-top:2px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="16" x2="12" y2="12"/>
+          <line x1="12" y1="8" x2="12.01" y2="8"/>
+        </svg>
+        <div>
+          <span class="alert-title">Notificare reprogramare · Etapa 12</span>
+          Meciul <strong>CS Viitorul Parc – Sporting Cartier</strong> a fost reprogramat din Sâm, 22 nov 14:00 (Teren 2) în <strong>Dum, 23 nov 16:00 (Teren 1 — Parc Nord)</strong>. Jucătorii și căpitanii au primit notificare in-app.
+        </div>
+      </div>
+    </div>
+
+    <!-- DS-p19-filter-bar -->
+    <section class="filter-bar animate-enter" style="animation-delay:80ms;" aria-label="Filtre program meciuri">
+      <div class="filter-grid">
+        <div class="field">
+          <label for="f-round">Etapă</label>
+          <select id="f-round" class="select-control">
+            <option value="">Toate etapele</option>
+            <option value="11">Etapa 11 (încheiată)</option>
+            <option value="12">Etapa 12 (curentă)</option>
+            <option value="13">Etapa 13 (viitoare)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-team">Echipă</label>
+          <select id="f-team" class="select-control">
+            <option value="">Toate echipele</option>
+            <option value="FC Vulturii Nord">FC Vulturii Nord</option>
+            <option value="AS Stejarul">AS Stejarul</option>
+            <option value="CS Viitorul Parc">CS Viitorul Parc</option>
+            <option value="AFC Rapiditate">AFC Rapiditate</option>
+            <option value="Unirea Dealul">Unirea Dealul</option>
+            <option value="Sporting Cartier">Sporting Cartier</option>
+            <option value="Progresul Sud">Progresul Sud</option>
+            <option value="Recolta Veche">Recolta Veche</option>
+            <option value="AS Gloria Nouă">AS Gloria Nouă</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-pitch">Teren</label>
+          <select id="f-pitch" class="select-control">
+            <option value="">Toate terenurile</option>
+            <option value="Teren 1 — Parc Nord">Teren 1 — Parc Nord</option>
+            <option value="Teren 2 — Baza Sud">Teren 2 — Baza Sud</option>
+            <option value="Teren 3 — Sintetic Est">Teren 3 — Sintetic Est</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-status">Status meci</label>
+          <select id="f-status" class="select-control">
+            <option value="">Toate statusurile</option>
+            <option value="Programat">Programat</option>
+            <option value="Jucat">Jucat</option>
+            <option value="Amânat">Amânat</option>
+          </select>
+        </div>
+        <button id="reset-filters" type="button" class="btn btn-ghost">Resetează filtrele</button>
+      </div>
+
+      <div class="filter-summary">
+        <span id="results-count" class="tabular">12 meciuri afișate din 3 etape</span>
+        <span>Notă: Meciurile amânate și etapele libere nu consumă etape de suspendare.</span>
+      </div>
+    </section>
+
+    <!-- Rounds list: ORDINE CRESCĂTOARE (Etapa 11 → Etapa 12 → Etapa 13) -->
+    <div id="rounds-container" class="rounds-stack">
+      <!-- Etapa 11 -->
+      <section class="round-panel animate-enter" style="animation-delay:120ms;" data-round="11" aria-labelledby="r11-title">
+        <div class="round-header">
+          <h2 id="r11-title" class="round-title">
+            Etapa 11
+            <span class="round-dates">· 15–16 noiembrie 2026</span>
+          </h2>
+          <span class="status-badge status-bye">Etapă liberă: Recolta Veche</span>
+        </div>
+
+        <article class="match-row" data-round="11" data-home="AS Stejarul" data-away="AFC Rapiditate" data-pitch="Teren 1 — Parc Nord" data-status="Jucat">
+          <div class="cell-dt tabular">Sâm, 15 nov · 11:00</div>
+          <div class="cell-pitch">Teren 1 — Parc Nord</div>
+          <div class="team-side cell-home">
+            <span class="team-text">AS Stejarul</span>
+            <span class="team-crest crest-as" aria-hidden="true">AS</span>
+          </div>
+          <div class="score-box tabular">
+            <span>1</span><span class="score-sep">–</span><span>1</span>
+          </div>
+          <div class="team-side cell-away">
+            <span class="team-crest crest-ar" aria-hidden="true">AR</span>
+            <span class="team-text">AFC Rapiditate</span>
+          </div>
+          <div class="cell-status">
+            <span class="status-badge status-played">Jucat</span>
+            <a class="detail-link" href="DS-p19-match-detail.html">Detalii <span class="arrow-glide" aria-hidden="true">→</span></a>
+          </div>
+        </article>
+
+        <article class="match-row" data-round="11" data-home="AS Gloria Nouă" data-away="FC Vulturii Nord" data-pitch="Teren 2 — Baza Sud" data-status="Jucat">
+          <div class="cell-dt tabular">Sâm, 15 nov · 13:00</div>
+          <div class="cell-pitch">Teren 2 — Baza Sud</div>
+          <div class="team-side cell-home is-loser">
+            <span class="team-text">AS Gloria Nouă</span>
+            <span class="team-crest crest-gn" aria-hidden="true">GN</span>
+          </div>
+          <div class="score-box tabular">
+            <span class="score-num-lose">0</span><span class="score-sep">–</span><span>4</span>
+          </div>
+          <div class="team-side cell-away is-winner">
+            <span class="team-crest crest-vn" aria-hidden="true">VN</span>
+            <span class="team-text">FC Vulturii Nord</span>
+            <span class="win-dot" title="Câștigătoare" aria-label="Câștigătoare"></span>
+          </div>
+          <div class="cell-status">
+            <span class="status-badge status-played">Jucat</span>
+            <a class="detail-link" href="DS-p19-match-detail.html">Detalii <span class="arrow-glide" aria-hidden="true">→</span></a>
+          </div>
+        </article>
+
+        <article class="match-row" data-round="11" data-home="Sporting Cartier" data-away="Unirea Dealul" data-pitch="Teren 3 — Sintetic Est" data-status="Jucat">
+          <div class="cell-dt tabular">Dum, 16 nov · 11:00</div>
+          <div class="cell-pitch">Teren 3 — Sintetic Est</div>
+          <div class="team-side cell-home is-winner">
+            <span class="win-dot" title="Câștigătoare" aria-label="Câștigătoare"></span>
+            <span class="team-text">Sporting Cartier</span>
+            <span class="team-crest crest-sc" aria-hidden="true">SC</span>
+          </div>
+          <div class="score-box tabular">
+            <span>2</span><span class="score-sep">–</span><span class="score-num-lose">1</span>
+          </div>
+          <div class="team-side cell-away is-loser">
+            <span class="team-crest crest-ud" aria-hidden="true">UD</span>
+            <span class="team-text">Unirea Dealul</span>
+          </div>
+          <div class="cell-status">
+            <span class="status-badge status-played">Jucat</span>
+            <a class="detail-link" href="DS-p19-match-detail.html">Detalii <span class="arrow-glide" aria-hidden="true">→</span></a>
+          </div>
+        </article>
+
+        <article class="match-row" data-round="11" data-home="Progresul Sud" data-away="CS Viitorul Parc" data-pitch="Teren 2 — Baza Sud" data-status="Jucat">
+          <div class="cell-dt tabular">Dum, 16 nov · 14:00</div>
+          <div class="cell-pitch">Teren 2 — Baza Sud</div>
+          <div class="team-side cell-home is-loser">
+            <span class="team-text">Progresul Sud</span>
+            <span class="team-crest crest-ps" aria-hidden="true">PS</span>
+          </div>
+          <div class="score-box tabular">
+            <span class="score-num-lose">1</span><span class="score-sep">–</span><span>3</span>
+          </div>
+          <div class="team-side cell-away is-winner">
+            <span class="team-crest crest-vp" aria-hidden="true">VP</span>
+            <span class="team-text">CS Viitorul Parc</span>
+            <span class="win-dot" title="Câștigătoare" aria-label="Câștigătoare"></span>
+          </div>
+          <div class="cell-status">
+            <span class="status-badge status-played">Jucat</span>
+            <a class="detail-link" href="DS-p19-match-detail.html">Detalii <span class="arrow-glide" aria-hidden="true">→</span></a>
+          </div>
+        </article>
+      </section>
+
+      <!-- Etapa 12 -->
+      <section class="round-panel animate-enter" style="animation-delay:170ms;" data-round="12" aria-labelledby="r12-title">
+        <div class="round-header">
+          <h2 id="r12-title" class="round-title">
+            Etapa 12
+            <span class="round-tag">Curentă</span>
+            <span class="round-dates">· 22–23 noiembrie 2026</span>
+          </h2>
+          <span class="status-badge status-bye">Etapă liberă: AS Gloria Nouă</span>
+        </div>
+
+        <article class="match-row" data-round="12" data-home="FC Vulturii Nord" data-away="AS Stejarul" data-pitch="Teren 1 — Parc Nord" data-status="Jucat">
+          <div class="cell-dt tabular">Sâm, 22 nov · 11:00</div>
+          <div class="cell-pitch">Teren 1 — Parc Nord</div>
+          <div class="team-side cell-home is-winner">
+            <span class="win-dot" title="Câștigătoare" aria-label="Câștigătoare"></span>
+            <span class="team-text">FC Vulturii Nord</span>
+            <span class="team-crest crest-vn" aria-hidden="true">VN</span>
+          </div>
+          <div class="score-box tabular">
+            <span>3</span><span class="score-sep">–</span><span class="score-num-lose">2</span>
+          </div>
+          <div class="team-side cell-away is-loser">
+            <span class="team-crest crest-as" aria-hidden="true">AS</span>
+            <span class="team-text">AS Stejarul</span>
+          </div>
+          <div class="cell-status">
+            <span class="status-badge status-corrected">Corecție rezultat</span>
+            <a class="detail-link" href="DS-p19-match-detail.html">Detalii <span class="arrow-glide" aria-hidden="true">→</span></a>
+          </div>
+        </article>
+
+        <article class="match-row" data-round="12" data-home="AFC Rapiditate" data-away="Progresul Sud" data-pitch="Teren 2 — Baza Sud" data-status="Jucat">
+          <div class="cell-dt tabular">Sâm, 22 nov · 13:00</div>
+          <div class="cell-pitch">Teren 2 — Baza Sud</div>
+          <div class="team-side cell-home is-winner">
+            <span class="win-dot" title="Câștigătoare" aria-label="Câștigătoare"></span>
+            <span class="team-text">AFC Rapiditate</span>
+            <span class="team-crest crest-ar" aria-hidden="true">AR</span>
+          </div>
+          <div class="score-box tabular">
+            <span>2</span><span class="score-sep">–</span><span class="score-num-lose">0</span>
+          </div>
+          <div class="team-side cell-away is-loser">
+            <span class="team-crest crest-ps" aria-hidden="true">PS</span>
+            <span class="team-text">Progresul Sud</span>
+          </div>
+          <div class="cell-status">
+            <span class="status-badge status-played">Jucat</span>
+            <a class="detail-link" href="DS-p19-match-detail.html">Detalii <span class="arrow-glide" aria-hidden="true">→</span></a>
+          </div>
+        </article>
+
+        <article class="match-row" data-round="12" data-home="CS Viitorul Parc" data-away="Sporting Cartier" data-pitch="Teren 1 — Parc Nord" data-status="Programat">
+          <div class="cell-dt tabular">Dum, 23 nov · 16:00</div>
+          <div class="cell-pitch">Teren 1 — Parc Nord</div>
+          <div class="team-side cell-home">
+            <span class="team-text">CS Viitorul Parc</span>
+            <span class="team-crest crest-vp" aria-hidden="true">VP</span>
+          </div>
+          <div class="score-box upcoming tabular">16:00</div>
+          <div class="team-side cell-away">
+            <span class="team-crest crest-sc" aria-hidden="true">SC</span>
+            <span class="team-text">Sporting Cartier</span>
+          </div>
+          <div class="cell-status">
+            <span class="status-badge status-corrected">Reprogramat</span>
+          </div>
+        </article>
+
+        <article class="match-row" data-round="12" data-home="Unirea Dealul" data-away="Recolta Veche" data-pitch="Teren 3 — Sintetic Est" data-status="Amânat">
+          <div class="cell-dt tabular">Dum, 23 nov · —</div>
+          <div class="cell-pitch">Teren 3 — Sintetic Est</div>
+          <div class="team-side cell-home">
+            <span class="team-text">Unirea Dealul</span>
+            <span class="team-crest crest-ud" aria-hidden="true">UD</span>
+          </div>
+          <div class="score-box upcoming">—</div>
+          <div class="team-side cell-away">
+            <span class="team-crest crest-rv" aria-hidden="true">RV</span>
+            <span class="team-text">Recolta Veche</span>
+          </div>
+          <div class="cell-status">
+            <span class="status-badge status-postponed">Amânat</span>
+          </div>
+        </article>
+      </section>
+
+      <!-- Etapa 13 -->
+      <section class="round-panel animate-enter" style="animation-delay:220ms;" data-round="13" aria-labelledby="r13-title">
+        <div class="round-header">
+          <h2 id="r13-title" class="round-title">
+            Etapa 13
+            <span class="round-dates">· 29–30 noiembrie 2026</span>
+          </h2>
+          <span class="status-badge status-bye">Etapă liberă: FC Vulturii Nord</span>
+        </div>
+
+        <article class="match-row" data-round="13" data-home="AS Stejarul" data-away="CS Viitorul Parc" data-pitch="Teren 1 — Parc Nord" data-status="Programat">
+          <div class="cell-dt tabular">Sâm, 29 nov · 11:00</div>
+          <div class="cell-pitch">Teren 1 — Parc Nord</div>
+          <div class="team-side cell-home">
+            <span class="team-text">AS Stejarul</span>
+            <span class="team-crest crest-as" aria-hidden="true">AS</span>
+          </div>
+          <div class="score-box upcoming tabular">11:00</div>
+          <div class="team-side cell-away">
+            <span class="team-crest crest-vp" aria-hidden="true">VP</span>
+            <span class="team-text">CS Viitorul Parc</span>
+          </div>
+          <div class="cell-status">
+            <span class="status-badge status-scheduled">Programat</span>
+          </div>
+        </article>
+
+        <article class="match-row" data-round="13" data-home="Sporting Cartier" data-away="AFC Rapiditate" data-pitch="Teren 2 — Baza Sud" data-status="Programat">
+          <div class="cell-dt tabular">Sâm, 29 nov · 13:00</div>
+          <div class="cell-pitch">Teren 2 — Baza Sud</div>
+          <div class="team-side cell-home">
+            <span class="team-text">Sporting Cartier</span>
+            <span class="team-crest crest-sc" aria-hidden="true">SC</span>
+          </div>
+          <div class="score-box upcoming tabular">13:00</div>
+          <div class="team-side cell-away">
+            <span class="team-crest crest-ar" aria-hidden="true">AR</span>
+            <span class="team-text">AFC Rapiditate</span>
+          </div>
+          <div class="cell-status">
+            <span class="status-badge status-scheduled">Programat</span>
+          </div>
+        </article>
+
+        <article class="match-row" data-round="13" data-home="Progresul Sud" data-away="Unirea Dealul" data-pitch="Teren 1 — Parc Nord" data-status="Programat">
+          <div class="cell-dt tabular">Dum, 30 nov · 10:30</div>
+          <div class="cell-pitch">Teren 1 — Parc Nord</div>
+          <div class="team-side cell-home">
+            <span class="team-text">Progresul Sud</span>
+            <span class="team-crest crest-ps" aria-hidden="true">PS</span>
+          </div>
+          <div class="score-box upcoming tabular">10:30</div>
+          <div class="team-side cell-away">
+            <span class="team-crest crest-ud" aria-hidden="true">UD</span>
+            <span class="team-text">Unirea Dealul</span>
+          </div>
+          <div class="cell-status">
+            <span class="status-badge status-scheduled">Programat</span>
+          </div>
+        </article>
+
+        <article class="match-row" data-round="13" data-home="Recolta Veche" data-away="AS Gloria Nouă" data-pitch="Teren 3 — Sintetic Est" data-status="Programat">
+          <div class="cell-dt tabular">Dum, 30 nov · 14:00</div>
+          <div class="cell-pitch">Teren 3 — Sintetic Est</div>
+          <div class="team-side cell-home">
+            <span class="team-text">Recolta Veche</span>
+            <span class="team-crest crest-rv" aria-hidden="true">RV</span>
+          </div>
+          <div class="score-box upcoming tabular">14:00</div>
+          <div class="team-side cell-away">
+            <span class="team-crest crest-gn" aria-hidden="true">GN</span>
+            <span class="team-text">AS Gloria Nouă</span>
+          </div>
+          <div class="cell-status">
+            <span class="status-badge status-scheduled">Programat</span>
+          </div>
+        </article>
+      </section>
+    </div>
+
+    <!-- Empty state -->
+    <section id="empty-state" class="empty-state" aria-live="polite">
+      <h2>Niciun meci nu corespunde filtrelor selectate</h2>
+      <p>Ajustează combinația de etapă, echipă, teren sau status pentru a vedea meciurile programate din sezon.</p>
+      <button id="empty-reset" type="button" class="btn btn-primary">Resetează filtrele</button>
+    </section>
+  </main>
+
+  <!-- Floating Animated Toast for #ical-feedback -->
+  <div class="toast-region" aria-live="polite" aria-atomic="true">
+    <div id="ical-feedback" class="toast" role="status">
+      <svg class="icon-sm toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+        <line x1="16" y1="2" x2="16" y2="6"/>
+        <line x1="8" y1="2" x2="8" y2="6"/>
+        <line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+      <div>
+        <span id="toast-title" class="toast-title">Export iCal (.ics)</span>
+        <span id="toast-message"></span>
+      </div>
+      <button id="toast-close" type="button" class="toast-close" aria-label="Închide notificarea">✕</button>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const root = document.documentElement;
+      const btn = document.getElementById('theme-toggle');
+      const label = document.getElementById('theme-label');
+      const icon = document.getElementById('theme-icon');
+      let rotation = 0;
+
+      const moonPath = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+      const sunPath = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+
+      function applyTheme(theme, animateIcon) {
+        root.setAttribute('data-theme', theme);
+        const isDark = theme === 'dark';
+        btn.setAttribute('aria-pressed', String(isDark));
+        label.textContent = isDark ? 'Light' : 'Dark';
+        icon.innerHTML = isDark ? sunPath : moonPath;
+        if (animateIcon) {
+          rotation += 180;
+          icon.style.transform = 'rotate(' + rotation + 'deg)';
+        }
+        try { localStorage.setItem('p19-mock-theme', theme); } catch (_) {}
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      const urlTheme = params.get('theme');
+      let saved = null;
+      try { saved = localStorage.getItem('p19-mock-theme'); } catch (_) {}
+      applyTheme((urlTheme === 'dark' || urlTheme === 'light') ? urlTheme : (saved || 'light'), false);
+
+      btn.addEventListener('click', function () {
+        applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark', true);
+      });
+
+      // Filters & Animated Toast
+      const fRound = document.getElementById('f-round');
+      const fTeam = document.getElementById('f-team');
+      const fPitch = document.getElementById('f-pitch');
+      const fStatus = document.getElementById('f-status');
+      const resetBtn = document.getElementById('reset-filters');
+      const emptyReset = document.getElementById('empty-reset');
+      const emptyState = document.getElementById('empty-state');
+      const resultsCount = document.getElementById('results-count');
+      const icalBtn = document.getElementById('ical-btn');
+      const icalLabel = document.getElementById('ical-label');
+      const toast = document.getElementById('ical-feedback');
+      const toastTitle = document.getElementById('toast-title');
+      const toastMessage = document.getElementById('toast-message');
+      const toastClose = document.getElementById('toast-close');
+      let toastTimer = null;
+
+      const roundPanels = Array.from(document.querySelectorAll('.round-panel'));
+
+      function hideToast() {
+        toast.classList.remove('visible');
+        if (toastTimer) { clearTimeout(toastTimer); toastTimer = null; }
+      }
+
+      function showToast(title, msg) {
+        toastTitle.textContent = title;
+        toastMessage.textContent = msg;
+        toast.classList.add('visible');
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(hideToast, 4500);
+      }
+
+      function updateFilters() {
+        const r = fRound.value;
+        const t = fTeam.value;
+        const p = fPitch.value;
+        const s = fStatus.value;
+
+        let visibleTotal = 0;
+        let visibleRounds = 0;
+
+        roundPanels.forEach(function (panel) {
+          const rows = Array.from(panel.querySelectorAll('.match-row'));
+          let visibleInPanel = 0;
+
+          rows.forEach(function (row) {
+            const matchR = !r || row.dataset.round === r;
+            const matchT = !t || row.dataset.home === t || row.dataset.away === t;
+            const matchP = !p || row.dataset.pitch === p;
+            const matchS = !s || row.dataset.status === s;
+            const ok = matchR && matchT && matchP && matchS;
+            row.style.display = ok ? '' : 'none';
+            if (ok) visibleInPanel++;
+          });
+
+          panel.style.display = visibleInPanel > 0 ? '' : 'none';
+          if (visibleInPanel > 0) {
+            visibleRounds++;
+            visibleTotal += visibleInPanel;
+          }
+        });
+
+        emptyState.classList.toggle('visible', visibleTotal === 0);
+        resultsCount.textContent = visibleTotal === 1
+          ? '1 meci afișat din 1 etapă'
+          : visibleTotal + ' meciuri afișate din ' + visibleRounds + (visibleRounds === 1 ? ' etapă' : ' etape');
+
+        icalLabel.textContent = t ? ('Export iCal · ' + t + ' (.ics)') : 'Export iCal (.ics)';
+      }
+
+      function resetAll() {
+        fRound.value = '';
+        fTeam.value = '';
+        fPitch.value = '';
+        fStatus.value = '';
+        updateFilters();
+      }
+
+      [fRound, fTeam, fPitch, fStatus].forEach(function (el) {
+        el.addEventListener('change', updateFilters);
+      });
+      resetBtn.addEventListener('click', resetAll);
+      emptyReset.addEventListener('click', resetAll);
+      toastClose.addEventListener('click', hideToast);
+
+      icalBtn.addEventListener('click', function () {
+        const team = fTeam.value;
+        if (team) {
+          showToast(
+            'Export iCal pregătit · ' + team,
+            'Calendarul sezonului 2025–2026 ar fi descărcat ca ' + team.toLowerCase().replace(/\s+/g, '-') + '.ics.'
+          );
+        } else {
+          showToast(
+            'Selectează o echipă',
+            'Alege o echipă din filtrul „Echipă” pentru exportul iCal (.ics) personalizat.'
+          );
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

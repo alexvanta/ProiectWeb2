@@ -1,0 +1,2845 @@
+<!DOCTYPE html>
+<html lang="ro" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clasament și etapa curentă — Liga de Amatori P19</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ==========================================================================
+       Tokens — docs/design/DESIGN.md (Light & Dark calibrated separately)
+       ========================================================================== */
+    :root {
+      --bg-canvas: #F7F8F6;
+      --bg-surface: #FFFFFF;
+      --bg-subtle: #EEF1EE;
+      --bg-header-glass: rgba(255, 255, 255, 0.84);
+      --surface-highlight: rgba(255, 255, 255, 0.80);
+      --hero-glow: radial-gradient(ellipse at 50% 0%, rgba(21, 104, 66, 0.09) 0%, transparent 68%);
+      --text-primary: #0F172A;
+      --text-secondary: #334155;
+      --text-muted: #526071;
+      --border-subtle: #DCE2E8;
+      --border-strong: #768596;
+      --accent-primary: #156842;
+      --accent-primary-hover: #0F5132;
+      --accent-primary-fg: #FFFFFF;
+      --focus-ring: #156842;
+
+      --status-win-bg: #DCFCE7;
+      --status-win-fg: #14532D;
+      --status-win-solid: #15803D;
+      --status-win-solid-fg: #FFFFFF;
+      --status-draw-bg: #E2E8F0;
+      --status-draw-fg: #334155;
+      --status-draw-solid: #475569;
+      --status-draw-solid-fg: #FFFFFF;
+      --status-loss-bg: #FEE2E2;
+      --status-loss-fg: #991B1B;
+      --status-loss-solid: #B91C1C;
+      --status-loss-solid-fg: #FFFFFF;
+
+      --card-yellow-fill: #FACC15;
+      --card-yellow-border: #A16207;
+      --card-yellow-bg: #FEF3C7;
+      --card-yellow-fg: #713F12;
+      --card-red-fill: #DC2626;
+      --card-red-bg: #FEE2E2;
+      --card-red-fg: #991B1B;
+
+      --alert-retro-bg: #FFEDD5;
+      --alert-retro-fg: #7C2D12;
+      --alert-retro-border: #C2410C;
+      --alert-retro-btn-fg: #FFFFFF;
+      --info-bg: #DBEAFE;
+      --info-fg: #1E3A8A;
+      --tooltip-bg: #0F172A;
+      --tooltip-fg: #F8FAFC;
+      --tooltip-muted: #94A3B8;
+      --tooltip-border: #1E293B;
+      --match-hl-self-bg: rgba(21, 104, 66, 0.11);
+      --match-hl-opp-bg: rgba(30, 58, 138, 0.08);
+      --match-hl-opp-accent: #1D4ED8;
+      --scorer-rank-1: #00380C;
+      --scorer-rank-2: #008C1E;
+      --scorer-rank-3: #00E331;
+      --scorer-rank-fg: #FFFFFF;
+      --scorer-rank-rest-fg: #334155;
+
+      --font-display: 'Barlow Semi Condensed', system-ui, -apple-system, sans-serif;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 20px;
+      --space-6: 24px;
+      --space-8: 32px;
+      --space-12: 48px;
+      --row-height-dense: 40px;
+      --container-max: 1200px;
+
+      --radius-sm: 4px;
+      --radius-md: 6px;
+      --radius-lg: 12px;
+      --radius-full: 9999px;
+
+      --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 10px 26px rgba(15, 23, 42, 0.12);
+      --motion-fast: 140ms cubic-bezier(0.22, 1, 0.36, 1);
+      --motion-base: 240ms cubic-bezier(0.22, 1, 0.36, 1);
+      --motion-enter: 360ms cubic-bezier(0.22, 1, 0.36, 1);
+      --motion-pulse: 2.2s ease-in-out infinite;
+    }
+
+    [data-theme="dark"] {
+      --bg-canvas: #0C1116;
+      --bg-surface: #141B22;
+      --bg-subtle: #1C2630;
+      --bg-header-glass: rgba(20, 27, 34, 0.80);
+      --surface-highlight: rgba(255, 255, 255, 0.06);
+      --hero-glow: radial-gradient(ellipse at 50% 0%, rgba(52, 211, 153, 0.14) 0%, transparent 68%);
+      --text-primary: #F1F5F9;
+      --text-secondary: #CBD5E1;
+      --text-muted: #94A3B8;
+      --border-subtle: #24303C;
+      --border-strong: #5E7083;
+      --accent-primary: #34D399;
+      --accent-primary-hover: #6EE7B7;
+      --accent-primary-fg: #062315;
+      --focus-ring: #34D399;
+
+      --status-win-bg: #102E20;
+      --status-win-fg: #86EFAC;
+      --status-win-solid: #4ADE80;
+      --status-win-solid-fg: #052E16;
+      --status-draw-bg: #25313E;
+      --status-draw-fg: #CBD5E1;
+      --status-draw-solid: #CBD5E1;
+      --status-draw-solid-fg: #0F172A;
+      --status-loss-bg: #3B1519;
+      --status-loss-fg: #FCA5A5;
+      --status-loss-solid: #DC2626;
+      --status-loss-solid-fg: #FFFFFF;
+
+      --card-yellow-fill: #FACC15;
+      --card-yellow-border: #FDE047;
+      --card-yellow-bg: #332609;
+      --card-yellow-fg: #FDE047;
+      --card-red-fill: #F87171;
+      --card-red-bg: #3B1519;
+      --card-red-fg: #FCA5A5;
+
+      --alert-retro-bg: #3B1F0B;
+      --alert-retro-fg: #FDBA74;
+      --alert-retro-border: #FB923C;
+      --alert-retro-btn-fg: #0C1116;
+      --info-bg: #13294B;
+      --info-fg: #93C5FD;
+      --tooltip-bg: #263341;
+      --tooltip-fg: #F8FAFC;
+      --tooltip-muted: #CBD5E1;
+      --tooltip-border: #475569;
+      --match-hl-self-bg: rgba(52, 211, 153, 0.14);
+      --match-hl-opp-bg: rgba(147, 197, 253, 0.13);
+      --match-hl-opp-accent: #60A5FA;
+      --scorer-rank-1: #00380C;
+      --scorer-rank-2: #008C1E;
+      --scorer-rank-3: #00E331;
+      --scorer-rank-fg: #FFFFFF;
+      --scorer-rank-rest-fg: #FFFFFF;
+
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.40);
+      --shadow-md: 0 10px 28px rgba(0, 0, 0, 0.52);
+    }
+
+    @keyframes enterUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulseRing {
+      0%, 100% { transform: scale(1); opacity: 0.75; }
+      50% { transform: scale(2.1); opacity: 0; }
+    }
+
+    @keyframes tabFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes tabPillGlide {
+      0% { opacity: 0.48; }
+      50% { opacity: 0.82; }
+      100% { opacity: 1; }
+    }
+
+    @keyframes rowCascadeDown {
+      0% {
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        animation-timing-function: step-end;
+      }
+      1% {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(-10px);
+        animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      100% {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes d3SpotlightFade {
+      0% {
+        opacity: 0.55;
+        transform: translateY(8px);
+        box-shadow: inset 0 1px 0 var(--surface-highlight), 0 0 0 0 color-mix(in srgb, var(--alert-retro-border) 0%, transparent), var(--shadow-sm);
+      }
+      45% {
+        opacity: 1;
+        transform: translateY(0);
+        box-shadow: inset 0 1px 0 var(--surface-highlight), 0 0 0 4px color-mix(in srgb, var(--alert-retro-border) 26%, transparent), var(--shadow-md);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+        box-shadow: inset 0 1px 0 var(--surface-highlight), 0 0 0 0 color-mix(in srgb, var(--alert-retro-border) 0%, transparent), var(--shadow-sm);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition-duration: 0ms !important;
+        animation-duration: 0ms !important;
+        animation-iteration-count: 1 !important;
+      }
+      .animate-enter, table.standings tbody tr, table.scorers tbody tr {
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: none !important;
+      }
+      .pulse-dot::after { display: none !important; }
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg-canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      line-height: 20px;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color var(--motion-base), color var(--motion-base);
+    }
+
+    a { color: inherit; text-decoration: none; }
+    :focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+    .tabular { font-variant-numeric: tabular-nums lining-nums; }
+
+    .animate-enter {
+      animation: enterUp var(--motion-enter) both;
+    }
+
+    /* ==========================================================================
+       Distinct Club Crests (WCAG AA >= 4.5:1 verified for white initials)
+       ========================================================================== */
+    .crest-vn { background: linear-gradient(135deg, #156842 0%, #0D4A2E 100%); }
+    .crest-as { background: linear-gradient(135deg, #1D4ED8 0%, #1E3A8A 100%); }
+    .crest-vp { background: linear-gradient(135deg, #B91C1C 0%, #7F1D1D 100%); }
+    .crest-ar { background: linear-gradient(135deg, #7E22CE 0%, #581C87 100%); }
+    .crest-ud { background: linear-gradient(135deg, #B45309 0%, #78350F 100%); }
+    .crest-sc { background: linear-gradient(135deg, #0F766E 0%, #134E4A 100%); }
+    .crest-ps { background: linear-gradient(135deg, #334155 0%, #0F172A 100%); }
+    .crest-rv { background: linear-gradient(135deg, #C2410C 0%, #7C2D12 100%); }
+    .crest-gn { background: linear-gradient(135deg, #4338CA 0%, #312E81 100%); }
+
+    /* ==========================================================================
+       DS-p19-app-header (Glassmorphism + Active Indicator)
+       ========================================================================== */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: var(--bg-header-glass);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-sm);
+      transition: background-color var(--motion-base), border-color var(--motion-base);
+    }
+
+    .header-inner {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: var(--space-2) var(--space-4);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-4);
+      flex-wrap: wrap;
+    }
+
+    .brand-group { display: flex; align-items: center; gap: var(--space-3); }
+
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-primary-hover) 100%);
+      color: var(--accent-primary-fg);
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      letter-spacing: 0.02em;
+      flex-shrink: 0;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+
+    .brand-title {
+      font-family: var(--font-display);
+      font-size: 18px;
+      line-height: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .brand-sub {
+      font-size: 12px;
+      line-height: 16px;
+      color: var(--text-muted);
+      display: block;
+    }
+
+    .main-nav {
+      display: flex;
+      align-items: center;
+      gap: var(--space-1);
+      flex-wrap: wrap;
+    }
+
+    .nav-link {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      min-height: 36px;
+      padding: 0 var(--space-3);
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      transition: background var(--motion-fast), color var(--motion-fast);
+    }
+
+    .nav-link:hover {
+      background: var(--bg-subtle);
+      color: var(--text-primary);
+    }
+
+    .nav-link.active {
+      background: color-mix(in srgb, var(--accent-primary) 11%, transparent);
+      color: var(--accent-primary);
+      font-weight: 600;
+    }
+
+    .nav-link.active::after {
+      content: "";
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      bottom: -9px;
+      height: 2px;
+      border-radius: var(--radius-full);
+      background: var(--accent-primary);
+    }
+
+    .nav-dropdown {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .nav-dropdown::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 100%;
+      height: 10px;
+    }
+
+    .nav-chevron {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+      transition: transform var(--motion-fast);
+    }
+
+    .nav-dropdown:hover .nav-chevron,
+    .nav-dropdown:focus-within .nav-chevron {
+      transform: rotate(180deg);
+    }
+
+    .nav-dropdown-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      min-width: 172px;
+      padding: var(--space-1);
+      border-radius: var(--radius-lg);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      box-shadow: inset 0 1px 0 var(--surface-highlight), var(--shadow-md);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateY(-4px);
+      transition: opacity var(--motion-base), transform var(--motion-base), visibility var(--motion-base);
+      z-index: 50;
+    }
+
+    .nav-dropdown:hover .nav-dropdown-menu,
+    .nav-dropdown:focus-within .nav-dropdown-menu {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .nav-dropdown-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 36px;
+      padding: 0 var(--space-3);
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      transition: background var(--motion-fast), color var(--motion-fast);
+    }
+
+    .nav-dropdown-item:hover,
+    .nav-dropdown-item:focus-visible {
+      background: var(--bg-subtle);
+      color: var(--text-primary);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .select-control {
+      min-height: 36px;
+      padding: 0 var(--space-3);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-strong);
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 500;
+      transition: background-color var(--motion-base), border-color var(--motion-fast), color var(--motion-base);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+      min-height: 36px;
+      padding: 0 var(--space-3);
+      border-radius: var(--radius-md);
+      border: 1px solid transparent;
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background var(--motion-fast), border-color var(--motion-fast), color var(--motion-fast), transform var(--motion-fast);
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-secondary {
+      background: var(--bg-surface);
+      border-color: var(--border-strong);
+      color: var(--text-primary);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-subtle);
+    }
+
+    .btn-primary {
+      background: var(--accent-primary);
+      color: var(--accent-primary-fg);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-primary-hover);
+    }
+
+    .icon-sm {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    .theme-icon {
+      transition: transform var(--motion-base);
+    }
+
+    /* ==========================================================================
+       Page Layout & Panels (12px radius + Dark top highlight)
+       ========================================================================== */
+    .container {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: var(--space-6) var(--space-4) var(--space-12);
+    }
+
+    .page-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: var(--space-4);
+      flex-wrap: wrap;
+      margin-bottom: var(--space-5);
+      padding-bottom: var(--space-4);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    h1 {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: 30px;
+      line-height: 34px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .page-meta {
+      margin: var(--space-1) 0 0;
+      font-size: 13px;
+      line-height: 18px;
+      color: var(--text-muted);
+    }
+
+    .demo-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      padding: 3px var(--space-2);
+      border-radius: var(--radius-md);
+      background: var(--bg-subtle);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.85fr) minmax(0, 1fr);
+      gap: var(--space-6);
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      box-shadow: inset 0 1px 0 var(--surface-highlight), var(--shadow-sm);
+      overflow: hidden;
+      transition: background-color var(--motion-base), border-color var(--motion-base);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-2) var(--space-3);
+      flex-wrap: wrap;
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .panel-header-left {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+      min-width: 0;
+    }
+
+    .panel-title {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: 20px;
+      line-height: 26px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      white-space: nowrap;
+      min-width: 128px;
+    }
+
+    /* Flashscore-style segmented panel tabs (CLASAMENT · FORMA · MARCATORI) */
+    .panel-tabs {
+      position: relative;
+      isolation: isolate;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 3px;
+      border-radius: var(--radius-md);
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+      transition: background-color var(--motion-base), border-color var(--motion-base);
+    }
+
+    .panel-tabs-indicator {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 0;
+      border-radius: var(--radius-sm);
+      background: var(--accent-primary);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.16);
+      pointer-events: none;
+      opacity: 0;
+      will-change: transform, width, opacity;
+    }
+
+    .panel-tabs.has-indicator .panel-tabs-indicator {
+      opacity: 1;
+    }
+
+    .panel-tabs.is-animated .panel-tabs-indicator {
+      transition:
+        transform 520ms cubic-bezier(0.22, 1, 0.36, 1),
+        width 520ms cubic-bezier(0.22, 1, 0.36, 1),
+        height 520ms cubic-bezier(0.22, 1, 0.36, 1),
+        background-color var(--motion-base),
+        opacity 360ms ease;
+    }
+
+    .panel-tabs-indicator.is-gliding {
+      animation: tabPillGlide 520ms ease-out;
+    }
+
+    .panel-tabs:has(.panel-tab[aria-selected="true"]:hover) .panel-tabs-indicator {
+      background: var(--accent-primary-hover);
+    }
+
+    .panel-tab {
+      position: relative;
+      z-index: 1;
+      appearance: none;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: var(--font-sans);
+      font-size: 11px;
+      line-height: 16px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 5px 10px;
+      min-height: 28px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      white-space: nowrap;
+      transition:
+        background-color 360ms ease,
+        color 480ms cubic-bezier(0.22, 1, 0.36, 1),
+        transform var(--motion-fast);
+    }
+
+    .panel-tab[aria-selected="false"]:hover {
+      background: color-mix(in srgb, var(--text-primary) 7%, transparent);
+      color: var(--text-primary);
+    }
+
+    .panel-tab:active {
+      transform: scale(0.97);
+    }
+
+    .panel-tab[aria-selected="true"] {
+      color: var(--accent-primary-fg);
+    }
+
+    .panel-tabs:not(.has-indicator) .panel-tab[aria-selected="true"] {
+      background: var(--accent-primary);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14);
+    }
+
+    .panel-tabs:not(.has-indicator) .panel-tab[aria-selected="true"]:hover {
+      background: var(--accent-primary-hover);
+    }
+
+    .tab-panel thead,
+    .tab-panel .table-footer {
+      animation: tabFadeIn 320ms ease-out both;
+    }
+
+    .tab-panel[hidden] {
+      display: none;
+    }
+
+    /* Top Scorers table (MARCATORI tab) */
+    table.scorers {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      line-height: 18px;
+    }
+
+    table.scorers thead th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: var(--bg-subtle);
+      color: var(--text-secondary);
+      font-size: 12px;
+      line-height: 16px;
+      font-weight: 600;
+      padding: var(--space-2) var(--space-3);
+      border-bottom: 1px solid var(--border-subtle);
+      white-space: nowrap;
+      transition: background-color var(--motion-base);
+    }
+
+    table.scorers thead th.col-pos {
+      text-align: center;
+      padding-left: var(--space-3);
+      padding-right: var(--space-1);
+      width: 46px;
+    }
+
+    table.scorers thead th.col-player { text-align: left; width: 29%; }
+    table.scorers thead th.col-club {
+      text-align: center;
+      padding-right: clamp(64px, 11vw, 152px);
+    }
+    table.scorers thead th.col-goals { text-align: right; width: 84px; }
+
+    table.scorers tbody tr {
+      height: 44px;
+      border-bottom: 1px solid var(--border-subtle);
+      transition: background-color var(--motion-fast);
+      animation: rowCascadeDown 340ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    }
+
+    table.scorers tbody tr:last-child { border-bottom: none; }
+    table.scorers tbody tr:hover { background: var(--bg-subtle); }
+
+    table.scorers tbody td {
+      padding: var(--space-2) var(--space-3);
+      vertical-align: middle;
+    }
+
+    table.scorers tbody td.col-pos {
+      text-align: center;
+      padding-left: var(--space-3);
+      padding-right: var(--space-1);
+      width: 46px;
+    }
+
+    table.scorers tbody td.col-pos .pos-badge {
+      color: var(--scorer-rank-rest-fg);
+    }
+
+    table.scorers tbody tr.scorer-rank-1 td.col-pos .pos-badge {
+      background: var(--scorer-rank-1);
+      color: var(--scorer-rank-fg);
+    }
+
+    table.scorers tbody tr.scorer-rank-2 td.col-pos .pos-badge {
+      background: var(--scorer-rank-2);
+      color: var(--scorer-rank-fg);
+    }
+
+    table.scorers tbody tr.scorer-rank-3 td.col-pos .pos-badge {
+      background: var(--scorer-rank-3);
+      color: var(--scorer-rank-fg);
+      text-shadow: 0 1px 2px rgba(0, 56, 12, 0.55);
+    }
+
+    table.scorers tbody td.col-club {
+      text-align: center;
+      padding-right: clamp(64px, 11vw, 152px);
+    }
+
+    table.scorers tbody td.col-goals {
+      text-align: right;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--text-primary);
+      background: color-mix(in srgb, var(--bg-subtle) 55%, transparent);
+    }
+
+    .scorer-cell {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      min-width: 0;
+    }
+
+    .flag-svg {
+      width: 18px;
+      height: 12px;
+      border-radius: 2px;
+      border: 1px solid var(--border-subtle);
+      flex-shrink: 0;
+      display: block;
+    }
+
+    .scorer-name {
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .scorer-club-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .legend-pos-s1 { background: var(--scorer-rank-1); color: var(--scorer-rank-fg); }
+    .legend-pos-s2 { background: var(--scorer-rank-2); color: var(--scorer-rank-fg); }
+    .legend-pos-s3 { background: var(--scorer-rank-3); color: var(--scorer-rank-fg); text-shadow: 0 1px 2px rgba(0, 56, 12, 0.55); }
+
+    .pulse-dot {
+      position: relative;
+      width: 8px;
+      height: 8px;
+      border-radius: var(--radius-full);
+      background: var(--accent-primary);
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    .pulse-dot::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius-full);
+      background: var(--accent-primary);
+      animation: pulseRing var(--motion-pulse);
+    }
+
+    .panel-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent-primary);
+      transition: color var(--motion-fast);
+    }
+
+    .panel-link:hover {
+      color: var(--accent-primary-hover);
+    }
+
+    .arrow-glide {
+      display: inline-block;
+      transition: transform var(--motion-fast);
+    }
+
+    .panel-link:hover .arrow-glide,
+    a.match-item:hover .arrow-glide {
+      transform: translateX(3px);
+    }
+
+    /* ==========================================================================
+       DS-p19-dense-table (StandingsTable)
+       ========================================================================== */
+    .table-wrap { width: 100%; }
+
+    table.standings {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      line-height: 18px;
+    }
+
+    table.standings thead th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: var(--bg-subtle);
+      color: var(--text-secondary);
+      font-size: 12px;
+      line-height: 16px;
+      font-weight: 600;
+      text-align: right;
+      padding: var(--space-2) var(--space-2);
+      border-bottom: 1px solid var(--border-subtle);
+      white-space: nowrap;
+      transition: background-color var(--motion-base);
+    }
+
+    table.standings thead th.col-team,
+    table.standings thead th.col-form {
+      text-align: left;
+    }
+
+    table.standings thead th[data-col-tooltip] {
+      cursor: help;
+      transition: background-color var(--motion-base), color var(--motion-fast);
+    }
+
+    table.standings thead th[data-col-tooltip]:hover,
+    table.standings thead th[data-col-tooltip]:focus-visible {
+      color: var(--text-primary);
+    }
+
+    table.standings thead th.col-pos {
+      text-align: center;
+      padding-left: var(--space-3);
+      padding-right: var(--space-1);
+      width: 46px;
+    }
+    table.standings thead th.col-form { padding-right: var(--space-3); }
+
+    table.standings tbody tr {
+      height: var(--row-height-dense);
+      border-bottom: 1px solid var(--border-subtle);
+      transition: background-color var(--motion-fast), box-shadow var(--motion-fast);
+      animation: rowCascadeDown 340ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    }
+
+    table.standings tbody tr:nth-child(1),
+    table.scorers tbody tr:nth-child(1) { animation-delay: 40ms; }
+    table.standings tbody tr:nth-child(2),
+    table.scorers tbody tr:nth-child(2) { animation-delay: 125ms; }
+    table.standings tbody tr:nth-child(3),
+    table.scorers tbody tr:nth-child(3) { animation-delay: 210ms; }
+    table.standings tbody tr:nth-child(4),
+    table.scorers tbody tr:nth-child(4) { animation-delay: 295ms; }
+    table.standings tbody tr:nth-child(5),
+    table.scorers tbody tr:nth-child(5) { animation-delay: 380ms; }
+    table.standings tbody tr:nth-child(6),
+    table.scorers tbody tr:nth-child(6) { animation-delay: 465ms; }
+    table.standings tbody tr:nth-child(7),
+    table.scorers tbody tr:nth-child(7) { animation-delay: 550ms; }
+    table.standings tbody tr:nth-child(8),
+    table.scorers tbody tr:nth-child(8) { animation-delay: 635ms; }
+    table.standings tbody tr:nth-child(9),
+    table.scorers tbody tr:nth-child(9) { animation-delay: 720ms; }
+
+    table.standings tbody tr:last-child { border-bottom: none; }
+    table.standings tbody tr:hover { background: var(--bg-subtle); }
+
+    /* Synchronized D3 Tie-Breaker Highlight */
+    table.standings tbody tr.d3-group-hover {
+      background: color-mix(in srgb, var(--alert-retro-bg) 52%, transparent);
+    }
+    table.standings tbody tr.d3-team-active {
+      background: var(--alert-retro-bg);
+    }
+
+    /* Synchronized Form-Badge Match Pair Highlight (takes priority over D3 while on .form-tile) */
+    table.standings tbody tr.form-pair-self,
+    table.standings tbody tr.form-pair-self:hover {
+      background: var(--match-hl-self-bg);
+    }
+    table.standings tbody tr.form-pair-self td:first-child {
+      box-shadow: inset 3px 0 0 var(--accent-primary);
+    }
+    table.standings tbody tr.form-pair-opp,
+    table.standings tbody tr.form-pair-opp:hover {
+      background: var(--match-hl-opp-bg);
+    }
+    table.standings tbody tr.form-pair-opp td:first-child {
+      box-shadow: inset 3px 0 0 var(--match-hl-opp-accent);
+    }
+
+    table.standings tbody td {
+      padding: var(--space-2) var(--space-2);
+      text-align: right;
+      color: var(--text-secondary);
+      vertical-align: middle;
+      transition: box-shadow 150ms ease-out;
+    }
+
+    table.standings tbody td.col-pos {
+      text-align: center;
+      padding-left: var(--space-3);
+      padding-right: var(--space-1);
+      width: 46px;
+    }
+
+    /* Flashscore-style 24x24px rounded rank badge */
+    .pos-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: var(--radius-md);
+      font-size: 12px;
+      line-height: 1;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums lining-nums;
+      background: transparent;
+      color: var(--text-muted);
+      transition: background-color var(--motion-fast), color var(--motion-fast), transform var(--motion-fast);
+    }
+
+    tr.rank-leader .pos-badge {
+      background: var(--accent-primary);
+      color: var(--accent-primary-fg);
+    }
+
+    tr.rank-tied .pos-badge {
+      background: var(--alert-retro-border);
+      color: var(--alert-retro-btn-fg);
+    }
+
+    tr.d3-team-active .pos-badge {
+      transform: scale(1.06);
+    }
+
+    table.standings tbody td.col-team {
+      text-align: left;
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .team-cell {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      min-width: 0;
+    }
+
+    .team-crest {
+      width: 24px;
+      height: 24px;
+      border-radius: var(--radius-md);
+      color: #FFFFFF;
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24), 0 1px 2px rgba(0, 0, 0, 0.16);
+    }
+
+    .team-crest-xs {
+      width: 18px;
+      height: 18px;
+      border-radius: var(--radius-sm);
+      font-size: 9px;
+    }
+
+    .team-name {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tie-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 1px 6px;
+      border-radius: var(--radius-sm);
+      background: var(--alert-retro-bg);
+      color: var(--alert-retro-fg);
+      border: 1px solid color-mix(in srgb, var(--alert-retro-border) 35%, transparent);
+      font-family: var(--font-sans);
+      font-size: 11px;
+      line-height: 15px;
+      font-weight: 700;
+      flex-shrink: 0;
+      transition: transform var(--motion-fast), background-color var(--motion-fast), border-color var(--motion-fast);
+    }
+
+    button.tie-tag {
+      cursor: pointer;
+    }
+
+    button.tie-tag:hover {
+      border-color: var(--alert-retro-border);
+      transform: scale(1.06);
+    }
+
+    button.tie-tag:active {
+      transform: scale(0.96);
+    }
+
+    tr.d3-team-active .tie-tag {
+      transform: scale(1.06);
+    }
+
+    table.standings tbody td.col-pts {
+      font-weight: 700;
+      color: var(--text-primary);
+      background: color-mix(in srgb, var(--bg-subtle) 55%, transparent);
+    }
+
+    table.standings tbody td.col-form {
+      text-align: left;
+      padding-right: var(--space-3);
+    }
+
+    /* ==========================================================================
+       DS-p19-status-badges (FormStrip W/D/L, StatusBadge)
+       ========================================================================== */
+    .form-strip {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .form-tile {
+      width: 22px;
+      height: 22px;
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      line-height: 22px;
+      font-weight: 700;
+      text-align: center;
+      display: inline-block;
+      cursor: default;
+      transition: transform var(--motion-fast), box-shadow var(--motion-fast);
+    }
+
+    .form-tile:hover,
+    .form-tile:focus-visible {
+      transform: scale(1.12);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.22);
+    }
+
+    /* Custom 2-line floating tooltip (portal on <body>, immune to overflow:hidden) */
+    .form-tooltip {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 80;
+      pointer-events: none;
+      padding: 6px 10px;
+      border-radius: var(--radius-md);
+      background: var(--tooltip-bg);
+      color: var(--tooltip-fg);
+      border: 1px solid var(--tooltip-border);
+      box-shadow: var(--shadow-md);
+      font-family: var(--font-sans);
+      text-align: center;
+      white-space: nowrap;
+      opacity: 0;
+      transform: translateY(-4px);
+      visibility: hidden;
+      transition: opacity 150ms ease-out, transform 150ms ease-out, visibility 150ms ease-out;
+    }
+
+    .form-tooltip.visible {
+      opacity: 1;
+      transform: translateY(0);
+      visibility: visible;
+    }
+
+    .form-tooltip::before {
+      content: "";
+      position: absolute;
+      top: -5px;
+      left: var(--arrow-x, 50%);
+      width: 8px;
+      height: 8px;
+      transform: translateX(-50%) rotate(45deg);
+      background: var(--tooltip-bg);
+      border-top: 1px solid var(--tooltip-border);
+      border-left: 1px solid var(--tooltip-border);
+    }
+
+    .form-tooltip-result {
+      display: block;
+      font-size: 12px;
+      line-height: 16px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums lining-nums;
+      color: var(--tooltip-fg);
+    }
+
+    .form-tooltip-meta {
+      display: block;
+      margin-top: 1px;
+      font-size: 10.5px;
+      line-height: 14px;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums lining-nums;
+      color: var(--tooltip-muted);
+    }
+
+    .form-tooltip-meta:empty {
+      display: none;
+    }
+
+    .form-w { background: var(--status-win-solid); color: var(--status-win-solid-fg); }
+    .form-d { background: var(--status-draw-solid); color: var(--status-draw-solid-fg); }
+    .form-l { background: var(--status-loss-solid); color: var(--status-loss-solid-fg); }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      padding: 2px var(--space-2);
+      border-radius: var(--radius-md);
+      font-size: 12px;
+      line-height: 16px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .status-played { background: var(--status-win-bg); color: var(--status-win-fg); }
+    .status-scheduled { background: var(--bg-subtle); color: var(--text-secondary); }
+    .status-postponed { background: var(--status-draw-bg); color: var(--status-draw-fg); }
+    .status-bye { background: var(--bg-subtle); color: var(--text-muted); border: 1px dashed var(--border-strong); }
+    .status-corrected { background: var(--info-bg); color: var(--info-fg); }
+    .status-suspended { background: var(--card-red-bg); color: var(--card-red-fg); }
+
+    /* Table footer & Tie-breaker Mini-table */
+    .table-footer {
+      padding: var(--space-3) var(--space-4);
+      border-top: 1px solid var(--border-subtle);
+      background: var(--bg-subtle);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-3);
+      font-size: 12px;
+      color: var(--text-muted);
+      transition: background-color var(--motion-base);
+    }
+
+    .legend-group { display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap; }
+    .legend-item { display: inline-flex; align-items: center; gap: 7px; }
+    .legend-pos {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      border-radius: 5px;
+      font-size: 10px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums lining-nums;
+      flex-shrink: 0;
+    }
+    .legend-pos-leader { background: var(--accent-primary); color: var(--accent-primary-fg); }
+    .legend-pos-tied { background: var(--alert-retro-border); color: var(--alert-retro-btn-fg); }
+
+    .tiebreak-panel {
+      margin-top: var(--space-4);
+      scroll-margin-top: 76px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-left: 4px solid var(--alert-retro-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-4);
+      box-shadow: inset 0 1px 0 var(--surface-highlight), var(--shadow-sm);
+      transition: background-color var(--motion-base), border-color var(--motion-fast), box-shadow var(--motion-fast);
+    }
+
+    .tiebreak-panel.d3-panel-active {
+      border-color: var(--alert-retro-border);
+      box-shadow: inset 0 1px 0 var(--surface-highlight), var(--shadow-md);
+    }
+
+    .tiebreak-panel.d3-panel-arrive {
+      animation: d3SpotlightFade 1050ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .tiebreak-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-3);
+      margin-bottom: var(--space-2);
+      flex-wrap: wrap;
+    }
+
+    .tiebreak-title { margin: 0; font-size: 15px; font-weight: 600; color: var(--text-primary); }
+    .tiebreak-desc { margin: 0 0 var(--space-3); font-size: 13px; color: var(--text-secondary); }
+
+    .mini-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    .mini-table th, .mini-table td {
+      padding: 7px var(--space-2);
+      border-bottom: 1px solid var(--border-subtle);
+      text-align: right;
+      transition: background-color var(--motion-fast);
+    }
+
+    .mini-table th:first-child, .mini-table td:first-child { text-align: left; }
+    .mini-table th { color: var(--text-muted); font-weight: 600; background: var(--bg-subtle); }
+    .mini-table td:first-child { color: var(--text-primary); font-weight: 600; }
+    .mini-table tr:last-child td { border-bottom: none; }
+    .mini-table tbody tr { cursor: pointer; }
+    .mini-table tbody tr:hover,
+    .mini-table tbody tr.d3-team-active {
+      background: var(--alert-retro-bg);
+    }
+
+    /* ==========================================================================
+       DS-p19-match-card (Sidebar Current Round)
+       ========================================================================== */
+    .side-stack {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-5);
+    }
+
+    .match-list { display: flex; flex-direction: column; }
+
+    .match-item {
+      display: block;
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--border-subtle);
+      transition: background-color var(--motion-fast), transform var(--motion-fast);
+    }
+
+    .match-item:last-child { border-bottom: none; }
+    a.match-item:hover { background: var(--bg-subtle); }
+
+    .match-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-2);
+      margin-bottom: var(--space-2);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .match-teams {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .match-side {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .match-side-home { justify-content: flex-end; }
+    .match-side-away { justify-content: flex-start; }
+
+    .match-team-label {
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--text-primary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .match-team-label.muted-loser {
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .score-pill {
+      min-width: 54px;
+      padding: 3px var(--space-2);
+      border-radius: var(--radius-md);
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+      font-size: 15px;
+      line-height: 20px;
+      font-weight: 700;
+      text-align: center;
+      color: var(--text-primary);
+    }
+
+    .score-pill.upcoming { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+
+    .match-foot {
+      margin-top: var(--space-2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-2);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .match-cta {
+      color: var(--accent-primary);
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .bye-row {
+      padding: var(--space-3) var(--space-4);
+      background: var(--bg-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-2);
+      font-size: 13px;
+    }
+
+    .summary-list {
+      padding: var(--space-3) var(--space-4);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    .summary-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-2);
+      font-size: 13px;
+    }
+
+    .summary-name { font-weight: 600; color: var(--text-primary); }
+    .summary-sub { font-size: 12px; color: var(--text-muted); display: block; }
+
+    /* ==========================================================================
+       Responsive — No horizontal scroll at 360px
+       ========================================================================== */
+    @media (max-width: 1023px) {
+      .main-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 767px) {
+      .header-inner { padding: var(--space-2) var(--space-3); }
+      .nav-link, .btn, .select-control { min-height: 44px; }
+      .nav-dropdown-item { min-height: 44px; }
+      .nav-link.active::after { bottom: 2px; }
+      .container { padding: var(--space-4) var(--space-3) var(--space-8); }
+
+      .col-gf, .col-ga, .col-form { display: none; }
+
+      table.standings thead th,
+      table.standings tbody td { padding: var(--space-2) 5px; }
+      table.scorers thead th,
+      table.scorers tbody td { padding: var(--space-2) 6px; font-size: 12px; }
+      table.scorers thead th.col-player { width: auto; }
+      table.scorers thead th.col-club,
+      table.scorers tbody td.col-club { padding-right: 6px; }
+      table.scorers thead th.col-goals { width: 58px; }
+      .scorer-club-pill { font-size: 12px; gap: 4px; }
+      table.standings thead th.col-pos,
+      table.standings tbody td.col-pos,
+      table.scorers thead th.col-pos,
+      table.scorers tbody td.col-pos { padding-left: var(--space-2); padding-right: 4px; width: 36px; }
+      table.standings thead th.col-pts,
+      table.standings tbody td.col-pts { padding-right: var(--space-2); }
+
+      .panel-header { padding: var(--space-3); }
+      .panel-header-left { width: 100%; justify-content: space-between; }
+      .panel-title { min-width: 0; }
+      .panel-tabs { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .panel-tab { min-height: 36px; padding: 6px 4px; text-align: center; font-size: 11px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand-group">
+        <a href="DS-p19-home-standings.html" class="brand-group" aria-label="Liga de Amatori P19 — Acasă">
+          <span class="brand-mark" aria-hidden="true">P19</span>
+          <span>
+            <span class="brand-title">Liga de Amatori</span>
+            <span class="brand-sub">Mock design · DS-p19-home-standings</span>
+          </span>
+        </a>
+      </div>
+
+      <nav class="main-nav" aria-label="Navigație principală">
+        <a class="nav-link active" href="DS-p19-home-standings.html" aria-current="page">Clasament</a>
+        <a class="nav-link" href="DS-p19-fixtures.html">Program</a>
+        <a class="nav-link" href="DS-p19-match-detail.html">Detaliu meci</a>
+        <div class="nav-dropdown">
+          <a class="nav-link nav-dropdown-trigger" href="DS-p19-team-profile.html" aria-haspopup="true">
+            <span>Echipe</span>
+            <svg class="nav-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 6l4 4 4-4"/>
+            </svg>
+          </a>
+          <div class="nav-dropdown-menu" role="menu" aria-label="Subcategorii Echipe">
+            <a class="nav-dropdown-item" role="menuitem" href="DS-p19-team-profile.html?tab=rezultate">Rezultate</a>
+            <a class="nav-dropdown-item" role="menuitem" href="DS-p19-team-profile.html?tab=lot">Lot</a>
+            <a class="nav-dropdown-item" role="menuitem" href="DS-p19-team-profile.html?tab=transferuri">Transferuri</a>
+          </div>
+        </div>
+      </nav>
+
+      <div class="header-actions">
+        <select id="season-select" class="select-control" aria-label="Selectează sezon">
+          <option selected>Sezon 2025–2026</option>
+          <option>Sezon 2024–2025</option>
+        </select>
+        <button id="theme-toggle" type="button" class="btn btn-secondary" aria-pressed="false" aria-label="Comută între modul luminos și modul întunecat">
+          <svg id="theme-icon" class="icon-sm theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+          <span id="theme-label">Dark</span>
+        </button>
+        <a href="#autentificare" class="btn btn-primary">Autentificare</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="page-head animate-enter">
+      <div>
+        <h1>Clasament și etapa curentă</h1>
+        <p class="page-meta">Sezon 2025–2026 · Format tur–retur (9 echipe, cu etapă liberă) · Actualizat după Etapa 11</p>
+      </div>
+      <span class="demo-pill">Date demonstrative · regulament configurabil per sezon</span>
+    </div>
+
+    <div class="main-grid">
+      <!-- Coloana stângă: Clasament + Mini-clasament D3 -->
+      <section aria-labelledby="standings-heading">
+        <div class="panel animate-enter" style="animation-delay:40ms;">
+          <div class="panel-header">
+            <div class="panel-header-left">
+              <h2 id="standings-heading" class="panel-title">
+                <span id="panel-live-dot" class="pulse-dot" aria-hidden="true"></span>
+                <span id="panel-title-text">Clasament live</span>
+              </h2>
+              <div class="panel-tabs" role="tablist" aria-label="Vizualizare clasament">
+                <span id="panel-tabs-indicator" class="panel-tabs-indicator" aria-hidden="true"></span>
+                <button id="tab-clasament" type="button" class="panel-tab" role="tab" aria-selected="true" aria-controls="view-clasament" data-tab="clasament" tabindex="0">CLASAMENT</button>
+                <button id="tab-forma" type="button" class="panel-tab" role="tab" aria-selected="false" aria-controls="view-forma" data-tab="forma" tabindex="-1">FORMA</button>
+                <button id="tab-marcatori" type="button" class="panel-tab" role="tab" aria-selected="false" aria-controls="view-marcatori" data-tab="marcatori" tabindex="-1">GOLGHETERI</button>
+              </div>
+            </div>
+            <span class="demo-pill tabular">Etapa 11 / 18</span>
+          </div>
+
+          <!-- Tab 1: CLASAMENT (general) -->
+          <div id="view-clasament" class="tab-panel" role="tabpanel" aria-labelledby="tab-clasament" data-tab-panel="clasament">
+          <div class="table-wrap">
+            <table class="standings">
+              <thead>
+                <tr>
+                  <th scope="col" class="col-pos">#</th>
+                  <th scope="col" class="col-team">Echipă</th>
+                  <th scope="col" tabindex="0" data-col-tooltip="Meciuri Jucate" aria-label="MJ — Meciuri Jucate">MJ</th>
+                  <th scope="col" tabindex="0" data-col-tooltip="Victorii" aria-label="V — Victorii">V</th>
+                  <th scope="col" tabindex="0" data-col-tooltip="Egal" aria-label="E — Egal">E</th>
+                  <th scope="col" tabindex="0" data-col-tooltip="Înfrângeri" aria-label="Î — Înfrângeri">Î</th>
+                  <th scope="col" class="col-gf" tabindex="0" data-col-tooltip="Goluri Marcate" aria-label="GM — Goluri Marcate">GM</th>
+                  <th scope="col" class="col-ga" tabindex="0" data-col-tooltip="Goluri Primite" aria-label="GP — Goluri Primite">GP</th>
+                  <th scope="col" tabindex="0" data-col-tooltip="Diferență Goluri" aria-label="DG — Diferență Goluri">DG</th>
+                  <th scope="col" class="col-pts" tabindex="0" data-col-tooltip="Puncte" aria-label="Pct — Puncte">Pct</th>
+                  <th scope="col" class="col-form">Formă (5)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="rank-leader" data-team="vn">
+                  <td class="col-pos"><span class="pos-badge">1</span></td>
+                  <td class="col-team">
+                    <div class="team-cell">
+                      <span class="team-crest crest-vn" aria-hidden="true">VN</span>
+                      <span class="team-name">FC Vulturii Nord</span>
+                    </div>
+                  </td>
+                  <td class="tabular">10</td>
+                  <td class="tabular">8</td>
+                  <td class="tabular">1</td>
+                  <td class="tabular">1</td>
+                  <td class="col-gf tabular">26</td>
+                  <td class="col-ga tabular">11</td>
+                  <td class="tabular">+15</td>
+                  <td class="col-pts tabular">25</td>
+                  <td class="col-form">
+                    <div class="form-strip" aria-label="Ultimele 5 meciuri: Victorie, Victorie, Egal, Înfrângere, Victorie">
+                      <span class="form-tile form-w" tabindex="0" data-opponent="ud" data-tooltip-result="3-1 (FC Vulturii Nord - Unirea Dealul)" data-tooltip-meta="Etapa 7 · 18.10.2026" aria-label="Victorie: 3-1 (FC Vulturii Nord - Unirea Dealul), Etapa 7, 18.10.2026">W</span>
+                      <span class="form-tile form-w" tabindex="0" data-opponent="sc" data-tooltip-result="0-2 (Sporting Cartier - FC Vulturii Nord)" data-tooltip-meta="Etapa 8 · 25.10.2026" aria-label="Victorie: 0-2 (Sporting Cartier - FC Vulturii Nord), Etapa 8, 25.10.2026">W</span>
+                      <span class="form-tile form-d" tabindex="0" data-opponent="vp" data-tooltip-result="1-1 (FC Vulturii Nord - CS Viitorul Parc)" data-tooltip-meta="Etapa 9 · 01.11.2026" aria-label="Egal: 1-1 (FC Vulturii Nord - CS Viitorul Parc), Etapa 9, 01.11.2026">D</span>
+                      <span class="form-tile form-l" tabindex="0" data-opponent="as" data-tooltip-result="2-1 (AS Stejarul - FC Vulturii Nord)" data-tooltip-meta="Etapa 10 · 07.11.2026" aria-label="Înfrângere: 2-1 (AS Stejarul - FC Vulturii Nord), Etapa 10, 07.11.2026">L</span>
+                      <span class="form-tile form-w" tabindex="0" data-opponent="gn" data-tooltip-result="0-4 (AS Gloria Nouă - FC Vulturii Nord)" data-tooltip-meta="Etapa 11 · 15.11.2026" aria-label="Victorie: 0-4 (AS Gloria Nouă - FC Vulturii Nord), Etapa 11, 15.11.2026">W</span>
+                    </div>
+                  </td>
+                </tr>
+
+                <tr class="rank-tied" data-team="as" data-d3-team="as" tabindex="0">
+                  <td class="col-pos"><span class="pos-badge">2</span></td>
+                  <td class="col-team">
+                    <div class="team-cell">
+                      <span class="team-crest crest-as" aria-hidden="true">AS</span>
+                      <span class="team-name">AS Stejarul</span>
+                      <button type="button" class="tie-tag" data-d3-jump="as" aria-label="Mergi la mini-clasamentul de departajare D3 pentru AS Stejarul">D3</button>
+                    </div>
+                  </td>
+                  <td class="tabular">10</td>
+                  <td class="tabular">7</td>
+                  <td class="tabular">1</td>
+                  <td class="tabular">2</td>
+                  <td class="col-gf tabular">22</td>
+                  <td class="col-ga tabular">12</td>
+                  <td class="tabular">+10</td>
+                  <td class="col-pts tabular">22</td>
+                  <td class="col-form">
+                    <div class="form-strip" aria-label="Ultimele 5 meciuri: Victorie, Înfrângere, Victorie, Victorie, Egal">
+                      <span class="form-tile form-w" tabindex="0" data-opponent="ps" data-tooltip-result="2-0 (AS Stejarul - Progresul Sud)" data-tooltip-meta="Etapa 7 · 17.10.2026" aria-label="Victorie: 2-0 (AS Stejarul - Progresul Sud), Etapa 7, 17.10.2026">W</span>
+                      <span class="form-tile form-l" tabindex="0" data-opponent="vp" data-tooltip-result="2-1 (CS Viitorul Parc - AS Stejarul)" data-tooltip-meta="Etapa 8 · 24.10.2026" aria-label="Înfrângere: 2-1 (CS Viitorul Parc - AS Stejarul), Etapa 8, 24.10.2026">L</span>
+                      <span class="form-tile form-w" tabindex="0" data-opponent="rv" data-tooltip-result="3-0 (AS Stejarul - Recolta Veche)" data-tooltip-meta="Etapa 9 · 31.10.2026" aria-label="Victorie: 3-0 (AS Stejarul - Recolta Veche), Etapa 9, 31.10.2026">W</span>
+                      <span class="form-tile form-w" tabindex="0" data-opponent="vn" data-tooltip-result="2-1 (AS Stejarul - FC Vulturii Nord)" data-tooltip-meta="Etapa 10 · 07.11.2026" aria-label="Victorie: 2-1 (AS Stejarul - FC Vulturii Nord), Etapa 10, 07.11.2026">W</span>
+                      <span class="form-tile form-d" tabindex="0" data-opponent="ar" data-tooltip-result="1-1 (AS Stejarul - AFC Rapiditate)" data-tooltip-meta="Etapa 11 · 15.11.2026" aria-label="Egal: 1-1 (AS Stejarul - AFC Rapiditate), Etapa 11, 15.11.2026">D</span>
+                    </div>
+                  </td>
+                </tr>
+
+                <tr class="rank-tied" data-team="vp" data-d3-team="vp" tabindex="0">
+                  <td class="col-pos"><span class="pos-badge">3</span></td>
+                  <td class="col-team">
+                    <div class="team-cell">
+                      <span class="team-crest crest-vp" aria-hidden="true">VP</span>
+                      <span class="team-name">CS Viitorul Parc</span>
+                      <button type="button" class="tie-tag" data-d3-jump="vp" aria-label="Mergi la mini-clasamentul de departajare D3 pentru CS Viitorul Parc">D3</button>
+                    </div>
+                  </td>
+                  <td class="tabular">10</td>
+                  <td class="tabular">7</td>
+                  <td class="tabular">1</td>
+                  <td class="tabular">2</td>
+                  <td class="col-gf tabular">24</td>
+                  <td class="col-ga tabular">13</td>
+                  <td class="tabular">+11</td>
+                  <td class="col-pts tabular">22</td>
+                  <td class="col-form">
+                    <div class="form-strip" aria-label="Ultimele 5 meciuri: Egal, Victorie, Victorie, Înfrângere, Victorie">
+                      <span class="form-tile form-d" tabindex="0" data-opponent="vn" data-tooltip-result="1-1 (FC Vulturii Nord - CS Viitorul Parc)" data-tooltip-meta="Etapa 7 · 18.10.2026" aria-label="Egal: 1-1 (FC Vulturii Nord - CS Viitorul Parc), Etapa 7, 18.10.2026">D</span>
+                      <span class="form-tile form-w" tabindex="0" data-opponent="as" data-tooltip-result="2-1 (CS Viitorul Parc - AS Stejarul)" data-tooltip-meta="Etapa 8 · 24.10.2026" aria-label="Victorie: 2-1 (CS Viitorul Parc - AS Stejarul), Etapa 8, 24.10.2026">W</span>
+                      <span class="form-tile form-w" tabindex="0" data-opponent="gn" data-tooltip-result="4-1 (CS Viitorul Parc - AS Gloria Nouă)" data-tooltip-meta="Etapa 9 · 01.11.2026" aria-label="Victorie: 4-1 (CS Viitorul Parc - AS Gloria Nouă), Etapa 9, 01.11.2026">W</span>
+                      <span class="form-tile form-l" tabindex="0" data-opponent="ud" data-tooltip-result="1-0 (Unirea Dealul - CS Viitorul Parc)" data-tooltip-meta="Etapa 10 · 08.11.2026" aria-label="Înfrângere: 1-0 (Unirea Dealul - CS Viitorul Parc), Etapa 10, 08.11.2026">L</span>
+                      <span class="form-tile form-w" tabindex="0" data-opponent="ps" data-tooltip-result="1-3 (Progresul Sud - CS Viitorul Parc)" data-tooltip-meta="Etapa 11 · 16.11.2026" aria-label="Victorie: 1-3 (Progresul Sud - CS Viitorul Parc), Etapa 11, 16.11.2026">W</span>
+                    </div>
+                  </td>
+                </tr>
+
+                <tr class="rank-tied" data-team="ar" data-d3-team="ar" tabindex="0">
+                  <td class="col-pos"><span class="pos-badge">4</span></td>
+                  <td class="col-team">
+                    <div class="team-cell">
+                      <span class="team-crest crest-ar" aria-hidden="true">AR</span>
+                      <span class="team-name">AFC Rapiditate</span>
+                      <button type="button" class="tie-tag" data-d3-jump="ar" aria-label="Mergi la mini-clasamentul de departajare D3 pentru AFC Rapiditate">D3</button>
+                    </div>
+                  </td>
+                  <td class="tabular">10</td>
+                  <td class="tabular">7</td>
+                  <td class="tabular">1</td>
+                  <td class="tabular">2</td>
+                  <td class="col-gf tabular">19</td>
+                  <td class="col-ga tabular">12</td>
+                  <td class="tabular">+7</td>
+                  <td class="col-pts tabular">22</td>
+                  <td class="col-form">
+                    <div class="form-strip" aria-label="Ultimele 5 meciuri: Victorie, Victorie, Înfrângere, Victorie, Victorie">
+                      <span class="form-tile form-w" tabindex="0" data-opponent="sc" data-tooltip-result="2-1 (AFC Rapiditate - Sporting Cartier)" data-tooltip-meta="Etapa 7 · 17.10.2026" aria-label="Victorie: 2-1 (AFC Rapiditate - Sporting Cartier), Etapa 7, 17.10.2026">W</span>
+                      <span class="form-tile form-w" tabindex="0" data-opponent="rv" data-tooltip-result="0-2 (Recolta Veche - AFC Rapiditate)" data-tooltip-meta="Etapa 8 · 25.10.2026" aria-label="Victorie: 0-2 (Recolta Veche - AFC Rapiditate), Etapa 8, 25.10.2026">W</span>
+                      <span class="form-tile form-l" tabindex="0" data-opponent="vn" data-tooltip-result="3-1 (FC Vulturii Nord - AFC Rapiditate)" data-tooltip-meta="Etapa 9 · 31.10.2026" aria-label="Înfrângere: 3-1 (FC Vulturii Nord - AFC Rapiditate), Etapa 9, 31.10.2026">L</span>
+                      <span class="form-tile form-w" tabindex="0" data-opponent="ud" data-tooltip-result="2-0 (AFC Rapiditate - Unirea Dealul)" data-tooltip-meta="Etapa 10 · 07.11.2026" aria-label="Victorie: 2-0 (AFC Rapiditate - Unirea Dealul), Etapa 10, 07.11.2026">W</span>
+                      <span class="form-tile form-w" tabindex="0" data-opponent="gn" data-tooltip-result="1-3 (AS Gloria Nouă - AFC Rapiditate)" data-tooltip-meta="Etapa 11 · 15.11.2026" aria-label="Victorie: 1-3 (AS Gloria Nouă - AFC Rapiditate), Etapa 11, 15.11.2026">W</span>
+                    </div>
+                  </td>
+                </tr>
+
+                <tr data-team="ud">
+                  <td class="col-pos"><span class="pos-badge">5</span></td>
+                  <td class="col-team">
+                    <div class="team-cell">
+                      <span class="team-crest crest-ud" aria-hidden="true">UD</span>
+                      <span class="team-name">Unirea Dealul</span>
+                    </div>
+                  </td>
+                  <td class="tabular">10</td>
+                  <td class="tabular">4</td>
+                  <td class="tabular">3</td>
+                  <td class="tabular">3</td>
+                  <td class="col-gf tabular">16</td>
+                  <td class="col-ga tabular">15</td>
+                  <td class="tabular">+1</td>
+                  <td class="col-pts tabular">15</td>
+                  <td class="col-form">
+                    <div class="form-strip" aria-label="Ultimele 5 meciuri: Egal, Egal, Victorie, Înfrângere, Egal">
+                      <span class="form-tile form-d" tabindex="0" data-opponent="ps" data-tooltip-result="1-1 (Unirea Dealul - Progresul Sud)" data-tooltip-meta="Etapa 7 · 18.10.2026" aria-label="Egal: 1-1 (Unirea Dealul - Progresul Sud), Etapa 7, 18.10.2026">D</span>
+                      <span class="form-tile form-d" tabindex="0" data-opponent="rv" data-tooltip-result="0-0 (Recolta Veche - Unirea Dealul)" data-tooltip-meta="Etapa 8 · 25.10.2026" aria-label="Egal: 0-0 (Recolta Veche - Unirea Dealul), Etapa 8, 25.10.2026">D</span>
+                      <span class="form-tile form-w" tabindex="0" data-opponent="vp" data-tooltip-result="1-0 (Unirea Dealul - CS Viitorul Parc)" data-tooltip-meta="Etapa 9 · 01.11.2026" aria-label="Victorie: 1-0 (Unirea Dealul - CS Viitorul Parc), Etapa 9, 01.11.2026">W</span>
+                      <span class="form-tile form-l" tabindex="0" data-opponent="sc" data-tooltip-result="2-1 (Sporting Cartier - Unirea Dealul)" data-tooltip-meta="Etapa 10 · 08.11.2026" aria-label="Înfrângere: 2-1 (Sporting Cartier - Unirea Dealul), Etapa 10, 08.11.2026">L</span>
+                      <span class="form-tile form-d" tabindex="0" data-opponent="as" data-tooltip-result="2-2 (Unirea Dealul - AS Stejarul)" data-tooltip-meta="Etapa 11 · 16.11.2026" aria-label="Egal: 2-2 (Unirea Dealul - AS Stejarul), Etapa 11, 16.11.2026">D</span>
+                    </div>
+                  </td>
+                </tr>
+
+                <tr data-team="sc">
+                  <td class="col-pos"><span class="pos-badge">6</span></td>
+                  <td class="col-team">
+                    <div class="team-cell">
+                      <span class="team-crest crest-sc" aria-hidden="true">SC</span>
+                      <span class="team-name">Sporting Cartier</span>
+                    </div>
+                  </td>
+                  <td class="tabular">10</td>
+                  <td class="tabular">4</td>
+                  <td class="tabular">1</td>
+                  <td class="tabular">5</td>
+                  <td class="col-gf tabular">15</td>
+                  <td class="col-ga tabular">18</td>
+                  <td class="tabular">-3</td>
+                  <td class="col-pts tabular">13</td>
+                  <td class="col-form">
+                    <div class="form-strip" aria-label="Ultimele 5 meciuri: Înfrângere, Victorie, Înfrângere, Înfrângere, Victorie">
+                      <span class="form-tile form-l" tabindex="0" data-opponent="ar" data-tooltip-result="2-1 (AFC Rapiditate - Sporting Cartier)" data-tooltip-meta="Etapa 7 · 17.10.2026" aria-label="Înfrângere: 2-1 (AFC Rapiditate - Sporting Cartier), Etapa 7, 17.10.2026">L</span>
+                      <span class="form-tile form-w" tabindex="0" data-opponent="gn" data-tooltip-result="3-1 (Sporting Cartier - AS Gloria Nouă)" data-tooltip-meta="Etapa 8 · 24.10.2026" aria-label="Victorie: 3-1 (Sporting Cartier - AS Gloria Nouă), Etapa 8, 24.10.2026">W</span>
+                      <span class="form-tile form-l" tabindex="0" data-opponent="vn" data-tooltip-result="0-2 (Sporting Cartier - FC Vulturii Nord)" data-tooltip-meta="Etapa 9 · 01.11.2026" aria-label="Înfrângere: 0-2 (Sporting Cartier - FC Vulturii Nord), Etapa 9, 01.11.2026">L</span>
+                      <span class="form-tile form-l" tabindex="0" data-opponent="ps" data-tooltip-result="1-0 (Progresul Sud - Sporting Cartier)" data-tooltip-meta="Etapa 10 · 08.11.2026" aria-label="Înfrângere: 1-0 (Progresul Sud - Sporting Cartier), Etapa 10, 08.11.2026">L</span>
+                      <span class="form-tile form-w" tabindex="0" data-opponent="ud" data-tooltip-result="2-1 (Sporting Cartier - Unirea Dealul)" data-tooltip-meta="Etapa 11 · 16.11.2026" aria-label="Victorie: 2-1 (Sporting Cartier - Unirea Dealul), Etapa 11, 16.11.2026">W</span>
+                    </div>
+                  </td>
+                </tr>
+
+                <tr data-team="ps">
+                  <td class="col-pos"><span class="pos-badge">7</span></td>
+                  <td class="col-team">
+                    <div class="team-cell">
+                      <span class="team-crest crest-ps" aria-hidden="true">PS</span>
+                      <span class="team-name">Progresul Sud</span>
+                    </div>
+                  </td>
+                  <td class="tabular">10</td>
+                  <td class="tabular">3</td>
+                  <td class="tabular">2</td>
+                  <td class="tabular">5</td>
+                  <td class="col-gf tabular">12</td>
+                  <td class="col-ga tabular">19</td>
+                  <td class="tabular">-7</td>
+                  <td class="col-pts tabular">11</td>
+                  <td class="col-form">
+                    <div class="form-strip" aria-label="Ultimele 5 meciuri: Înfrângere, Egal, Înfrângere, Victorie, Înfrângere">
+                      <span class="form-tile form-l" tabindex="0" data-opponent="as" data-tooltip-result="2-0 (AS Stejarul - Progresul Sud)" data-tooltip-meta="Etapa 7 · 17.10.2026" aria-label="Înfrângere: 2-0 (AS Stejarul - Progresul Sud), Etapa 7, 17.10.2026">L</span>
+                      <span class="form-tile form-d" tabindex="0" data-opponent="ud" data-tooltip-result="1-1 (Unirea Dealul - Progresul Sud)" data-tooltip-meta="Etapa 8 · 25.10.2026" aria-label="Egal: 1-1 (Unirea Dealul - Progresul Sud), Etapa 8, 25.10.2026">D</span>
+                      <span class="form-tile form-l" tabindex="0" data-opponent="ar" data-tooltip-result="3-0 (AFC Rapiditate - Progresul Sud)" data-tooltip-meta="Etapa 9 · 31.10.2026" aria-label="Înfrângere: 3-0 (AFC Rapiditate - Progresul Sud), Etapa 9, 31.10.2026">L</span>
+                      <span class="form-tile form-w" tabindex="0" data-opponent="sc" data-tooltip-result="1-0 (Progresul Sud - Sporting Cartier)" data-tooltip-meta="Etapa 10 · 08.11.2026" aria-label="Victorie: 1-0 (Progresul Sud - Sporting Cartier), Etapa 10, 08.11.2026">W</span>
+                      <span class="form-tile form-l" tabindex="0" data-opponent="vp" data-tooltip-result="1-3 (Progresul Sud - CS Viitorul Parc)" data-tooltip-meta="Etapa 11 · 16.11.2026" aria-label="Înfrângere: 1-3 (Progresul Sud - CS Viitorul Parc), Etapa 11, 16.11.2026">L</span>
+                    </div>
+                  </td>
+                </tr>
+
+                <tr data-team="rv">
+                  <td class="col-pos"><span class="pos-badge">8</span></td>
+                  <td class="col-team">
+                    <div class="team-cell">
+                      <span class="team-crest crest-rv" aria-hidden="true">RV</span>
+                      <span class="team-name">Recolta Veche</span>
+                    </div>
+                  </td>
+                  <td class="tabular">9</td>
+                  <td class="tabular">2</td>
+                  <td class="tabular">1</td>
+                  <td class="tabular">6</td>
+                  <td class="col-gf tabular">10</td>
+                  <td class="col-ga tabular">21</td>
+                  <td class="tabular">-11</td>
+                  <td class="col-pts tabular">7</td>
+                  <td class="col-form">
+                    <div class="form-strip" aria-label="Ultimele 5 meciuri: Înfrângere, Înfrângere, Egal, Înfrângere, Înfrângere">
+                      <span class="form-tile form-l" tabindex="0" data-opponent="ar" data-tooltip-result="0-2 (Recolta Veche - AFC Rapiditate)" data-tooltip-meta="Etapa 6 · 10.10.2026" aria-label="Înfrângere: 0-2 (Recolta Veche - AFC Rapiditate), Etapa 6, 10.10.2026">L</span>
+                      <span class="form-tile form-l" tabindex="0" data-opponent="as" data-tooltip-result="3-0 (AS Stejarul - Recolta Veche)" data-tooltip-meta="Etapa 7 · 18.10.2026" aria-label="Înfrângere: 3-0 (AS Stejarul - Recolta Veche), Etapa 7, 18.10.2026">L</span>
+                      <span class="form-tile form-d" tabindex="0" data-opponent="ud" data-tooltip-result="0-0 (Recolta Veche - Unirea Dealul)" data-tooltip-meta="Etapa 8 · 25.10.2026" aria-label="Egal: 0-0 (Recolta Veche - Unirea Dealul), Etapa 8, 25.10.2026">D</span>
+                      <span class="form-tile form-l" tabindex="0" data-opponent="gn" data-tooltip-result="2-1 (AS Gloria Nouă - Recolta Veche)" data-tooltip-meta="Etapa 9 · 01.11.2026" aria-label="Înfrângere: 2-1 (AS Gloria Nouă - Recolta Veche), Etapa 9, 01.11.2026">L</span>
+                      <span class="form-tile form-l" tabindex="0" data-opponent="ps" data-tooltip-result="0-2 (Recolta Veche - Progresul Sud)" data-tooltip-meta="Etapa 10 · 08.11.2026" aria-label="Înfrângere: 0-2 (Recolta Veche - Progresul Sud), Etapa 10, 08.11.2026">L</span>
+                    </div>
+                  </td>
+                </tr>
+
+                <tr data-team="gn">
+                  <td class="col-pos"><span class="pos-badge">9</span></td>
+                  <td class="col-team">
+                    <div class="team-cell">
+                      <span class="team-crest crest-gn" aria-hidden="true">GN</span>
+                      <span class="team-name">AS Gloria Nouă</span>
+                    </div>
+                  </td>
+                  <td class="tabular">9</td>
+                  <td class="tabular">1</td>
+                  <td class="tabular">1</td>
+                  <td class="tabular">7</td>
+                  <td class="col-gf tabular">8</td>
+                  <td class="col-ga tabular">22</td>
+                  <td class="tabular">-14</td>
+                  <td class="col-pts tabular">4</td>
+                  <td class="col-form">
+                    <div class="form-strip" aria-label="Ultimele 5 meciuri: Înfrângere, Înfrângere, Înfrângere, Victorie, Înfrângere">
+                      <span class="form-tile form-l" tabindex="0" data-opponent="sc" data-tooltip-result="3-1 (Sporting Cartier - AS Gloria Nouă)" data-tooltip-meta="Etapa 7 · 17.10.2026" aria-label="Înfrângere: 3-1 (Sporting Cartier - AS Gloria Nouă), Etapa 7, 17.10.2026">L</span>
+                      <span class="form-tile form-l" tabindex="0" data-opponent="vp" data-tooltip-result="4-1 (CS Viitorul Parc - AS Gloria Nouă)" data-tooltip-meta="Etapa 8 · 24.10.2026" aria-label="Înfrângere: 4-1 (CS Viitorul Parc - AS Gloria Nouă), Etapa 8, 24.10.2026">L</span>
+                      <span class="form-tile form-l" tabindex="0" data-opponent="ar" data-tooltip-result="1-3 (AS Gloria Nouă - AFC Rapiditate)" data-tooltip-meta="Etapa 9 · 01.11.2026" aria-label="Înfrângere: 1-3 (AS Gloria Nouă - AFC Rapiditate), Etapa 9, 01.11.2026">L</span>
+                      <span class="form-tile form-w" tabindex="0" data-opponent="rv" data-tooltip-result="2-1 (AS Gloria Nouă - Recolta Veche)" data-tooltip-meta="Etapa 10 · 07.11.2026" aria-label="Victorie: 2-1 (AS Gloria Nouă - Recolta Veche), Etapa 10, 07.11.2026">W</span>
+                      <span class="form-tile form-l" tabindex="0" data-opponent="vn" data-tooltip-result="0-4 (AS Gloria Nouă - FC Vulturii Nord)" data-tooltip-meta="Etapa 11 · 15.11.2026" aria-label="Înfrângere: 0-4 (AS Gloria Nouă - FC Vulturii Nord), Etapa 11, 15.11.2026">L</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="table-footer">
+            <div class="legend-group">
+              <span class="legend-item">
+                <span class="legend-pos legend-pos-leader" aria-hidden="true">1</span>
+                Locul 1
+              </span>
+              <span class="legend-item">
+                <span class="legend-pos legend-pos-tied" aria-hidden="true">2</span>
+                Departajare activă D3 (treci cu mouse-ul pe rând)
+              </span>
+            </div>
+            <span>Formă: W = Victorie · D = Egal · L = Înfrângere</span>
+          </div>
+          </div>
+
+          <!-- Tab 2: FORMA (ultimele 5 etape jucate) -->
+          <div id="view-forma" class="tab-panel" role="tabpanel" aria-labelledby="tab-forma" data-tab-panel="forma" hidden>
+            <div class="table-wrap">
+              <table class="standings">
+                <thead>
+                  <tr>
+                    <th scope="col" class="col-pos">#</th>
+                    <th scope="col" class="col-team">Echipă</th>
+                    <th scope="col" tabindex="0" data-col-tooltip="Meciuri Jucate" aria-label="MJ — Meciuri Jucate">MJ</th>
+                    <th scope="col" tabindex="0" data-col-tooltip="Victorii" aria-label="V — Victorii">V</th>
+                    <th scope="col" tabindex="0" data-col-tooltip="Egal" aria-label="E — Egal">E</th>
+                    <th scope="col" tabindex="0" data-col-tooltip="Înfrângeri" aria-label="Î — Înfrângeri">Î</th>
+                    <th scope="col" class="col-gf" tabindex="0" data-col-tooltip="Goluri Marcate" aria-label="GM — Goluri Marcate">GM</th>
+                    <th scope="col" class="col-ga" tabindex="0" data-col-tooltip="Goluri Primite" aria-label="GP — Goluri Primite">GP</th>
+                    <th scope="col" tabindex="0" data-col-tooltip="Diferență Goluri" aria-label="DG — Diferență Goluri">DG</th>
+                    <th scope="col" class="col-pts" tabindex="0" data-col-tooltip="Puncte" aria-label="Pct — Puncte">Pct</th>
+                    <th scope="col" class="col-form">Formă (5)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="rank-leader" data-team="ar">
+                    <td class="col-pos"><span class="pos-badge">1</span></td>
+                    <td class="col-team">
+                      <div class="team-cell">
+                        <span class="team-crest crest-ar" aria-hidden="true">AR</span>
+                        <span class="team-name">AFC Rapiditate</span>
+                      </div>
+                    </td>
+                    <td class="tabular">5</td>
+                    <td class="tabular">4</td>
+                    <td class="tabular">0</td>
+                    <td class="tabular">1</td>
+                    <td class="col-gf tabular">10</td>
+                    <td class="col-ga tabular">5</td>
+                    <td class="tabular">+5</td>
+                    <td class="col-pts tabular">12</td>
+                    <td class="col-form">
+                      <div class="form-strip" aria-label="Ultimele 5 meciuri: Victorie, Victorie, Înfrângere, Victorie, Victorie">
+                        <span class="form-tile form-w" tabindex="0" data-opponent="sc" data-tooltip-result="2-1 (AFC Rapiditate - Sporting Cartier)" data-tooltip-meta="Etapa 7 · 17.10.2026" aria-label="Victorie: 2-1 (AFC Rapiditate - Sporting Cartier), Etapa 7, 17.10.2026">W</span>
+                        <span class="form-tile form-w" tabindex="0" data-opponent="rv" data-tooltip-result="0-2 (Recolta Veche - AFC Rapiditate)" data-tooltip-meta="Etapa 8 · 25.10.2026" aria-label="Victorie: 0-2 (Recolta Veche - AFC Rapiditate), Etapa 8, 25.10.2026">W</span>
+                        <span class="form-tile form-l" tabindex="0" data-opponent="vn" data-tooltip-result="3-1 (FC Vulturii Nord - AFC Rapiditate)" data-tooltip-meta="Etapa 9 · 31.10.2026" aria-label="Înfrângere: 3-1 (FC Vulturii Nord - AFC Rapiditate), Etapa 9, 31.10.2026">L</span>
+                        <span class="form-tile form-w" tabindex="0" data-opponent="ud" data-tooltip-result="2-0 (AFC Rapiditate - Unirea Dealul)" data-tooltip-meta="Etapa 10 · 07.11.2026" aria-label="Victorie: 2-0 (AFC Rapiditate - Unirea Dealul), Etapa 10, 07.11.2026">W</span>
+                        <span class="form-tile form-w" tabindex="0" data-opponent="gn" data-tooltip-result="1-3 (AS Gloria Nouă - AFC Rapiditate)" data-tooltip-meta="Etapa 11 · 15.11.2026" aria-label="Victorie: 1-3 (AS Gloria Nouă - AFC Rapiditate), Etapa 11, 15.11.2026">W</span>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <tr data-team="vn">
+                    <td class="col-pos"><span class="pos-badge">2</span></td>
+                    <td class="col-team">
+                      <div class="team-cell">
+                        <span class="team-crest crest-vn" aria-hidden="true">VN</span>
+                        <span class="team-name">FC Vulturii Nord</span>
+                      </div>
+                    </td>
+                    <td class="tabular">5</td>
+                    <td class="tabular">3</td>
+                    <td class="tabular">1</td>
+                    <td class="tabular">1</td>
+                    <td class="col-gf tabular">11</td>
+                    <td class="col-ga tabular">4</td>
+                    <td class="tabular">+7</td>
+                    <td class="col-pts tabular">10</td>
+                    <td class="col-form">
+                      <div class="form-strip" aria-label="Ultimele 5 meciuri: Victorie, Victorie, Egal, Înfrângere, Victorie">
+                        <span class="form-tile form-w" tabindex="0" data-opponent="ud" data-tooltip-result="3-1 (FC Vulturii Nord - Unirea Dealul)" data-tooltip-meta="Etapa 7 · 18.10.2026" aria-label="Victorie: 3-1 (FC Vulturii Nord - Unirea Dealul), Etapa 7, 18.10.2026">W</span>
+                        <span class="form-tile form-w" tabindex="0" data-opponent="sc" data-tooltip-result="0-2 (Sporting Cartier - FC Vulturii Nord)" data-tooltip-meta="Etapa 8 · 25.10.2026" aria-label="Victorie: 0-2 (Sporting Cartier - FC Vulturii Nord), Etapa 8, 25.10.2026">W</span>
+                        <span class="form-tile form-d" tabindex="0" data-opponent="vp" data-tooltip-result="1-1 (FC Vulturii Nord - CS Viitorul Parc)" data-tooltip-meta="Etapa 9 · 01.11.2026" aria-label="Egal: 1-1 (FC Vulturii Nord - CS Viitorul Parc), Etapa 9, 01.11.2026">D</span>
+                        <span class="form-tile form-l" tabindex="0" data-opponent="as" data-tooltip-result="2-1 (AS Stejarul - FC Vulturii Nord)" data-tooltip-meta="Etapa 10 · 07.11.2026" aria-label="Înfrângere: 2-1 (AS Stejarul - FC Vulturii Nord), Etapa 10, 07.11.2026">L</span>
+                        <span class="form-tile form-w" tabindex="0" data-opponent="gn" data-tooltip-result="0-4 (AS Gloria Nouă - FC Vulturii Nord)" data-tooltip-meta="Etapa 11 · 15.11.2026" aria-label="Victorie: 0-4 (AS Gloria Nouă - FC Vulturii Nord), Etapa 11, 15.11.2026">W</span>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <tr data-team="vp">
+                    <td class="col-pos"><span class="pos-badge">3</span></td>
+                    <td class="col-team">
+                      <div class="team-cell">
+                        <span class="team-crest crest-vp" aria-hidden="true">VP</span>
+                        <span class="team-name">CS Viitorul Parc</span>
+                      </div>
+                    </td>
+                    <td class="tabular">5</td>
+                    <td class="tabular">3</td>
+                    <td class="tabular">1</td>
+                    <td class="tabular">1</td>
+                    <td class="col-gf tabular">10</td>
+                    <td class="col-ga tabular">5</td>
+                    <td class="tabular">+5</td>
+                    <td class="col-pts tabular">10</td>
+                    <td class="col-form">
+                      <div class="form-strip" aria-label="Ultimele 5 meciuri: Egal, Victorie, Victorie, Înfrângere, Victorie">
+                        <span class="form-tile form-d" tabindex="0" data-opponent="vn" data-tooltip-result="1-1 (FC Vulturii Nord - CS Viitorul Parc)" data-tooltip-meta="Etapa 7 · 18.10.2026" aria-label="Egal: 1-1 (FC Vulturii Nord - CS Viitorul Parc), Etapa 7, 18.10.2026">D</span>
+                        <span class="form-tile form-w" tabindex="0" data-opponent="as" data-tooltip-result="2-1 (CS Viitorul Parc - AS Stejarul)" data-tooltip-meta="Etapa 8 · 24.10.2026" aria-label="Victorie: 2-1 (CS Viitorul Parc - AS Stejarul), Etapa 8, 24.10.2026">W</span>
+                        <span class="form-tile form-w" tabindex="0" data-opponent="gn" data-tooltip-result="4-1 (CS Viitorul Parc - AS Gloria Nouă)" data-tooltip-meta="Etapa 9 · 01.11.2026" aria-label="Victorie: 4-1 (CS Viitorul Parc - AS Gloria Nouă), Etapa 9, 01.11.2026">W</span>
+                        <span class="form-tile form-l" tabindex="0" data-opponent="ud" data-tooltip-result="1-0 (Unirea Dealul - CS Viitorul Parc)" data-tooltip-meta="Etapa 10 · 08.11.2026" aria-label="Înfrângere: 1-0 (Unirea Dealul - CS Viitorul Parc), Etapa 10, 08.11.2026">L</span>
+                        <span class="form-tile form-w" tabindex="0" data-opponent="ps" data-tooltip-result="1-3 (Progresul Sud - CS Viitorul Parc)" data-tooltip-meta="Etapa 11 · 16.11.2026" aria-label="Victorie: 1-3 (Progresul Sud - CS Viitorul Parc), Etapa 11, 16.11.2026">W</span>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <tr data-team="as">
+                    <td class="col-pos"><span class="pos-badge">4</span></td>
+                    <td class="col-team">
+                      <div class="team-cell">
+                        <span class="team-crest crest-as" aria-hidden="true">AS</span>
+                        <span class="team-name">AS Stejarul</span>
+                      </div>
+                    </td>
+                    <td class="tabular">5</td>
+                    <td class="tabular">3</td>
+                    <td class="tabular">1</td>
+                    <td class="tabular">1</td>
+                    <td class="col-gf tabular">9</td>
+                    <td class="col-ga tabular">4</td>
+                    <td class="tabular">+5</td>
+                    <td class="col-pts tabular">10</td>
+                    <td class="col-form">
+                      <div class="form-strip" aria-label="Ultimele 5 meciuri: Victorie, Înfrângere, Victorie, Victorie, Egal">
+                        <span class="form-tile form-w" tabindex="0" data-opponent="ps" data-tooltip-result="2-0 (AS Stejarul - Progresul Sud)" data-tooltip-meta="Etapa 7 · 17.10.2026" aria-label="Victorie: 2-0 (AS Stejarul - Progresul Sud), Etapa 7, 17.10.2026">W</span>
+                        <span class="form-tile form-l" tabindex="0" data-opponent="vp" data-tooltip-result="2-1 (CS Viitorul Parc - AS Stejarul)" data-tooltip-meta="Etapa 8 · 24.10.2026" aria-label="Înfrângere: 2-1 (CS Viitorul Parc - AS Stejarul), Etapa 8, 24.10.2026">L</span>
+                        <span class="form-tile form-w" tabindex="0" data-opponent="rv" data-tooltip-result="3-0 (AS Stejarul - Recolta Veche)" data-tooltip-meta="Etapa 9 · 31.10.2026" aria-label="Victorie: 3-0 (AS Stejarul - Recolta Veche), Etapa 9, 31.10.2026">W</span>
+                        <span class="form-tile form-w" tabindex="0" data-opponent="vn" data-tooltip-result="2-1 (AS Stejarul - FC Vulturii Nord)" data-tooltip-meta="Etapa 10 · 07.11.2026" aria-label="Victorie: 2-1 (AS Stejarul - FC Vulturii Nord), Etapa 10, 07.11.2026">W</span>
+                        <span class="form-tile form-d" tabindex="0" data-opponent="ar" data-tooltip-result="1-1 (AS Stejarul - AFC Rapiditate)" data-tooltip-meta="Etapa 11 · 15.11.2026" aria-label="Egal: 1-1 (AS Stejarul - AFC Rapiditate), Etapa 11, 15.11.2026">D</span>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <tr data-team="ud">
+                    <td class="col-pos"><span class="pos-badge">5</span></td>
+                    <td class="col-team">
+                      <div class="team-cell">
+                        <span class="team-crest crest-ud" aria-hidden="true">UD</span>
+                        <span class="team-name">Unirea Dealul</span>
+                      </div>
+                    </td>
+                    <td class="tabular">5</td>
+                    <td class="tabular">1</td>
+                    <td class="tabular">3</td>
+                    <td class="tabular">1</td>
+                    <td class="col-gf tabular">5</td>
+                    <td class="col-ga tabular">5</td>
+                    <td class="tabular">0</td>
+                    <td class="col-pts tabular">6</td>
+                    <td class="col-form">
+                      <div class="form-strip" aria-label="Ultimele 5 meciuri: Egal, Egal, Victorie, Înfrângere, Egal">
+                        <span class="form-tile form-d" tabindex="0" data-opponent="ps" data-tooltip-result="1-1 (Unirea Dealul - Progresul Sud)" data-tooltip-meta="Etapa 7 · 18.10.2026" aria-label="Egal: 1-1 (Unirea Dealul - Progresul Sud), Etapa 7, 18.10.2026">D</span>
+                        <span class="form-tile form-d" tabindex="0" data-opponent="rv" data-tooltip-result="0-0 (Recolta Veche - Unirea Dealul)" data-tooltip-meta="Etapa 8 · 25.10.2026" aria-label="Egal: 0-0 (Recolta Veche - Unirea Dealul), Etapa 8, 25.10.2026">D</span>
+                        <span class="form-tile form-w" tabindex="0" data-opponent="vp" data-tooltip-result="1-0 (Unirea Dealul - CS Viitorul Parc)" data-tooltip-meta="Etapa 9 · 01.11.2026" aria-label="Victorie: 1-0 (Unirea Dealul - CS Viitorul Parc), Etapa 9, 01.11.2026">W</span>
+                        <span class="form-tile form-l" tabindex="0" data-opponent="sc" data-tooltip-result="2-1 (Sporting Cartier - Unirea Dealul)" data-tooltip-meta="Etapa 10 · 08.11.2026" aria-label="Înfrângere: 2-1 (Sporting Cartier - Unirea Dealul), Etapa 10, 08.11.2026">L</span>
+                        <span class="form-tile form-d" tabindex="0" data-opponent="as" data-tooltip-result="2-2 (Unirea Dealul - AS Stejarul)" data-tooltip-meta="Etapa 11 · 16.11.2026" aria-label="Egal: 2-2 (Unirea Dealul - AS Stejarul), Etapa 11, 16.11.2026">D</span>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <tr data-team="sc">
+                    <td class="col-pos"><span class="pos-badge">6</span></td>
+                    <td class="col-team">
+                      <div class="team-cell">
+                        <span class="team-crest crest-sc" aria-hidden="true">SC</span>
+                        <span class="team-name">Sporting Cartier</span>
+                      </div>
+                    </td>
+                    <td class="tabular">5</td>
+                    <td class="tabular">2</td>
+                    <td class="tabular">0</td>
+                    <td class="tabular">3</td>
+                    <td class="col-gf tabular">6</td>
+                    <td class="col-ga tabular">7</td>
+                    <td class="tabular">-1</td>
+                    <td class="col-pts tabular">6</td>
+                    <td class="col-form">
+                      <div class="form-strip" aria-label="Ultimele 5 meciuri: Înfrângere, Victorie, Înfrângere, Înfrângere, Victorie">
+                        <span class="form-tile form-l" tabindex="0" data-opponent="ar" data-tooltip-result="2-1 (AFC Rapiditate - Sporting Cartier)" data-tooltip-meta="Etapa 7 · 17.10.2026" aria-label="Înfrângere: 2-1 (AFC Rapiditate - Sporting Cartier), Etapa 7, 17.10.2026">L</span>
+                        <span class="form-tile form-w" tabindex="0" data-opponent="gn" data-tooltip-result="3-1 (Sporting Cartier - AS Gloria Nouă)" data-tooltip-meta="Etapa 8 · 24.10.2026" aria-label="Victorie: 3-1 (Sporting Cartier - AS Gloria Nouă), Etapa 8, 24.10.2026">W</span>
+                        <span class="form-tile form-l" tabindex="0" data-opponent="vn" data-tooltip-result="0-2 (Sporting Cartier - FC Vulturii Nord)" data-tooltip-meta="Etapa 9 · 01.11.2026" aria-label="Înfrângere: 0-2 (Sporting Cartier - FC Vulturii Nord), Etapa 9, 01.11.2026">L</span>
+                        <span class="form-tile form-l" tabindex="0" data-opponent="ps" data-tooltip-result="1-0 (Progresul Sud - Sporting Cartier)" data-tooltip-meta="Etapa 10 · 08.11.2026" aria-label="Înfrângere: 1-0 (Progresul Sud - Sporting Cartier), Etapa 10, 08.11.2026">L</span>
+                        <span class="form-tile form-w" tabindex="0" data-opponent="ud" data-tooltip-result="2-1 (Sporting Cartier - Unirea Dealul)" data-tooltip-meta="Etapa 11 · 16.11.2026" aria-label="Victorie: 2-1 (Sporting Cartier - Unirea Dealul), Etapa 11, 16.11.2026">W</span>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <tr data-team="ps">
+                    <td class="col-pos"><span class="pos-badge">7</span></td>
+                    <td class="col-team">
+                      <div class="team-cell">
+                        <span class="team-crest crest-ps" aria-hidden="true">PS</span>
+                        <span class="team-name">Progresul Sud</span>
+                      </div>
+                    </td>
+                    <td class="tabular">5</td>
+                    <td class="tabular">1</td>
+                    <td class="tabular">1</td>
+                    <td class="tabular">3</td>
+                    <td class="col-gf tabular">3</td>
+                    <td class="col-ga tabular">9</td>
+                    <td class="tabular">-6</td>
+                    <td class="col-pts tabular">4</td>
+                    <td class="col-form">
+                      <div class="form-strip" aria-label="Ultimele 5 meciuri: Înfrângere, Egal, Înfrângere, Victorie, Înfrângere">
+                        <span class="form-tile form-l" tabindex="0" data-opponent="as" data-tooltip-result="2-0 (AS Stejarul - Progresul Sud)" data-tooltip-meta="Etapa 7 · 17.10.2026" aria-label="Înfrângere: 2-0 (AS Stejarul - Progresul Sud), Etapa 7, 17.10.2026">L</span>
+                        <span class="form-tile form-d" tabindex="0" data-opponent="ud" data-tooltip-result="1-1 (Unirea Dealul - Progresul Sud)" data-tooltip-meta="Etapa 8 · 25.10.2026" aria-label="Egal: 1-1 (Unirea Dealul - Progresul Sud), Etapa 8, 25.10.2026">D</span>
+                        <span class="form-tile form-l" tabindex="0" data-opponent="ar" data-tooltip-result="3-0 (AFC Rapiditate - Progresul Sud)" data-tooltip-meta="Etapa 9 · 31.10.2026" aria-label="Înfrângere: 3-0 (AFC Rapiditate - Progresul Sud), Etapa 9, 31.10.2026">L</span>
+                        <span class="form-tile form-w" tabindex="0" data-opponent="sc" data-tooltip-result="1-0 (Progresul Sud - Sporting Cartier)" data-tooltip-meta="Etapa 10 · 08.11.2026" aria-label="Victorie: 1-0 (Progresul Sud - Sporting Cartier), Etapa 10, 08.11.2026">W</span>
+                        <span class="form-tile form-l" tabindex="0" data-opponent="vp" data-tooltip-result="1-3 (Progresul Sud - CS Viitorul Parc)" data-tooltip-meta="Etapa 11 · 16.11.2026" aria-label="Înfrângere: 1-3 (Progresul Sud - CS Viitorul Parc), Etapa 11, 16.11.2026">L</span>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <tr data-team="gn">
+                    <td class="col-pos"><span class="pos-badge">8</span></td>
+                    <td class="col-team">
+                      <div class="team-cell">
+                        <span class="team-crest crest-gn" aria-hidden="true">GN</span>
+                        <span class="team-name">AS Gloria Nouă</span>
+                      </div>
+                    </td>
+                    <td class="tabular">5</td>
+                    <td class="tabular">1</td>
+                    <td class="tabular">0</td>
+                    <td class="tabular">4</td>
+                    <td class="col-gf tabular">5</td>
+                    <td class="col-ga tabular">15</td>
+                    <td class="tabular">-10</td>
+                    <td class="col-pts tabular">3</td>
+                    <td class="col-form">
+                      <div class="form-strip" aria-label="Ultimele 5 meciuri: Înfrângere, Înfrângere, Înfrângere, Victorie, Înfrângere">
+                        <span class="form-tile form-l" tabindex="0" data-opponent="sc" data-tooltip-result="3-1 (Sporting Cartier - AS Gloria Nouă)" data-tooltip-meta="Etapa 7 · 17.10.2026" aria-label="Înfrângere: 3-1 (Sporting Cartier - AS Gloria Nouă), Etapa 7, 17.10.2026">L</span>
+                        <span class="form-tile form-l" tabindex="0" data-opponent="vp" data-tooltip-result="4-1 (CS Viitorul Parc - AS Gloria Nouă)" data-tooltip-meta="Etapa 8 · 24.10.2026" aria-label="Înfrângere: 4-1 (CS Viitorul Parc - AS Gloria Nouă), Etapa 8, 24.10.2026">L</span>
+                        <span class="form-tile form-l" tabindex="0" data-opponent="ar" data-tooltip-result="1-3 (AS Gloria Nouă - AFC Rapiditate)" data-tooltip-meta="Etapa 9 · 01.11.2026" aria-label="Înfrângere: 1-3 (AS Gloria Nouă - AFC Rapiditate), Etapa 9, 01.11.2026">L</span>
+                        <span class="form-tile form-w" tabindex="0" data-opponent="rv" data-tooltip-result="2-1 (AS Gloria Nouă - Recolta Veche)" data-tooltip-meta="Etapa 10 · 07.11.2026" aria-label="Victorie: 2-1 (AS Gloria Nouă - Recolta Veche), Etapa 10, 07.11.2026">W</span>
+                        <span class="form-tile form-l" tabindex="0" data-opponent="vn" data-tooltip-result="0-4 (AS Gloria Nouă - FC Vulturii Nord)" data-tooltip-meta="Etapa 11 · 15.11.2026" aria-label="Înfrângere: 0-4 (AS Gloria Nouă - FC Vulturii Nord), Etapa 11, 15.11.2026">L</span>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <tr data-team="rv">
+                    <td class="col-pos"><span class="pos-badge">9</span></td>
+                    <td class="col-team">
+                      <div class="team-cell">
+                        <span class="team-crest crest-rv" aria-hidden="true">RV</span>
+                        <span class="team-name">Recolta Veche</span>
+                      </div>
+                    </td>
+                    <td class="tabular">5</td>
+                    <td class="tabular">0</td>
+                    <td class="tabular">1</td>
+                    <td class="tabular">4</td>
+                    <td class="col-gf tabular">1</td>
+                    <td class="col-ga tabular">9</td>
+                    <td class="tabular">-8</td>
+                    <td class="col-pts tabular">1</td>
+                    <td class="col-form">
+                      <div class="form-strip" aria-label="Ultimele 5 meciuri: Înfrângere, Înfrângere, Egal, Înfrângere, Înfrângere">
+                        <span class="form-tile form-l" tabindex="0" data-opponent="ar" data-tooltip-result="0-2 (Recolta Veche - AFC Rapiditate)" data-tooltip-meta="Etapa 6 · 10.10.2026" aria-label="Înfrângere: 0-2 (Recolta Veche - AFC Rapiditate), Etapa 6, 10.10.2026">L</span>
+                        <span class="form-tile form-l" tabindex="0" data-opponent="as" data-tooltip-result="3-0 (AS Stejarul - Recolta Veche)" data-tooltip-meta="Etapa 7 · 18.10.2026" aria-label="Înfrângere: 3-0 (AS Stejarul - Recolta Veche), Etapa 7, 18.10.2026">L</span>
+                        <span class="form-tile form-d" tabindex="0" data-opponent="ud" data-tooltip-result="0-0 (Recolta Veche - Unirea Dealul)" data-tooltip-meta="Etapa 8 · 25.10.2026" aria-label="Egal: 0-0 (Recolta Veche - Unirea Dealul), Etapa 8, 25.10.2026">D</span>
+                        <span class="form-tile form-l" tabindex="0" data-opponent="gn" data-tooltip-result="2-1 (AS Gloria Nouă - Recolta Veche)" data-tooltip-meta="Etapa 9 · 01.11.2026" aria-label="Înfrângere: 2-1 (AS Gloria Nouă - Recolta Veche), Etapa 9, 01.11.2026">L</span>
+                        <span class="form-tile form-l" tabindex="0" data-opponent="ps" data-tooltip-result="0-2 (Recolta Veche - Progresul Sud)" data-tooltip-meta="Etapa 10 · 08.11.2026" aria-label="Înfrângere: 0-2 (Recolta Veche - Progresul Sud), Etapa 10, 08.11.2026">L</span>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="table-footer">
+              <div class="legend-group">
+                <span class="legend-item">
+                  <span class="legend-pos legend-pos-leader" aria-hidden="true">1</span>
+                  Cea mai bună formă
+                </span>
+              </div>
+              <span>Clasament calculat exclusiv pe ultimele 5 etape jucate</span>
+            </div>
+          </div>
+
+          <!-- Tab 3: MARCATORI -->
+          <div id="view-marcatori" class="tab-panel" role="tabpanel" aria-labelledby="tab-marcatori" data-tab-panel="marcatori" hidden>
+            <div class="table-wrap">
+              <table class="scorers">
+                <thead>
+                  <tr>
+                    <th scope="col" class="col-pos">#</th>
+                    <th scope="col" class="col-player">Jucător</th>
+                    <th scope="col" class="col-club">Echipă</th>
+                    <th scope="col" class="col-goals">Goluri</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="scorer-rank-1">
+                    <td class="col-pos"><span class="pos-badge">1</span></td>
+                    <td>
+                      <div class="scorer-cell">
+                        <svg class="flag-svg" viewBox="0 0 18 12" role="img" aria-label="România"><rect width="6" height="12" fill="#002B7F"/><rect x="6" width="6" height="12" fill="#FCD116"/><rect x="12" width="6" height="12" fill="#CE1126"/></svg>
+                        <span class="scorer-name">Alexandru Stoica</span>
+                      </div>
+                    </td>
+                    <td class="col-club">
+                      <span class="scorer-club-pill"><span class="team-crest team-crest-xs crest-vn" aria-hidden="true">VN</span> FC Vulturii Nord</span>
+                    </td>
+                    <td class="col-goals tabular">11</td>
+                  </tr>
+                  <tr class="scorer-rank-2">
+                    <td class="col-pos"><span class="pos-badge">2</span></td>
+                    <td>
+                      <div class="scorer-cell">
+                        <svg class="flag-svg" viewBox="0 0 18 12" role="img" aria-label="România"><rect width="6" height="12" fill="#002B7F"/><rect x="6" width="6" height="12" fill="#FCD116"/><rect x="12" width="6" height="12" fill="#CE1126"/></svg>
+                        <span class="scorer-name">Bogdan Neagu</span>
+                      </div>
+                    </td>
+                    <td class="col-club">
+                      <span class="scorer-club-pill"><span class="team-crest team-crest-xs crest-as" aria-hidden="true">AS</span> AS Stejarul</span>
+                    </td>
+                    <td class="col-goals tabular">9</td>
+                  </tr>
+                  <tr class="scorer-rank-3">
+                    <td class="col-pos"><span class="pos-badge">3</span></td>
+                    <td>
+                      <div class="scorer-cell">
+                        <svg class="flag-svg" viewBox="0 0 18 12" role="img" aria-label="Italia"><rect width="6" height="12" fill="#009246"/><rect x="6" width="6" height="12" fill="#FFFFFF"/><rect x="12" width="6" height="12" fill="#CE2B37"/></svg>
+                        <span class="scorer-name">Marco Conti</span>
+                      </div>
+                    </td>
+                    <td class="col-club">
+                      <span class="scorer-club-pill"><span class="team-crest team-crest-xs crest-vp" aria-hidden="true">VP</span> CS Viitorul Parc</span>
+                    </td>
+                    <td class="col-goals tabular">8</td>
+                  </tr>
+                  <tr>
+                    <td class="col-pos"><span class="pos-badge">4</span></td>
+                    <td>
+                      <div class="scorer-cell">
+                        <svg class="flag-svg" viewBox="0 0 18 12" role="img" aria-label="România"><rect width="6" height="12" fill="#002B7F"/><rect x="6" width="6" height="12" fill="#FCD116"/><rect x="12" width="6" height="12" fill="#CE1126"/></svg>
+                        <span class="scorer-name">Dan Rusu</span>
+                      </div>
+                    </td>
+                    <td class="col-club">
+                      <span class="scorer-club-pill"><span class="team-crest team-crest-xs crest-vn" aria-hidden="true">VN</span> FC Vulturii Nord</span>
+                    </td>
+                    <td class="col-goals tabular">7</td>
+                  </tr>
+                  <tr>
+                    <td class="col-pos"><span class="pos-badge">5</span></td>
+                    <td>
+                      <div class="scorer-cell">
+                        <svg class="flag-svg" viewBox="0 0 18 12" role="img" aria-label="România"><rect width="6" height="12" fill="#002B7F"/><rect x="6" width="6" height="12" fill="#FCD116"/><rect x="12" width="6" height="12" fill="#CE1126"/></svg>
+                        <span class="scorer-name">Florin Lazar</span>
+                      </div>
+                    </td>
+                    <td class="col-club">
+                      <span class="scorer-club-pill"><span class="team-crest team-crest-xs crest-as" aria-hidden="true">AS</span> AS Stejarul</span>
+                    </td>
+                    <td class="col-goals tabular">7</td>
+                  </tr>
+                  <tr>
+                    <td class="col-pos"><span class="pos-badge">6</span></td>
+                    <td>
+                      <div class="scorer-cell">
+                        <svg class="flag-svg" viewBox="0 0 18 12" role="img" aria-label="România"><rect width="6" height="12" fill="#002B7F"/><rect x="6" width="6" height="12" fill="#FCD116"/><rect x="12" width="6" height="12" fill="#CE1126"/></svg>
+                        <span class="scorer-name">Răzvan Munteanu</span>
+                      </div>
+                    </td>
+                    <td class="col-club">
+                      <span class="scorer-club-pill"><span class="team-crest team-crest-xs crest-ar" aria-hidden="true">AR</span> AFC Rapiditate</span>
+                    </td>
+                    <td class="col-goals tabular">6</td>
+                  </tr>
+                  <tr>
+                    <td class="col-pos"><span class="pos-badge">7</span></td>
+                    <td>
+                      <div class="scorer-cell">
+                        <svg class="flag-svg" viewBox="0 0 18 12" role="img" aria-label="Bulgaria"><rect width="18" height="4" fill="#FFFFFF"/><rect y="4" width="18" height="4" fill="#00966E"/><rect y="8" width="18" height="4" fill="#D62612"/></svg>
+                        <span class="scorer-name">Dimitar Petrov</span>
+                      </div>
+                    </td>
+                    <td class="col-club">
+                      <span class="scorer-club-pill"><span class="team-crest team-crest-xs crest-sc" aria-hidden="true">SC</span> Sporting Cartier</span>
+                    </td>
+                    <td class="col-goals tabular">6</td>
+                  </tr>
+                  <tr>
+                    <td class="col-pos"><span class="pos-badge">8</span></td>
+                    <td>
+                      <div class="scorer-cell">
+                        <svg class="flag-svg" viewBox="0 0 18 12" role="img" aria-label="România"><rect width="6" height="12" fill="#002B7F"/><rect x="6" width="6" height="12" fill="#FCD116"/><rect x="12" width="6" height="12" fill="#CE1126"/></svg>
+                        <span class="scorer-name">Andrei Iliescu</span>
+                      </div>
+                    </td>
+                    <td class="col-club">
+                      <span class="scorer-club-pill"><span class="team-crest team-crest-xs crest-ud" aria-hidden="true">UD</span> Unirea Dealul</span>
+                    </td>
+                    <td class="col-goals tabular">5</td>
+                  </tr>
+                  <tr>
+                    <td class="col-pos"><span class="pos-badge">9</span></td>
+                    <td>
+                      <div class="scorer-cell">
+                        <svg class="flag-svg" viewBox="0 0 18 12" role="img" aria-label="România"><rect width="6" height="12" fill="#002B7F"/><rect x="6" width="6" height="12" fill="#FCD116"/><rect x="12" width="6" height="12" fill="#CE1126"/></svg>
+                        <span class="scorer-name">Cătălin Matei</span>
+                      </div>
+                    </td>
+                    <td class="col-club">
+                      <span class="scorer-club-pill"><span class="team-crest team-crest-xs crest-ps" aria-hidden="true">PS</span> Progresul Sud</span>
+                    </td>
+                    <td class="col-goals tabular">4</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="table-footer">
+              <div class="legend-group">
+                <span class="legend-item">
+                  <span class="legend-pos legend-pos-s1" aria-hidden="true">1</span>
+                  <span class="legend-pos legend-pos-s2" aria-hidden="true">2</span>
+                  <span class="legend-pos legend-pos-s3" aria-hidden="true">3</span>
+                  Top 3 marcatori
+                </span>
+              </div>
+              <span>Marcatori actualizați după Etapa 11 · Sezon 2025–2026</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mini-clasament explicativ D3 (sincronizat la hover cu clasamentul) -->
+        <div id="d3-panel" class="tiebreak-panel animate-enter" style="animation-delay:120ms;" aria-labelledby="tiebreak-heading">
+          <div class="tiebreak-head">
+            <h3 id="tiebreak-heading" class="tiebreak-title">Lanț de departajare activ · Egalitate la 3 echipe (22 pct)</h3>
+            <span class="tie-tag">Mini-clasament D3</span>
+          </div>
+          <p class="tiebreak-desc">
+            Ordinea configurată în sezon (exemplu demonstrativ): 1) Puncte meciuri directe → 2) Golaveraj meciuri directe → 3) Golaveraj general. În caz de circularitate (A &gt; B &gt; C &gt; A), se reia lanțul pe criteriul următor.
+          </p>
+          <table class="mini-table">
+            <thead>
+              <tr>
+                <th scope="col">Echipă (meciuri directe)</th>
+                <th scope="col">MJ</th>
+                <th scope="col">Pct directe</th>
+                <th scope="col">DG direct</th>
+                <th scope="col">DG general</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr data-d3-mini="as" tabindex="0">
+                <td>
+                  <span class="team-cell">
+                    <span class="team-crest team-crest-xs crest-as" aria-hidden="true">AS</span>
+                    <span>2. AS Stejarul</span>
+                  </span>
+                </td>
+                <td class="tabular">2</td>
+                <td class="tabular"><strong>4</strong></td>
+                <td class="tabular">+2</td>
+                <td class="tabular">+10</td>
+              </tr>
+              <tr data-d3-mini="vp" tabindex="0">
+                <td>
+                  <span class="team-cell">
+                    <span class="team-crest team-crest-xs crest-vp" aria-hidden="true">VP</span>
+                    <span>3. CS Viitorul Parc</span>
+                  </span>
+                </td>
+                <td class="tabular">2</td>
+                <td class="tabular"><strong>3</strong></td>
+                <td class="tabular">0</td>
+                <td class="tabular">+11</td>
+              </tr>
+              <tr data-d3-mini="ar" tabindex="0">
+                <td>
+                  <span class="team-cell">
+                    <span class="team-crest team-crest-xs crest-ar" aria-hidden="true">AR</span>
+                    <span>4. AFC Rapiditate</span>
+                  </span>
+                </td>
+                <td class="tabular">2</td>
+                <td class="tabular"><strong>1</strong></td>
+                <td class="tabular">-2</td>
+                <td class="tabular">+7</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Coloana dreaptă: Etapa curentă + Suspendări active -->
+      <aside class="side-stack" aria-label="Etapa curentă și rezumat disciplină">
+        <section class="panel animate-enter" style="animation-delay:80ms;" aria-labelledby="round-heading">
+          <div class="panel-header">
+            <h2 id="round-heading" class="panel-title">Etapa 12</h2>
+            <a class="panel-link" href="DS-p19-fixtures.html">Tot programul <span class="arrow-glide" aria-hidden="true">→</span></a>
+          </div>
+
+          <div class="match-list">
+            <a class="match-item" href="DS-p19-match-detail.html">
+              <div class="match-meta">
+                <span class="tabular">Sâm, 22 nov · 11:00</span>
+                <span class="status-badge status-corrected">Corecție rezultat</span>
+              </div>
+              <div class="match-teams">
+                <span class="match-side match-side-home">
+                  <span class="match-team-label">FC Vulturii Nord</span>
+                  <span class="team-crest team-crest-xs crest-vn" aria-hidden="true">VN</span>
+                </span>
+                <span class="score-pill tabular">3 – 2</span>
+                <span class="match-side match-side-away">
+                  <span class="team-crest team-crest-xs crest-as" aria-hidden="true">AS</span>
+                  <span class="match-team-label muted-loser">AS Stejarul</span>
+                </span>
+              </div>
+              <div class="match-foot">
+                <span>Teren 1 — Parc Nord</span>
+                <span class="match-cta">Detalii <span class="arrow-glide" aria-hidden="true">→</span></span>
+              </div>
+            </a>
+
+            <a class="match-item" href="DS-p19-match-detail.html">
+              <div class="match-meta">
+                <span class="tabular">Sâm, 22 nov · 13:00</span>
+                <span class="status-badge status-played">Jucat</span>
+              </div>
+              <div class="match-teams">
+                <span class="match-side match-side-home">
+                  <span class="match-team-label">AFC Rapiditate</span>
+                  <span class="team-crest team-crest-xs crest-ar" aria-hidden="true">AR</span>
+                </span>
+                <span class="score-pill tabular">2 – 0</span>
+                <span class="match-side match-side-away">
+                  <span class="team-crest team-crest-xs crest-ps" aria-hidden="true">PS</span>
+                  <span class="match-team-label muted-loser">Progresul Sud</span>
+                </span>
+              </div>
+              <div class="match-foot">
+                <span>Teren 2 — Baza Sud</span>
+                <span class="match-cta">Detalii <span class="arrow-glide" aria-hidden="true">→</span></span>
+              </div>
+            </a>
+
+            <div class="match-item">
+              <div class="match-meta">
+                <span class="tabular">Dum, 23 nov · 16:00</span>
+                <span class="status-badge status-scheduled">Programat</span>
+              </div>
+              <div class="match-teams">
+                <span class="match-side match-side-home">
+                  <span class="match-team-label">CS Viitorul Parc</span>
+                  <span class="team-crest team-crest-xs crest-vp" aria-hidden="true">VP</span>
+                </span>
+                <span class="score-pill upcoming tabular">16:00</span>
+                <span class="match-side match-side-away">
+                  <span class="team-crest team-crest-xs crest-sc" aria-hidden="true">SC</span>
+                  <span class="match-team-label">Sporting Cartier</span>
+                </span>
+              </div>
+              <div class="match-foot">
+                <span>Teren 1 — Parc Nord</span>
+                <span>Reprogramat</span>
+              </div>
+            </div>
+
+            <div class="match-item">
+              <div class="match-meta">
+                <span class="tabular">Dum, 23 nov · —</span>
+                <span class="status-badge status-postponed">Amânat</span>
+              </div>
+              <div class="match-teams">
+                <span class="match-side match-side-home">
+                  <span class="match-team-label">Unirea Dealul</span>
+                  <span class="team-crest team-crest-xs crest-ud" aria-hidden="true">UD</span>
+                </span>
+                <span class="score-pill upcoming">—</span>
+                <span class="match-side match-side-away">
+                  <span class="team-crest team-crest-xs crest-rv" aria-hidden="true">RV</span>
+                  <span class="match-team-label">Recolta Veche</span>
+                </span>
+              </div>
+              <div class="match-foot">
+                <span>Teren 3 — Sintetic Est</span>
+                <span>Nu consumă suspendări</span>
+              </div>
+            </div>
+
+            <div class="bye-row">
+              <span class="team-cell">
+                <span class="team-crest team-crest-xs crest-gn" aria-hidden="true">GN</span>
+                <strong>AS Gloria Nouă</strong>
+              </span>
+              <span class="status-badge status-bye">Etapă liberă</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel animate-enter" style="animation-delay:160ms;" aria-labelledby="suspensions-heading">
+          <div class="panel-header">
+            <h2 id="suspensions-heading" class="panel-title">Suspendări active</h2>
+            <span class="demo-pill tabular">3 jucători</span>
+          </div>
+          <div class="summary-list">
+            <div class="summary-row">
+              <div>
+                <span class="summary-name">Andrei Popa</span>
+                <span class="summary-sub">AS Stejarul · Cumul cartonașe galbene</span>
+              </div>
+              <span class="status-badge status-suspended tabular">1 etapă</span>
+            </div>
+            <div class="summary-row">
+              <div>
+                <span class="summary-name">Vlad Marinescu</span>
+                <span class="summary-sub">Sporting Cartier · Cartonaș roșu direct</span>
+              </div>
+              <span class="status-badge status-suspended tabular">2 etape</span>
+            </div>
+            <div class="summary-row">
+              <div>
+                <span class="summary-name">Cristian Enache</span>
+                <span class="summary-sub">Recolta Veche · Cumul cartonașe galbene</span>
+              </div>
+              <span class="status-badge status-suspended tabular">1 etapă</span>
+            </div>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      const root = document.documentElement;
+      const btn = document.getElementById('theme-toggle');
+      const label = document.getElementById('theme-label');
+      const icon = document.getElementById('theme-icon');
+      let rotation = 0;
+
+      const moonPath = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+      const sunPath = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+
+      function applyTheme(theme, animateIcon) {
+        root.setAttribute('data-theme', theme);
+        const isDark = theme === 'dark';
+        btn.setAttribute('aria-pressed', String(isDark));
+        label.textContent = isDark ? 'Light' : 'Dark';
+        icon.innerHTML = isDark ? sunPath : moonPath;
+        if (animateIcon) {
+          rotation += 180;
+          icon.style.transform = 'rotate(' + rotation + 'deg)';
+        }
+        try { localStorage.setItem('p19-mock-theme', theme); } catch (_) {}
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      const urlTheme = params.get('theme');
+      let saved = null;
+      try { saved = localStorage.getItem('p19-mock-theme'); } catch (_) {}
+      applyTheme((urlTheme === 'dark' || urlTheme === 'light') ? urlTheme : (saved || 'light'), false);
+
+      btn.addEventListener('click', function () {
+        applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark', true);
+      });
+
+      // Unified highlight state: form-tile match pair takes priority over D3 tie-breaker highlight
+      const allStandingsRows = Array.from(document.querySelectorAll('table.standings tbody tr[data-team]'));
+      const mainD3Rows = Array.from(document.querySelectorAll('tr[data-d3-team]'));
+      const miniD3Rows = Array.from(document.querySelectorAll('tr[data-d3-mini]'));
+      const d3Panel = document.getElementById('d3-panel');
+
+      let activeD3Key = null;
+      let activePair = null; // { table: HTMLTableElement, self: string, opp: string } | null
+
+      function renderHighlights() {
+        const hasPair = Boolean(activePair);
+        allStandingsRows.forEach(function (row) {
+          const sameTable = hasPair && row.closest('table.standings') === activePair.table;
+          const team = row.dataset.team;
+          row.classList.toggle('form-pair-self', sameTable && team === activePair.self);
+          row.classList.toggle('form-pair-opp', sameTable && team === activePair.opp);
+        });
+
+        const showD3 = !hasPair && Boolean(activeD3Key);
+        d3Panel.classList.toggle('d3-panel-active', showD3);
+        mainD3Rows.forEach(function (row) {
+          row.classList.toggle('d3-group-hover', showD3 && row.dataset.d3Team !== activeD3Key);
+          row.classList.toggle('d3-team-active', showD3 && row.dataset.d3Team === activeD3Key);
+        });
+        miniD3Rows.forEach(function (row) {
+          row.classList.toggle('d3-team-active', showD3 && row.dataset.d3Mini === activeD3Key);
+        });
+      }
+
+      mainD3Rows.forEach(function (row) {
+        const key = row.dataset.d3Team;
+        row.addEventListener('mouseenter', function () { activeD3Key = key; renderHighlights(); });
+        row.addEventListener('mouseleave', function () { if (activeD3Key === key) activeD3Key = null; renderHighlights(); });
+        row.addEventListener('focus', function () { activeD3Key = key; renderHighlights(); });
+        row.addEventListener('blur', function () { if (activeD3Key === key) activeD3Key = null; renderHighlights(); });
+      });
+
+      miniD3Rows.forEach(function (row) {
+        const key = row.dataset.d3Mini;
+        row.addEventListener('mouseenter', function () { activeD3Key = key; renderHighlights(); });
+        row.addEventListener('mouseleave', function () { if (activeD3Key === key) activeD3Key = null; renderHighlights(); });
+        row.addEventListener('focus', function () { activeD3Key = key; renderHighlights(); });
+        row.addEventListener('blur', function () { if (activeD3Key === key) activeD3Key = null; renderHighlights(); });
+      });
+
+      // Premium slower eased scroll + soft fading spotlight to D3 tie-breaker panel
+      let d3JumpTimer = null;
+      let d3ScrollRaf = null;
+
+      function cancelD3Scroll() {
+        if (d3ScrollRaf) {
+          cancelAnimationFrame(d3ScrollRaf);
+          d3ScrollRaf = null;
+        }
+      }
+
+      window.addEventListener('wheel', cancelD3Scroll, { passive: true });
+      window.addEventListener('touchstart', cancelD3Scroll, { passive: true });
+
+      function smoothGlideTo(el, durationMs) {
+        cancelD3Scroll();
+        const rect = el.getBoundingClientRect();
+        const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+        const targetY = Math.max(0, Math.min(maxScroll, window.scrollY + rect.top - (window.innerHeight - rect.height) / 2));
+        const startY = window.scrollY;
+        const delta = targetY - startY;
+
+        if (Math.abs(delta) < 2) return;
+        const startTime = performance.now();
+
+        function easeInOutCubic(t) {
+          return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        }
+
+        function step(now) {
+          const progress = Math.min(1, (now - startTime) / durationMs);
+          window.scrollTo(0, startY + delta * easeInOutCubic(progress));
+          if (progress < 1) {
+            d3ScrollRaf = requestAnimationFrame(step);
+          } else {
+            d3ScrollRaf = null;
+          }
+        }
+
+        d3ScrollRaf = requestAnimationFrame(step);
+      }
+
+      document.querySelectorAll('button.tie-tag[data-d3-jump]').forEach(function (jumpBtn) {
+        jumpBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          const key = jumpBtn.dataset.d3Jump;
+          if (d3Panel.hidden) activateTab('clasament', false);
+          const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+          if (prefersReduced) {
+            d3Panel.scrollIntoView({ behavior: 'auto', block: 'center' });
+          } else {
+            smoothGlideTo(d3Panel, 880);
+            d3Panel.classList.remove('d3-panel-arrive');
+            void d3Panel.offsetWidth;
+            d3Panel.classList.add('d3-panel-arrive');
+          }
+
+          activeD3Key = key;
+          activePair = null;
+          renderHighlights();
+          if (d3JumpTimer) clearTimeout(d3JumpTimer);
+          d3JumpTimer = setTimeout(function () {
+            d3Panel.classList.remove('d3-panel-arrive');
+            if (activeD3Key === key) {
+              activeD3Key = null;
+              renderHighlights();
+            }
+          }, 2100);
+        });
+      });
+
+      // Custom 2-line floating tooltip + synchronized opponent highlight for W/D/L form badges
+      const tip = document.createElement('div');
+      tip.id = 'form-tooltip';
+      tip.className = 'form-tooltip';
+      tip.setAttribute('role', 'tooltip');
+      tip.setAttribute('aria-hidden', 'true');
+
+      const tipResult = document.createElement('span');
+      tipResult.className = 'form-tooltip-result';
+      const tipMeta = document.createElement('span');
+      tipMeta.className = 'form-tooltip-meta';
+      tip.appendChild(tipResult);
+      tip.appendChild(tipMeta);
+      document.body.appendChild(tip);
+
+      let activeTile = null;
+
+      function hideTooltip() {
+        if (activeTile) {
+          activeTile.removeAttribute('aria-describedby');
+          activeTile = null;
+        }
+        activePair = null;
+        renderHighlights();
+        tip.classList.remove('visible');
+        tip.setAttribute('aria-hidden', 'true');
+      }
+
+      function showTooltip(tile) {
+        const res = tile.getAttribute('data-tooltip-result');
+        const meta = tile.getAttribute('data-tooltip-meta');
+        if (!res) return;
+
+        const row = tile.closest('tr[data-team]');
+        const table = tile.closest('table.standings');
+        const selfKey = row ? row.dataset.team : null;
+        const oppKey = tile.getAttribute('data-opponent');
+        activePair = (table && selfKey && oppKey) ? { table: table, self: selfKey, opp: oppKey } : null;
+        renderHighlights();
+
+        tipResult.textContent = res;
+        tipMeta.textContent = meta || '';
+
+        const rect = tile.getBoundingClientRect();
+        const tipWidth = tip.offsetWidth;
+        const pad = 10;
+        const centerX = rect.left + rect.width / 2;
+        const left = Math.max(pad, Math.min(centerX - tipWidth / 2, window.innerWidth - tipWidth - pad));
+        const top = rect.bottom + 8;
+        const arrowX = Math.max(12, Math.min(tipWidth - 12, centerX - left));
+
+        tip.style.left = left + 'px';
+        tip.style.top = top + 'px';
+        tip.style.setProperty('--arrow-x', arrowX + 'px');
+        tip.setAttribute('aria-hidden', 'false');
+        tip.classList.add('visible');
+
+        if (activeTile && activeTile !== tile) activeTile.removeAttribute('aria-describedby');
+        activeTile = tile;
+        tile.setAttribute('aria-describedby', 'form-tooltip');
+      }
+
+      function showHeaderTooltip(th) {
+        const labelText = th.getAttribute('data-col-tooltip');
+        if (!labelText) return;
+
+        activePair = null;
+        renderHighlights();
+
+        tipResult.textContent = labelText;
+        tipMeta.textContent = '';
+
+        const rect = th.getBoundingClientRect();
+        const tipWidth = tip.offsetWidth;
+        const pad = 10;
+        const centerX = rect.left + rect.width / 2;
+        const left = Math.max(pad, Math.min(centerX - tipWidth / 2, window.innerWidth - tipWidth - pad));
+        const top = rect.bottom + 8;
+        const arrowX = Math.max(12, Math.min(tipWidth - 12, centerX - left));
+
+        tip.style.left = left + 'px';
+        tip.style.top = top + 'px';
+        tip.style.setProperty('--arrow-x', arrowX + 'px');
+        tip.setAttribute('aria-hidden', 'false');
+        tip.classList.add('visible');
+
+        if (activeTile && activeTile !== th) activeTile.removeAttribute('aria-describedby');
+        activeTile = th;
+        th.setAttribute('aria-describedby', 'form-tooltip');
+      }
+
+      document.querySelectorAll('.form-tile[data-tooltip-result]').forEach(function (tile) {
+        tile.addEventListener('mouseenter', function () { showTooltip(tile); });
+        tile.addEventListener('mouseleave', hideTooltip);
+        tile.addEventListener('focus', function () { showTooltip(tile); });
+        tile.addEventListener('blur', hideTooltip);
+      });
+
+      document.querySelectorAll('th[data-col-tooltip]').forEach(function (th) {
+        th.addEventListener('mouseenter', function () { showHeaderTooltip(th); });
+        th.addEventListener('mouseleave', hideTooltip);
+        th.addEventListener('focus', function () { showHeaderTooltip(th); });
+        th.addEventListener('blur', hideTooltip);
+      });
+
+      // Flashscore-style segmented tabs (CLASAMENT · FORMA · MARCATORI)
+      const tabList = document.querySelector('.panel-tabs[role="tablist"]');
+      const tabIndicator = document.getElementById('panel-tabs-indicator');
+      const tabButtons = Array.from(document.querySelectorAll('.panel-tab[role="tab"]'));
+      const tabPanels = Array.from(document.querySelectorAll('.tab-panel[role="tabpanel"]'));
+      const panelTitleText = document.getElementById('panel-title-text');
+      const panelLiveDot = document.getElementById('panel-live-dot');
+      const TAB_TITLES = {
+        clasament: 'Clasament live',
+        forma: 'Forma',
+        marcatori: 'Golgheteri'
+      };
+      let currentTabKey = 'clasament';
+
+      function positionTabIndicator(activeBtn, animate) {
+        if (!tabList || !tabIndicator || !activeBtn) return;
+        const x = activeBtn.offsetLeft;
+        const y = activeBtn.offsetTop;
+        const w = activeBtn.offsetWidth;
+        const h = activeBtn.offsetHeight;
+
+        if (!animate) {
+          tabList.classList.remove('is-animated');
+        }
+
+        tabIndicator.style.width = w + 'px';
+        tabIndicator.style.height = h + 'px';
+        tabIndicator.style.transform = 'translate3d(' + x + 'px, ' + y + 'px, 0)';
+        tabList.classList.add('has-indicator');
+
+        if (animate) {
+          tabIndicator.classList.remove('is-gliding');
+          void tabIndicator.offsetWidth;
+          tabIndicator.classList.add('is-gliding');
+        } else {
+          void tabIndicator.offsetWidth;
+          requestAnimationFrame(function () {
+            tabList.classList.add('is-animated');
+          });
+        }
+      }
+
+      function activateTab(tabKey, focusTab) {
+        hideTooltip();
+        activeD3Key = null;
+        renderHighlights();
+
+        const changed = tabKey !== currentTabKey;
+        currentTabKey = tabKey;
+        let selectedBtn = null;
+
+        tabButtons.forEach(function (btnEl) {
+          const selected = btnEl.dataset.tab === tabKey;
+          btnEl.setAttribute('aria-selected', String(selected));
+          btnEl.setAttribute('tabindex', selected ? '0' : '-1');
+          if (selected) {
+            selectedBtn = btnEl;
+            if (focusTab) btnEl.focus();
+          }
+        });
+
+        positionTabIndicator(selectedBtn, changed);
+
+        tabPanels.forEach(function (panelEl) {
+          panelEl.hidden = panelEl.dataset.tabPanel !== tabKey;
+        });
+
+        panelTitleText.textContent = TAB_TITLES[tabKey] || 'Clasament live';
+        panelLiveDot.style.display = tabKey === 'clasament' ? '' : 'none';
+        d3Panel.hidden = tabKey !== 'clasament';
+      }
+
+      const initialTabBtn = tabButtons.find(function (b) { return b.getAttribute('aria-selected') === 'true'; }) || tabButtons[0];
+      positionTabIndicator(initialTabBtn, false);
+
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(function () {
+          const curBtn = tabButtons.find(function (b) { return b.dataset.tab === currentTabKey; });
+          positionTabIndicator(curBtn, false);
+        });
+      }
+
+      if (typeof ResizeObserver !== 'undefined' && tabList) {
+        new ResizeObserver(function () {
+          const curBtn = tabButtons.find(function (b) { return b.dataset.tab === currentTabKey; });
+          positionTabIndicator(curBtn, false);
+        }).observe(tabList);
+      }
+
+      tabButtons.forEach(function (btnEl, idx) {
+        btnEl.addEventListener('click', function () {
+          activateTab(btnEl.dataset.tab, false);
+        });
+        btnEl.addEventListener('keydown', function (e) {
+          let nextIdx = null;
+          if (e.key === 'ArrowRight') nextIdx = (idx + 1) % tabButtons.length;
+          else if (e.key === 'ArrowLeft') nextIdx = (idx - 1 + tabButtons.length) % tabButtons.length;
+          else if (e.key === 'Home') nextIdx = 0;
+          else if (e.key === 'End') nextIdx = tabButtons.length - 1;
+          if (nextIdx !== null) {
+            e.preventDefault();
+            activateTab(tabButtons[nextIdx].dataset.tab, true);
+          }
+        });
+      });
+
+      window.addEventListener('scroll', hideTooltip, { passive: true });
+      window.addEventListener('resize', hideTooltip, { passive: true });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') hideTooltip();
+      });
+    })();
+  </script>
+</body>
+</html>

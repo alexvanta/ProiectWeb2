@@ -69,7 +69,6 @@ Nu a fost inventat niciun detaliu despre liga reală sau organizator. Toate vari
 | ID | Variabilă deschisă | Ce blochează |
 |---|---|---|
 | `Q-004` | Deploy / release la predare (local-only vs deploy public) | Secțiunea 5 din `AGENTS.md` |
-| `Q-005` | Token-uri de design (Light/Dark) și sursa lor în cod | `docs/design/DESIGN.md`, mock-uri și UI |
 | `Q-007` | Liga reală aleasă și concluziile interviului cu organizatorul | `INTERVIEW.md`, `RULES.md`, identitatea ligii |
 | `Q-008` | Datele reale ale unui sezon trecut (echipe, loturi, rezultate) | `prisma/seed.ts` cu date reale |
 | `Q-009` | Parametrii exacți ai formatului ligii (tururi, puncte, limite foaie de meci) | Configurația implicită de sezon |

@@ -13,7 +13,7 @@
 - Q-002 · What tech stack and dev/build/test/lint commands does this repo use? · _answered_
 - Q-003 · What is the top-level repository layout and high-level architecture? · _answered_
 - Q-004 · What is the git remote, branching, versioning, and release workflow?
-- Q-005 · What are the design tokens, token source, and design board / Figma links?
+- Q-005 · What are the design tokens, token source, and design board / Figma links? · _answered_
 - Q-006 · How do we screenshot this app? · _answered_
 - Q-007 · Which real amateur football league is selected, and what did the organizer interview reveal?
 - Q-008 · What are the exact historical seed data (teams, rosters, results) from a past season?
@@ -52,9 +52,11 @@
 - **Proposed answer:** Remote `origin` is `https://github.com/alexvanta/ProiectWeb2.git` with default branch `main`; application runs locally with PostgreSQL, with no production deploy or CI/CD pipeline unless needed later.
 
 ## Q-005 · What are the design tokens, token source, and design board / Figma links?
-- **Status:** open
+- **Status:** answered 2026-11-19
 - **Blocks:** `docs/design/DESIGN.md` token tables, HTML mocks in `docs/design/mocks/`, and UI implementation
 - **Who answers:** project owner / designer
+- **Answer:** Clean sport-editorial direction approved for Light and Dark modes: pitch-emerald primary accent (`#156842` Light / `#34D399` Dark) on neutral surfaces, WCAG AA semantic tokens for `W`/`D`/`L` form badges (using `W`/`D`/`L` labels with Romanian `aria-label`), yellow/red cards, active suspensions, retroactive suspension alerts (`--alert-retro-*`), and reschedule notifications (`--info-*`). Typography: `Barlow Semi Condensed` (headings/scoreboards), `Inter` with `tabular-nums` (UI/dense tables/scores), and `JetBrains Mono` (audit snapshots/timestamps). Token source in code planned as `src/app/globals.css` mapped to Tailwind CSS; no external design board or Figma link yet.
+- **Recorded as:** `docs/design/DESIGN.md`, `docs/design/registry.yaml`
 
 ## Q-006 · How do we screenshot this app?
 - **Status:** answered 2026-11-19

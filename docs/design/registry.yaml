@@ -1,25 +1,61 @@
 # docs/design/registry.yaml — every screen and shared component, by DS- ID.
 # Plans, commits, mocks and board files use the ID (tickets don't). kind: foundation | component | screen
 # status: draft (mock drawn) | approved (confirmed on the board) | implemented | deprecated (never delete an entry)
-# Note: Mocks are not drawn yet; waiting on Q-005 design tokens before creating docs/design/mocks/<DS-id>.html.
+# Note: Design tokens approved in docs/design/DESIGN.md (Q-005); initial public screen mocks drafted in docs/design/mocks/.
 designs:
+  - id: DS-p19-app-header
+    kind: component
+    source: TBD (planned AppHeader, SeasonSelector, ThemeToggle)
+    screenshots: []
+    design_ref: docs/design/mocks/DS-p19-home-standings.html
+    status: draft
+  - id: DS-p19-dense-table
+    kind: component
+    source: TBD (planned StandingsTable, StatsTable, AuditTable)
+    screenshots: []
+    design_ref: docs/design/mocks/DS-p19-home-standings.html
+    status: draft
+  - id: DS-p19-filter-bar
+    kind: component
+    source: TBD (planned FilterBar + iCal export action)
+    screenshots: []
+    design_ref: docs/design/mocks/DS-p19-fixtures.html
+    status: draft
+  - id: DS-p19-match-card
+    kind: component
+    source: TBD (planned MatchRow, MatchCard, MatchScoreboard)
+    screenshots: []
+    design_ref: docs/design/mocks/DS-p19-fixtures.html
+    status: draft
+  - id: DS-p19-status-badges
+    kind: component
+    source: TBD (planned FormStrip W/D/L, CardCountBadge, StatusBadge)
+    screenshots: []
+    design_ref: docs/design/mocks/DS-p19-home-standings.html
+    status: draft
+  - id: DS-p19-alert-banner
+    kind: component
+    source: TBD (planned AlertBanner for retroactive alerts & reschedule notifications)
+    screenshots: []
+    design_ref: docs/design/mocks/DS-p19-match-detail.html
+    status: draft
   - id: DS-p19-home-standings
     kind: screen
     source: TBD (planned route /)
     screenshots: []
-    design_ref: none
+    design_ref: docs/design/mocks/DS-p19-home-standings.html
     status: draft
   - id: DS-p19-fixtures
     kind: screen
     source: TBD (planned route /program)
     screenshots: []
-    design_ref: none
+    design_ref: docs/design/mocks/DS-p19-fixtures.html
     status: draft
   - id: DS-p19-match-detail
     kind: screen
     source: TBD (planned route /meciuri/[id])
     screenshots: []
-    design_ref: none
+    design_ref: docs/design/mocks/DS-p19-match-detail.html
     status: draft
   - id: DS-p19-stats-suspensions
     kind: screen
@@ -31,7 +67,7 @@ designs:
     kind: screen
     source: TBD (planned route /echipe/[id])
     screenshots: []
-    design_ref: none
+    design_ref: docs/design/mocks/DS-p19-team-profile.html
     status: draft
   - id: DS-p19-player-profile
     kind: screen

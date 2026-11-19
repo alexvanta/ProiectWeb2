@@ -1,0 +1,1751 @@
+<!DOCTYPE html>
+<html lang="ro" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Echipe — Rezultate, Lot și Transferuri — Liga de Amatori P19</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ==========================================================================
+       Tokens — docs/design/DESIGN.md (Light & Dark calibrated separately)
+       ========================================================================== */
+    :root {
+      --bg-canvas: #F7F8F6;
+      --bg-surface: #FFFFFF;
+      --bg-subtle: #EEF1EE;
+      --bg-header-glass: rgba(255, 255, 255, 0.84);
+      --surface-highlight: rgba(255, 255, 255, 0.80);
+      --hero-glow: radial-gradient(ellipse at 50% 0%, rgba(21, 104, 66, 0.09) 0%, transparent 68%);
+      --text-primary: #0F172A;
+      --text-secondary: #334155;
+      --text-muted: #526071;
+      --border-subtle: #DCE2E8;
+      --border-strong: #768596;
+      --accent-primary: #156842;
+      --accent-primary-hover: #0F5132;
+      --accent-primary-fg: #FFFFFF;
+      --focus-ring: #156842;
+
+      --status-win-bg: #DCFCE7;
+      --status-win-fg: #14532D;
+      --status-win-solid: #15803D;
+      --status-win-solid-fg: #FFFFFF;
+      --status-draw-bg: #E2E8F0;
+      --status-draw-fg: #334155;
+      --status-draw-solid: #475569;
+      --status-draw-solid-fg: #FFFFFF;
+      --status-loss-bg: #FEE2E2;
+      --status-loss-fg: #991B1B;
+      --status-loss-solid: #B91C1C;
+      --status-loss-solid-fg: #FFFFFF;
+
+      --card-yellow-fill: #FACC15;
+      --card-yellow-border: #A16207;
+      --card-yellow-bg: #FEF3C7;
+      --card-yellow-fg: #713F12;
+      --card-red-fill: #DC2626;
+      --card-red-bg: #FEE2E2;
+      --card-red-fg: #991B1B;
+
+      --alert-retro-bg: #FFEDD5;
+      --alert-retro-fg: #7C2D12;
+      --alert-retro-border: #C2410C;
+      --alert-retro-btn-fg: #FFFFFF;
+      --info-bg: #DBEAFE;
+      --info-fg: #1E3A8A;
+      --tooltip-bg: #0F172A;
+      --tooltip-fg: #F8FAFC;
+      --tooltip-muted: #94A3B8;
+      --tooltip-border: #1E293B;
+
+      --font-display: 'Barlow Semi Condensed', system-ui, -apple-system, sans-serif;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 20px;
+      --space-6: 24px;
+      --space-8: 32px;
+      --space-12: 48px;
+      --row-height-dense: 42px;
+      --container-max: 1200px;
+
+      --radius-sm: 4px;
+      --radius-md: 6px;
+      --radius-lg: 12px;
+      --radius-full: 9999px;
+
+      --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 10px 26px rgba(15, 23, 42, 0.12);
+      --motion-fast: 140ms cubic-bezier(0.22, 1, 0.36, 1);
+      --motion-base: 240ms cubic-bezier(0.22, 1, 0.36, 1);
+      --motion-enter: 360ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    [data-theme="dark"] {
+      --bg-canvas: #0C1116;
+      --bg-surface: #141B22;
+      --bg-subtle: #1C2630;
+      --bg-header-glass: rgba(20, 27, 34, 0.80);
+      --surface-highlight: rgba(255, 255, 255, 0.06);
+      --hero-glow: radial-gradient(ellipse at 50% 0%, rgba(52, 211, 153, 0.14) 0%, transparent 68%);
+      --text-primary: #F1F5F9;
+      --text-secondary: #CBD5E1;
+      --text-muted: #94A3B8;
+      --border-subtle: #24303C;
+      --border-strong: #5E7083;
+      --accent-primary: #34D399;
+      --accent-primary-hover: #6EE7B7;
+      --accent-primary-fg: #062315;
+      --focus-ring: #34D399;
+
+      --status-win-bg: #102E20;
+      --status-win-fg: #86EFAC;
+      --status-win-solid: #4ADE80;
+      --status-win-solid-fg: #052E16;
+      --status-draw-bg: #25313E;
+      --status-draw-fg: #CBD5E1;
+      --status-draw-solid: #CBD5E1;
+      --status-draw-solid-fg: #0F172A;
+      --status-loss-bg: #3B1519;
+      --status-loss-fg: #FCA5A5;
+      --status-loss-solid: #DC2626;
+      --status-loss-solid-fg: #FFFFFF;
+
+      --card-yellow-fill: #FACC15;
+      --card-yellow-border: #FDE047;
+      --card-yellow-bg: #332609;
+      --card-yellow-fg: #FDE047;
+      --card-red-fill: #F87171;
+      --card-red-bg: #3B1519;
+      --card-red-fg: #FCA5A5;
+
+      --alert-retro-bg: #3B1F0B;
+      --alert-retro-fg: #FDBA74;
+      --alert-retro-border: #FB923C;
+      --alert-retro-btn-fg: #0C1116;
+      --info-bg: #13294B;
+      --info-fg: #93C5FD;
+      --tooltip-bg: #263341;
+      --tooltip-fg: #F8FAFC;
+      --tooltip-muted: #CBD5E1;
+      --tooltip-border: #475569;
+
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.40);
+      --shadow-md: 0 10px 28px rgba(0, 0, 0, 0.52);
+    }
+
+    @keyframes enterUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes tabFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes tabPillGlide {
+      0% { opacity: 0.48; }
+      50% { opacity: 0.82; }
+      100% { opacity: 1; }
+    }
+
+    @keyframes rowCascadeDown {
+      0% {
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        animation-timing-function: step-end;
+      }
+      1% {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(-10px);
+        animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      100% {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition-duration: 0ms !important;
+        animation-duration: 0ms !important;
+        animation-iteration-count: 1 !important;
+      }
+      .animate-enter, table.data-table tbody tr {
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: none !important;
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg-canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      line-height: 20px;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color var(--motion-base), color var(--motion-base);
+    }
+
+    a { color: inherit; text-decoration: none; }
+    :focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+    .tabular { font-variant-numeric: tabular-nums lining-nums; }
+    .animate-enter { animation: enterUp var(--motion-enter) both; }
+
+    /* ==========================================================================
+       Distinct Club Crests (WCAG AA >= 4.5:1 verified for white initials)
+       ========================================================================== */
+    .crest-vn { background: linear-gradient(135deg, #156842 0%, #0D4A2E 100%); }
+    .crest-as { background: linear-gradient(135deg, #1D4ED8 0%, #1E3A8A 100%); }
+    .crest-vp { background: linear-gradient(135deg, #B91C1C 0%, #7F1D1D 100%); }
+    .crest-ar { background: linear-gradient(135deg, #7E22CE 0%, #581C87 100%); }
+    .crest-ud { background: linear-gradient(135deg, #B45309 0%, #78350F 100%); }
+    .crest-sc { background: linear-gradient(135deg, #0F766E 0%, #134E4A 100%); }
+    .crest-ps { background: linear-gradient(135deg, #334155 0%, #0F172A 100%); }
+    .crest-rv { background: linear-gradient(135deg, #C2410C 0%, #7C2D12 100%); }
+    .crest-gn { background: linear-gradient(135deg, #4338CA 0%, #312E81 100%); }
+
+    /* ==========================================================================
+       DS-p19-app-header (Glassmorphism + Active Indicator + Echipe Dropdown)
+       ========================================================================== */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: var(--bg-header-glass);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-sm);
+      transition: background-color var(--motion-base), border-color var(--motion-base);
+    }
+
+    .header-inner {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: var(--space-2) var(--space-4);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-4);
+      flex-wrap: wrap;
+    }
+
+    .brand-group { display: flex; align-items: center; gap: var(--space-3); }
+
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-primary-hover) 100%);
+      color: var(--accent-primary-fg);
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 16px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      letter-spacing: 0.02em;
+      flex-shrink: 0;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+
+    .brand-title {
+      font-family: var(--font-display);
+      font-size: 18px;
+      line-height: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .brand-sub {
+      font-size: 12px;
+      line-height: 16px;
+      color: var(--text-muted);
+      display: block;
+    }
+
+    .main-nav {
+      display: flex;
+      align-items: center;
+      gap: var(--space-1);
+      flex-wrap: wrap;
+    }
+
+    .nav-link {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      min-height: 36px;
+      padding: 0 var(--space-3);
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      transition: background var(--motion-fast), color var(--motion-fast);
+    }
+
+    .nav-link:hover {
+      background: var(--bg-subtle);
+      color: var(--text-primary);
+    }
+
+    .nav-link.active {
+      background: color-mix(in srgb, var(--accent-primary) 11%, transparent);
+      color: var(--accent-primary);
+      font-weight: 600;
+    }
+
+    .nav-link.active::after {
+      content: "";
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      bottom: -9px;
+      height: 2px;
+      border-radius: var(--radius-full);
+      background: var(--accent-primary);
+    }
+
+    .nav-dropdown {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .nav-dropdown::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 100%;
+      height: 10px;
+    }
+
+    .nav-chevron {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+      transition: transform var(--motion-fast);
+    }
+
+    .nav-dropdown:hover .nav-chevron,
+    .nav-dropdown:focus-within .nav-chevron,
+    .nav-dropdown.is-open .nav-chevron {
+      transform: rotate(180deg);
+    }
+
+    .nav-dropdown-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      min-width: 172px;
+      padding: var(--space-1);
+      border-radius: var(--radius-lg);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      box-shadow: inset 0 1px 0 var(--surface-highlight), var(--shadow-md);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateY(-4px);
+      transition: opacity var(--motion-base), transform var(--motion-base), visibility var(--motion-base);
+      z-index: 50;
+    }
+
+    .nav-dropdown:hover .nav-dropdown-menu,
+    .nav-dropdown:focus-within .nav-dropdown-menu,
+    .nav-dropdown.is-open .nav-dropdown-menu {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .nav-dropdown-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 36px;
+      padding: 0 var(--space-3);
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      transition: background var(--motion-fast), color var(--motion-fast);
+    }
+
+    .nav-dropdown-item:hover,
+    .nav-dropdown-item:focus-visible {
+      background: var(--bg-subtle);
+      color: var(--text-primary);
+    }
+
+    .nav-dropdown-item.is-active {
+      background: color-mix(in srgb, var(--accent-primary) 11%, transparent);
+      color: var(--accent-primary);
+      font-weight: 600;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .select-control {
+      min-height: 36px;
+      padding: 0 var(--space-3);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-strong);
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 500;
+      transition: background-color var(--motion-base), border-color var(--motion-fast), color var(--motion-base);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+      min-height: 36px;
+      padding: 0 var(--space-3);
+      border-radius: var(--radius-md);
+      border: 1px solid transparent;
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background var(--motion-fast), border-color var(--motion-fast), color var(--motion-fast), transform var(--motion-fast);
+    }
+
+    .btn:active { transform: scale(0.97); }
+
+    .btn-secondary {
+      background: var(--bg-surface);
+      border-color: var(--border-strong);
+      color: var(--text-primary);
+    }
+
+    .btn-secondary:hover { background: var(--bg-subtle); }
+
+    .btn-primary {
+      background: var(--accent-primary);
+      color: var(--accent-primary-fg);
+    }
+
+    .btn-primary:hover { background: var(--accent-primary-hover); }
+
+    .icon-sm {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    .theme-icon { transition: transform var(--motion-base); }
+
+    /* ==========================================================================
+       Page Layout & Team Hero Banner
+       ========================================================================== */
+    .container {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: var(--space-6) var(--space-4) var(--space-12);
+    }
+
+    .team-hero {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-4);
+      flex-wrap: wrap;
+      padding: var(--space-5);
+      margin-bottom: var(--space-6);
+      border-radius: var(--radius-lg);
+      background: var(--hero-glow), var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      box-shadow: inset 0 1px 0 var(--surface-highlight), var(--shadow-sm);
+      transition: background-color var(--motion-base), border-color var(--motion-base);
+    }
+
+    .team-hero-main {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+      min-width: 0;
+    }
+
+    .team-crest-lg {
+      width: 56px;
+      height: 56px;
+      border-radius: var(--radius-lg);
+      color: #FFFFFF;
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 4px 12px rgba(0, 0, 0, 0.18);
+    }
+
+    .team-crest {
+      width: 24px;
+      height: 24px;
+      border-radius: var(--radius-md);
+      color: #FFFFFF;
+      font-family: var(--font-display);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24), 0 1px 2px rgba(0, 0, 0, 0.16);
+    }
+
+    .team-crest-xs {
+      width: 18px;
+      height: 18px;
+      border-radius: var(--radius-sm);
+      font-size: 9px;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: 30px;
+      line-height: 34px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .page-meta {
+      margin: var(--space-1) 0 0;
+      font-size: 13px;
+      line-height: 18px;
+      color: var(--text-muted);
+    }
+
+    .team-hero-controls {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+    }
+
+    .team-kpi-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      flex-wrap: wrap;
+    }
+
+    .kpi-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px var(--space-3);
+      border-radius: var(--radius-md);
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+      font-size: 12px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .kpi-chip strong {
+      color: var(--text-primary);
+      font-weight: 700;
+    }
+
+    .demo-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      padding: 3px var(--space-2);
+      border-radius: var(--radius-md);
+      background: var(--bg-subtle);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    /* ==========================================================================
+       Main 2-column Grid & Panels
+       ========================================================================== */
+    .main-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.85fr) minmax(0, 1fr);
+      gap: var(--space-6);
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      box-shadow: inset 0 1px 0 var(--surface-highlight), var(--shadow-sm);
+      overflow: hidden;
+      transition: background-color var(--motion-base), border-color var(--motion-base);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-2) var(--space-3);
+      flex-wrap: wrap;
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .panel-header-left {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+      min-width: 0;
+    }
+
+    .panel-title {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: 20px;
+      line-height: 26px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      white-space: nowrap;
+      min-width: 112px;
+    }
+
+    /* Segmented Tabs (REZULTATE · LOT · TRANSFERURI) */
+    .panel-tabs {
+      position: relative;
+      isolation: isolate;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 3px;
+      border-radius: var(--radius-md);
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+      transition: background-color var(--motion-base), border-color var(--motion-base);
+    }
+
+    .panel-tabs-indicator {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 0;
+      border-radius: var(--radius-sm);
+      background: var(--accent-primary);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.16);
+      pointer-events: none;
+      opacity: 0;
+      will-change: transform, width, opacity;
+    }
+
+    .panel-tabs.has-indicator .panel-tabs-indicator { opacity: 1; }
+
+    .panel-tabs.is-animated .panel-tabs-indicator {
+      transition:
+        transform 520ms cubic-bezier(0.22, 1, 0.36, 1),
+        width 520ms cubic-bezier(0.22, 1, 0.36, 1),
+        height 520ms cubic-bezier(0.22, 1, 0.36, 1),
+        background-color var(--motion-base),
+        opacity 360ms ease;
+    }
+
+    .panel-tabs-indicator.is-gliding {
+      animation: tabPillGlide 520ms ease-out;
+    }
+
+    .panel-tabs:has(.panel-tab[aria-selected="true"]:hover) .panel-tabs-indicator {
+      background: var(--accent-primary-hover);
+    }
+
+    .panel-tab {
+      position: relative;
+      z-index: 1;
+      appearance: none;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-family: var(--font-sans);
+      font-size: 11px;
+      line-height: 16px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 5px 10px;
+      min-height: 28px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      white-space: nowrap;
+      transition:
+        background-color 360ms ease,
+        color 480ms cubic-bezier(0.22, 1, 0.36, 1),
+        transform var(--motion-fast);
+    }
+
+    .panel-tab[aria-selected="false"]:hover {
+      background: color-mix(in srgb, var(--text-primary) 7%, transparent);
+      color: var(--text-primary);
+    }
+
+    .panel-tab:active { transform: scale(0.97); }
+    .panel-tab[aria-selected="true"] { color: var(--accent-primary-fg); }
+
+    .panel-tabs:not(.has-indicator) .panel-tab[aria-selected="true"] {
+      background: var(--accent-primary);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14);
+    }
+
+    .tab-panel thead,
+    .tab-panel .table-footer {
+      animation: tabFadeIn 320ms ease-out both;
+    }
+
+    .tab-panel[hidden] { display: none; }
+
+    /* ==========================================================================
+       Dense Data Tables (Rezultate, Lot, Transferuri)
+       ========================================================================== */
+    .table-wrap { width: 100%; }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      line-height: 18px;
+    }
+
+    table.data-table thead th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: var(--bg-subtle);
+      color: var(--text-secondary);
+      font-size: 12px;
+      line-height: 16px;
+      font-weight: 600;
+      text-align: left;
+      padding: var(--space-2) var(--space-3);
+      border-bottom: 1px solid var(--border-subtle);
+      white-space: nowrap;
+      transition: background-color var(--motion-base);
+    }
+
+    table.data-table thead th.col-num,
+    table.data-table tbody td.col-num { text-align: right; }
+
+    table.data-table thead th.col-center,
+    table.data-table tbody td.col-center { text-align: center; }
+
+    table.data-table tbody tr {
+      height: var(--row-height-dense);
+      border-bottom: 1px solid var(--border-subtle);
+      transition: background-color var(--motion-fast);
+      animation: rowCascadeDown 340ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    }
+
+    table.data-table tbody tr:nth-child(1) { animation-delay: 40ms; }
+    table.data-table tbody tr:nth-child(2) { animation-delay: 110ms; }
+    table.data-table tbody tr:nth-child(3) { animation-delay: 180ms; }
+    table.data-table tbody tr:nth-child(4) { animation-delay: 250ms; }
+    table.data-table tbody tr:nth-child(5) { animation-delay: 320ms; }
+    table.data-table tbody tr:nth-child(6) { animation-delay: 390ms; }
+    table.data-table tbody tr:nth-child(7) { animation-delay: 460ms; }
+    table.data-table tbody tr:nth-child(8) { animation-delay: 530ms; }
+    table.data-table tbody tr:nth-child(9) { animation-delay: 600ms; }
+
+    table.data-table tbody tr:last-child { border-bottom: none; }
+    table.data-table tbody tr:hover { background: var(--bg-subtle); }
+
+    table.data-table tbody td {
+      padding: var(--space-2) var(--space-3);
+      vertical-align: middle;
+      color: var(--text-secondary);
+    }
+
+    .round-tag {
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+    }
+
+    .sub-meta {
+      display: block;
+      font-size: 11.5px;
+      line-height: 15px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .fixture-inline {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .fixture-side {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .fixture-side-home { justify-content: flex-end; }
+    .fixture-side-away { justify-content: flex-start; }
+
+    .fixture-team {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .fixture-team.is-current {
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .score-pill {
+      min-width: 52px;
+      padding: 3px var(--space-2);
+      border-radius: var(--radius-md);
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+      font-size: 14px;
+      line-height: 18px;
+      font-weight: 700;
+      text-align: center;
+      color: var(--text-primary);
+    }
+
+    .score-pill.upcoming {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .form-tile {
+      width: 22px;
+      height: 22px;
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      line-height: 22px;
+      font-weight: 700;
+      text-align: center;
+      display: inline-block;
+    }
+
+    .form-w { background: var(--status-win-solid); color: var(--status-win-solid-fg); }
+    .form-d { background: var(--status-draw-solid); color: var(--status-draw-solid-fg); }
+    .form-l { background: var(--status-loss-solid); color: var(--status-loss-solid-fg); }
+
+    .detail-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent-primary);
+      white-space: nowrap;
+    }
+
+    .detail-link:hover { color: var(--accent-primary-hover); }
+
+    .arrow-glide {
+      display: inline-block;
+      transition: transform var(--motion-fast);
+    }
+
+    .detail-link:hover .arrow-glide { transform: translateX(3px); }
+
+    /* Lot (Squad) specific styles */
+    .jersey-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 24px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .player-cell {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      min-width: 0;
+    }
+
+    .flag-svg {
+      width: 18px;
+      height: 12px;
+      border-radius: 2px;
+      border: 1px solid var(--border-subtle);
+      flex-shrink: 0;
+      display: block;
+    }
+
+    .player-name {
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .captain-tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      border-radius: var(--radius-sm);
+      background: var(--accent-primary);
+      color: var(--accent-primary-fg);
+      font-size: 10px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .cards-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .card-count {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 6px;
+      border-radius: var(--radius-sm);
+      font-size: 11.5px;
+      font-weight: 700;
+    }
+
+    .card-count-yellow {
+      background: var(--card-yellow-bg);
+      color: var(--card-yellow-fg);
+    }
+
+    .card-count-red {
+      background: var(--card-red-bg);
+      color: var(--card-red-fg);
+    }
+
+    .card-glyph {
+      width: 8px;
+      height: 11px;
+      border-radius: 2px;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    .card-glyph-yellow {
+      background: var(--card-yellow-fill);
+      border: 1px solid var(--card-yellow-border);
+    }
+
+    .card-glyph-red { background: var(--card-red-fill); }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-1);
+      padding: 2px var(--space-2);
+      border-radius: var(--radius-md);
+      font-size: 12px;
+      line-height: 16px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .status-eligible { background: var(--status-win-bg); color: var(--status-win-fg); }
+    .status-suspended { background: var(--card-red-bg); color: var(--card-red-fg); }
+    .status-scheduled { background: var(--bg-subtle); color: var(--text-secondary); }
+    .status-in { background: var(--status-win-bg); color: var(--status-win-fg); }
+    .status-out { background: var(--status-loss-bg); color: var(--status-loss-fg); }
+    .status-info { background: var(--info-bg); color: var(--info-fg); }
+
+    /* Transferuri specific styles */
+    .transfer-route {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      font-size: 13px;
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .transfer-arrow {
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .table-footer {
+      padding: var(--space-3) var(--space-4);
+      border-top: 1px solid var(--border-subtle);
+      background: var(--bg-subtle);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-3);
+      font-size: 12px;
+      color: var(--text-muted);
+      transition: background-color var(--motion-base);
+    }
+
+    /* ==========================================================================
+       Right Sidebar
+       ========================================================================== */
+    .side-stack {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-5);
+    }
+
+    .summary-list {
+      padding: var(--space-3) var(--space-4);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    .summary-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-2);
+      font-size: 13px;
+    }
+
+    .summary-label { color: var(--text-muted); }
+    .summary-val { font-weight: 600; color: var(--text-primary); text-align: right; }
+
+    .team-directory {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .team-dir-btn {
+      width: 100%;
+      appearance: none;
+      border: none;
+      background: transparent;
+      padding: 9px var(--space-4);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-2);
+      font-family: var(--font-sans);
+      font-size: 13px;
+      color: var(--text-primary);
+      cursor: pointer;
+      text-align: left;
+      transition: background-color var(--motion-fast);
+    }
+
+    .team-dir-btn:last-child { border-bottom: none; }
+    .team-dir-btn:hover { background: var(--bg-subtle); }
+
+    .team-dir-btn.is-selected {
+      background: color-mix(in srgb, var(--accent-primary) 10%, transparent);
+    }
+
+    .team-dir-left {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      min-width: 0;
+    }
+
+    .team-dir-name {
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .team-dir-rank {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    /* ==========================================================================
+       Responsive — No horizontal scroll at 360px
+       ========================================================================== */
+    @media (max-width: 1023px) {
+      .main-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 767px) {
+      .header-inner { padding: var(--space-2) var(--space-3); }
+      .nav-link, .btn, .select-control { min-height: 44px; }
+      .nav-link.active::after { bottom: 2px; }
+      .nav-dropdown-item { min-height: 44px; }
+      .container { padding: var(--space-4) var(--space-3) var(--space-8); }
+      .team-hero { padding: var(--space-4); }
+
+      .col-hide-sm { display: none; }
+
+      table.data-table thead th,
+      table.data-table tbody td { padding: var(--space-2) 6px; font-size: 12px; }
+
+      .panel-header { padding: var(--space-3); }
+      .panel-header-left { width: 100%; justify-content: space-between; }
+      .panel-title { min-width: 0; }
+      .panel-tabs { width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .panel-tab { min-height: 36px; padding: 6px 4px; text-align: center; font-size: 11px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand-group">
+        <a href="DS-p19-home-standings.html" class="brand-group" aria-label="Liga de Amatori P19 — Acasă">
+          <span class="brand-mark" aria-hidden="true">P19</span>
+          <span>
+            <span class="brand-title">Liga de Amatori</span>
+            <span class="brand-sub">Mock design · DS-p19-team-profile</span>
+          </span>
+        </a>
+      </div>
+
+      <nav class="main-nav" aria-label="Navigație principală">
+        <a class="nav-link" href="DS-p19-home-standings.html">Clasament</a>
+        <a class="nav-link" href="DS-p19-fixtures.html">Program</a>
+        <a class="nav-link" href="DS-p19-match-detail.html">Detaliu meci</a>
+        <div class="nav-dropdown" data-nav-dropdown>
+          <a class="nav-link active nav-dropdown-trigger" href="DS-p19-team-profile.html" aria-current="page" aria-haspopup="true" aria-expanded="false">
+            <span>Echipe</span>
+            <svg class="nav-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 6l4 4 4-4"/>
+            </svg>
+          </a>
+          <div class="nav-dropdown-menu" role="menu" aria-label="Subcategorii Echipe">
+            <a class="nav-dropdown-item is-active" role="menuitem" href="DS-p19-team-profile.html?tab=rezultate" data-nav-subtab="rezultate">Rezultate</a>
+            <a class="nav-dropdown-item" role="menuitem" href="DS-p19-team-profile.html?tab=lot" data-nav-subtab="lot">Lot</a>
+            <a class="nav-dropdown-item" role="menuitem" href="DS-p19-team-profile.html?tab=transferuri" data-nav-subtab="transferuri">Transferuri</a>
+          </div>
+        </div>
+      </nav>
+
+      <div class="header-actions">
+        <select id="season-select" class="select-control" aria-label="Selectează sezon">
+          <option selected>Sezon 2025–2026</option>
+          <option>Sezon 2024–2025</option>
+        </select>
+        <button id="theme-toggle" type="button" class="btn btn-secondary" aria-pressed="false" aria-label="Comută între modul luminos și modul întunecat">
+          <svg id="theme-icon" class="icon-sm theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+          <span id="theme-label">Dark</span>
+        </button>
+        <a href="#autentificare" class="btn btn-primary">Autentificare</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Profil echipă selectată -->
+    <section class="team-hero animate-enter" aria-labelledby="team-heading">
+      <div class="team-hero-main">
+        <span id="hero-crest" class="team-crest-lg crest-vn" aria-hidden="true">VN</span>
+        <div>
+          <h1 id="team-heading">FC Vulturii Nord</h1>
+          <p id="hero-meta" class="page-meta">Sezon 2025–2026 · Teren gazdă: Teren 1 — Parc Nord · Căpitan: George Petre</p>
+        </div>
+      </div>
+
+      <div class="team-hero-controls">
+        <div class="team-kpi-row">
+          <span class="kpi-chip tabular">Loc: <strong id="kpi-rank">#1</strong></span>
+          <span class="kpi-chip tabular">Puncte: <strong id="kpi-pts">25 pct</strong></span>
+          <span class="kpi-chip tabular">Bilanț: <strong id="kpi-record">8V · 1E · 1Î</strong></span>
+        </div>
+        <select id="team-select" class="select-control" aria-label="Selectează echipa">
+          <option value="vn" selected>FC Vulturii Nord</option>
+          <option value="as">AS Stejarul</option>
+          <option value="vp">CS Viitorul Parc</option>
+          <option value="ar">AFC Rapiditate</option>
+        </select>
+      </div>
+    </section>
+
+    <div class="main-grid">
+      <!-- Coloana stângă: Rezultate · Lot · Transferuri -->
+      <section aria-labelledby="panel-heading">
+        <div class="panel animate-enter" style="animation-delay:40ms;">
+          <div class="panel-header">
+            <div class="panel-header-left">
+              <h2 id="panel-heading" class="panel-title">
+                <span id="panel-title-text">Rezultate</span>
+              </h2>
+              <div class="panel-tabs" role="tablist" aria-label="Subcategorii echipă">
+                <span id="panel-tabs-indicator" class="panel-tabs-indicator" aria-hidden="true"></span>
+                <button id="tab-rezultate" type="button" class="panel-tab" role="tab" aria-selected="true" aria-controls="view-rezultate" data-tab="rezultate" tabindex="0">REZULTATE</button>
+                <button id="tab-lot" type="button" class="panel-tab" role="tab" aria-selected="false" aria-controls="view-lot" data-tab="lot" tabindex="-1">LOT</button>
+                <button id="tab-transferuri" type="button" class="panel-tab" role="tab" aria-selected="false" aria-controls="view-transferuri" data-tab="transferuri" tabindex="-1">TRANSFERURI</button>
+              </div>
+            </div>
+            <span id="panel-count-pill" class="demo-pill tabular">6 meciuri</span>
+          </div>
+
+          <!-- Subcategoria 1: REZULTATE -->
+          <div id="view-rezultate" class="tab-panel" role="tabpanel" aria-labelledby="tab-rezultate" data-tab-panel="rezultate">
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Etapă</th>
+                    <th scope="col">Meci</th>
+                    <th scope="col" class="col-center">Rezultat</th>
+                    <th scope="col" class="col-num col-hide-sm">Detalii</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-rezultate"></tbody>
+              </table>
+            </div>
+            <div class="table-footer">
+              <span>Meciuri oficiale din Sezon 2025–2026</span>
+              <span>W = Victorie · D = Egal · L = Înfrângere</span>
+            </div>
+          </div>
+
+          <!-- Subcategoria 2: LOT -->
+          <div id="view-lot" class="tab-panel" role="tabpanel" aria-labelledby="tab-lot" data-tab-panel="lot" hidden>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th scope="col" class="col-center" style="width:48px;">#</th>
+                    <th scope="col">Jucător</th>
+                    <th scope="col" class="col-hide-sm">Post</th>
+                    <th scope="col" class="col-num">MJ</th>
+                    <th scope="col" class="col-num">Goluri</th>
+                    <th scope="col" class="col-center col-hide-sm">Cartonașe</th>
+                    <th scope="col" class="col-num">Eligibilitate</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-lot"></tbody>
+              </table>
+            </div>
+            <div class="table-footer">
+              <span>Suspendările se aplică automat pe server la depunerea foii de meci (D-005)</span>
+              <span>C = Căpitan</span>
+            </div>
+          </div>
+
+          <!-- Subcategoria 3: TRANSFERURI -->
+          <div id="view-transferuri" class="tab-panel" role="tabpanel" aria-labelledby="tab-transferuri" data-tab-panel="transferuri" hidden>
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Sezon</th>
+                    <th scope="col">Jucător</th>
+                    <th scope="col" class="col-center">Tip</th>
+                    <th scope="col">Traseu transfer</th>
+                    <th scope="col" class="col-num col-hide-sm">Istoric</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-transferuri"></tbody>
+              </table>
+            </div>
+            <div class="table-footer">
+              <span>Transferurile între echipe se efectuează între sezoane, păstrând intact istoricul sezoanelor anterioare.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Coloana dreaptă: Rezumat echipă + Director echipe -->
+      <aside class="side-stack" aria-label="Rezumat și director echipe">
+        <section class="panel animate-enter" style="animation-delay:80ms;" aria-labelledby="summary-heading">
+          <div class="panel-header">
+            <h2 id="summary-heading" class="panel-title">Rezumat sezon</h2>
+            <span class="demo-pill">Sezon 2025–2026</span>
+          </div>
+          <div id="team-summary-list" class="summary-list"></div>
+        </section>
+
+        <section class="panel animate-enter" style="animation-delay:140ms;" aria-labelledby="directory-heading">
+          <div class="panel-header">
+            <h2 id="directory-heading" class="panel-title">Echipe în ligă</h2>
+            <span class="demo-pill tabular">4 active în demo</span>
+          </div>
+          <div id="team-directory" class="team-directory" role="list"></div>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    (function () {
+      const root = document.documentElement;
+      const btn = document.getElementById('theme-toggle');
+      const label = document.getElementById('theme-label');
+      const icon = document.getElementById('theme-icon');
+      let rotation = 0;
+
+      const moonPath = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+      const sunPath = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+
+      function applyTheme(theme, animateIcon) {
+        root.setAttribute('data-theme', theme);
+        const isDark = theme === 'dark';
+        btn.setAttribute('aria-pressed', String(isDark));
+        label.textContent = isDark ? 'Light' : 'Dark';
+        icon.innerHTML = isDark ? sunPath : moonPath;
+        if (animateIcon) {
+          rotation += 180;
+          icon.style.transform = 'rotate(' + rotation + 'deg)';
+        }
+        try { localStorage.setItem('p19-mock-theme', theme); } catch (_) {}
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      const urlTheme = params.get('theme');
+      let saved = null;
+      try { saved = localStorage.getItem('p19-mock-theme'); } catch (_) {}
+      applyTheme((urlTheme === 'dark' || urlTheme === 'light') ? urlTheme : (saved || 'light'), false);
+
+      btn.addEventListener('click', function () {
+        applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark', true);
+      });
+
+      const FLAG_RO = '<svg class="flag-svg" viewBox="0 0 18 12" role="img" aria-label="România"><rect width="6" height="12" fill="#002B7F"/><rect x="6" width="6" height="12" fill="#FCD116"/><rect x="12" width="6" height="12" fill="#CE1126"/></svg>';
+      const FLAG_IT = '<svg class="flag-svg" viewBox="0 0 18 12" role="img" aria-label="Italia"><rect width="6" height="12" fill="#009246"/><rect x="6" width="6" height="12" fill="#FFFFFF"/><rect x="12" width="6" height="12" fill="#CE2B37"/></svg>';
+
+      const TEAMS = {
+        vn: {
+          code: 'VN',
+          crest: 'crest-vn',
+          name: 'FC Vulturii Nord',
+          pitch: 'Teren 1 — Parc Nord',
+          captain: 'George Petre',
+          rank: '#1',
+          pts: '25 pct',
+          record: '8V · 1E · 1Î',
+          gd: '+15 (26:11)',
+          topScorer: 'Alexandru Stoica (11 goluri)',
+          nextMatch: 'Etapa 13 · vs Sporting Cartier',
+          results: [
+            { round: 'Etapa 12', meta: '22.11.2026 · Teren 1', home: { code: 'VN', crest: 'crest-vn', name: 'FC Vulturii Nord', cur: true }, away: { code: 'AS', crest: 'crest-as', name: 'AS Stejarul' }, score: '3 – 2', outcome: 'W', status: 'Corecție rezultat' },
+            { round: 'Etapa 11', meta: '15.11.2026 · Teren 3', home: { code: 'GN', crest: 'crest-gn', name: 'AS Gloria Nouă' }, away: { code: 'VN', crest: 'crest-vn', name: 'FC Vulturii Nord', cur: true }, score: '0 – 4', outcome: 'W' },
+            { round: 'Etapa 10', meta: '07.11.2026 · Teren 2', home: { code: 'AS', crest: 'crest-as', name: 'AS Stejarul' }, away: { code: 'VN', crest: 'crest-vn', name: 'FC Vulturii Nord', cur: true }, score: '2 – 1', outcome: 'L' },
+            { round: 'Etapa 9', meta: '01.11.2026 · Teren 1', home: { code: 'VN', crest: 'crest-vn', name: 'FC Vulturii Nord', cur: true }, away: { code: 'VP', crest: 'crest-vp', name: 'CS Viitorul Parc' }, score: '1 – 1', outcome: 'D' },
+            { round: 'Etapa 8', meta: '25.10.2026 · Teren 2', home: { code: 'SC', crest: 'crest-sc', name: 'Sporting Cartier' }, away: { code: 'VN', crest: 'crest-vn', name: 'FC Vulturii Nord', cur: true }, score: '0 – 2', outcome: 'W' },
+            { round: 'Etapa 7', meta: '18.10.2026 · Teren 1', home: { code: 'VN', crest: 'crest-vn', name: 'FC Vulturii Nord', cur: true }, away: { code: 'UD', crest: 'crest-ud', name: 'Unirea Dealul' }, score: '3 – 1', outcome: 'W' }
+          ],
+          squad: [
+            { num: 1, name: 'Ionuț Preda', flag: FLAG_RO, pos: 'Portar', mj: 10, goals: 0, yc: 0, rc: 0, status: 'eligible' },
+            { num: 4, name: 'George Petre', flag: FLAG_RO, captain: true, pos: 'Fundaș', mj: 10, goals: 2, yc: 2, rc: 0, status: 'eligible' },
+            { num: 7, name: 'Dan Rusu', flag: FLAG_RO, pos: 'Mijlocaș', mj: 10, goals: 7, yc: 1, rc: 0, status: 'eligible' },
+            { num: 9, name: 'Alexandru Stoica', flag: FLAG_RO, pos: 'Atacant', mj: 10, goals: 11, yc: 1, rc: 0, status: 'eligible' },
+            { num: 11, name: 'Marius Sava', flag: FLAG_RO, pos: 'Mijlocaș', mj: 9, goals: 4, yc: 2, rc: 0, status: 'eligible' },
+            { num: 14, name: 'Cătălin Tudor', flag: FLAG_RO, pos: 'Fundaș', mj: 8, goals: 1, yc: 0, rc: 0, status: 'eligible' },
+            { num: 18, name: 'Robert Albu', flag: FLAG_RO, pos: 'Atacant', mj: 7, goals: 1, yc: 1, rc: 0, status: 'eligible' }
+          ],
+          transfers: [
+            { season: '2025–2026', player: 'Dan Rusu', flag: FLAG_RO, type: 'in', from: { code: 'UD', crest: 'crest-ud', name: 'Unirea Dealul' }, to: { code: 'VN', crest: 'crest-vn', name: 'FC Vulturii Nord' }, history: 'Păstrat · 2024–2025' },
+            { season: '2025–2026', player: 'Robert Albu', flag: FLAG_RO, type: 'in', from: { code: 'SC', crest: 'crest-sc', name: 'Sporting Cartier' }, to: { code: 'VN', crest: 'crest-vn', name: 'FC Vulturii Nord' }, history: 'Păstrat · 2024–2025' },
+            { season: '2025–2026', player: 'Vlad Marinescu', flag: FLAG_RO, type: 'out', from: { code: 'VN', crest: 'crest-vn', name: 'FC Vulturii Nord' }, to: { code: 'SC', crest: 'crest-sc', name: 'Sporting Cartier' }, history: 'Păstrat · 2024–2025' },
+            { season: '2024–2025', player: 'Marius Sava', flag: FLAG_RO, type: 'in', from: { code: 'PS', crest: 'crest-ps', name: 'Progresul Sud' }, to: { code: 'VN', crest: 'crest-vn', name: 'FC Vulturii Nord' }, history: 'Păstrat · 2023–2024' }
+          ]
+        },
+        as: {
+          code: 'AS',
+          crest: 'crest-as',
+          name: 'AS Stejarul',
+          pitch: 'Teren 2 — Baza Sud',
+          captain: 'Mihai Dobre',
+          rank: '#2 (D3)',
+          pts: '22 pct',
+          record: '7V · 1E · 2Î',
+          gd: '+10 (22:12)',
+          topScorer: 'Bogdan Neagu (9 goluri)',
+          nextMatch: 'Etapa 13 · vs Recolta Veche',
+          results: [
+            { round: 'Etapa 12', meta: '22.11.2026 · Teren 1', home: { code: 'VN', crest: 'crest-vn', name: 'FC Vulturii Nord' }, away: { code: 'AS', crest: 'crest-as', name: 'AS Stejarul', cur: true }, score: '3 – 2', outcome: 'L', status: 'Corecție rezultat' },
+            { round: 'Etapa 11', meta: '15.11.2026 · Teren 2', home: { code: 'AS', crest: 'crest-as', name: 'AS Stejarul', cur: true }, away: { code: 'AR', crest: 'crest-ar', name: 'AFC Rapiditate' }, score: '1 – 1', outcome: 'D' },
+            { round: 'Etapa 10', meta: '07.11.2026 · Teren 2', home: { code: 'AS', crest: 'crest-as', name: 'AS Stejarul', cur: true }, away: { code: 'VN', crest: 'crest-vn', name: 'FC Vulturii Nord' }, score: '2 – 1', outcome: 'W' },
+            { round: 'Etapa 9', meta: '31.10.2026 · Teren 2', home: { code: 'AS', crest: 'crest-as', name: 'AS Stejarul', cur: true }, away: { code: 'RV', crest: 'crest-rv', name: 'Recolta Veche' }, score: '3 – 0', outcome: 'W' },
+            { round: 'Etapa 8', meta: '24.10.2026 · Teren 1', home: { code: 'VP', crest: 'crest-vp', name: 'CS Viitorul Parc' }, away: { code: 'AS', crest: 'crest-as', name: 'AS Stejarul', cur: true }, score: '2 – 1', outcome: 'L' }
+          ],
+          squad: [
+            { num: 12, name: 'Ștefan Oprea', flag: FLAG_RO, pos: 'Portar', mj: 10, goals: 0, yc: 0, rc: 0, status: 'eligible' },
+            { num: 5, name: 'Mihai Dobre', flag: FLAG_RO, captain: true, pos: 'Fundaș', mj: 10, goals: 1, yc: 3, rc: 0, status: 'eligible' },
+            { num: 6, name: 'Sorin Vasile', flag: FLAG_RO, pos: 'Fundaș', mj: 9, goals: 1, yc: 1, rc: 1, status: 'suspended', ban: 'Suspendat · comisie' },
+            { num: 8, name: 'Bogdan Neagu', flag: FLAG_RO, pos: 'Atacant', mj: 10, goals: 9, yc: 1, rc: 0, status: 'eligible' },
+            { num: 10, name: 'Florin Lazar', flag: FLAG_RO, pos: 'Mijlocaș', mj: 10, goals: 7, yc: 2, rc: 0, status: 'eligible' },
+            { num: 15, name: 'Paul Barbu', flag: FLAG_RO, pos: 'Mijlocaș', mj: 8, goals: 2, yc: 1, rc: 0, status: 'eligible' },
+            { num: 19, name: 'Andrei Popa', flag: FLAG_RO, pos: 'Fundaș', mj: 8, goals: 1, yc: 4, rc: 0, status: 'suspended', ban: 'Suspendat · 1 etapă' }
+          ],
+          transfers: [
+            { season: '2025–2026', player: 'Florin Lazar', flag: FLAG_RO, type: 'in', from: { code: 'AR', crest: 'crest-ar', name: 'AFC Rapiditate' }, to: { code: 'AS', crest: 'crest-as', name: 'AS Stejarul' }, history: 'Păstrat · 2024–2025' },
+            { season: '2025–2026', player: 'Andrei Iliescu', flag: FLAG_RO, type: 'out', from: { code: 'AS', crest: 'crest-as', name: 'AS Stejarul' }, to: { code: 'UD', crest: 'crest-ud', name: 'Unirea Dealul' }, history: 'Păstrat · 2024–2025' },
+            { season: '2024–2025', player: 'Bogdan Neagu', flag: FLAG_RO, type: 'in', from: { code: 'RV', crest: 'crest-rv', name: 'Recolta Veche' }, to: { code: 'AS', crest: 'crest-as', name: 'AS Stejarul' }, history: 'Păstrat · 2023–2024' }
+          ]
+        },
+        vp: {
+          code: 'VP',
+          crest: 'crest-vp',
+          name: 'CS Viitorul Parc',
+          pitch: 'Teren 1 — Parc Nord',
+          captain: 'Marco Conti',
+          rank: '#3 (D3)',
+          pts: '22 pct',
+          record: '7V · 1E · 2Î',
+          gd: '+11 (24:13)',
+          topScorer: 'Marco Conti (8 goluri)',
+          nextMatch: 'Etapa 12 · vs Sporting Cartier (16:00)',
+          results: [
+            { round: 'Etapa 12', meta: '23.11.2026 · Teren 1', home: { code: 'VP', crest: 'crest-vp', name: 'CS Viitorul Parc', cur: true }, away: { code: 'SC', crest: 'crest-sc', name: 'Sporting Cartier' }, score: '16:00', outcome: 'scheduled' },
+            { round: 'Etapa 11', meta: '16.11.2026 · Teren 2', home: { code: 'PS', crest: 'crest-ps', name: 'Progresul Sud' }, away: { code: 'VP', crest: 'crest-vp', name: 'CS Viitorul Parc', cur: true }, score: '1 – 3', outcome: 'W' },
+            { round: 'Etapa 10', meta: '08.11.2026 · Teren 3', home: { code: 'UD', crest: 'crest-ud', name: 'Unirea Dealul' }, away: { code: 'VP', crest: 'crest-vp', name: 'CS Viitorul Parc', cur: true }, score: '1 – 0', outcome: 'L' },
+            { round: 'Etapa 9', meta: '01.11.2026 · Teren 1', home: { code: 'VP', crest: 'crest-vp', name: 'CS Viitorul Parc', cur: true }, away: { code: 'GN', crest: 'crest-gn', name: 'AS Gloria Nouă' }, score: '4 – 1', outcome: 'W' },
+            { round: 'Etapa 8', meta: '24.10.2026 · Teren 1', home: { code: 'VP', crest: 'crest-vp', name: 'CS Viitorul Parc', cur: true }, away: { code: 'AS', crest: 'crest-as', name: 'AS Stejarul' }, score: '2 – 1', outcome: 'W' }
+          ],
+          squad: [
+            { num: 1, name: 'Tudor Radu', flag: FLAG_RO, pos: 'Portar', mj: 10, goals: 0, yc: 0, rc: 0, status: 'eligible' },
+            { num: 3, name: 'Dragoș Marin', flag: FLAG_RO, pos: 'Fundaș', mj: 10, goals: 2, yc: 2, rc: 0, status: 'eligible' },
+            { num: 8, name: 'Adrian Stan', flag: FLAG_RO, pos: 'Mijlocaș', mj: 9, goals: 5, yc: 1, rc: 0, status: 'eligible' },
+            { num: 10, name: 'Marco Conti', flag: FLAG_IT, captain: true, pos: 'Atacant', mj: 10, goals: 8, yc: 1, rc: 0, status: 'eligible' },
+            { num: 17, name: 'Cosmin Diaconu', flag: FLAG_RO, pos: 'Atacant', mj: 9, goals: 5, yc: 0, rc: 0, status: 'eligible' }
+          ],
+          transfers: [
+            { season: '2025–2026', player: 'Marco Conti', flag: FLAG_IT, type: 'in', from: { code: 'PS', crest: 'crest-ps', name: 'Progresul Sud' }, to: { code: 'VP', crest: 'crest-vp', name: 'CS Viitorul Parc' }, history: 'Păstrat · 2024–2025' },
+            { season: '2025–2026', player: 'Cătălin Matei', flag: FLAG_RO, type: 'out', from: { code: 'VP', crest: 'crest-vp', name: 'CS Viitorul Parc' }, to: { code: 'PS', crest: 'crest-ps', name: 'Progresul Sud' }, history: 'Păstrat · 2024–2025' }
+          ]
+        },
+        ar: {
+          code: 'AR',
+          crest: 'crest-ar',
+          name: 'AFC Rapiditate',
+          pitch: 'Teren 2 — Baza Sud',
+          captain: 'Răzvan Munteanu',
+          rank: '#4 (D3)',
+          pts: '22 pct',
+          record: '7V · 1E · 2Î',
+          gd: '+7 (19:12)',
+          topScorer: 'Răzvan Munteanu (6 goluri)',
+          nextMatch: 'Etapa 13 · vs Unirea Dealul',
+          results: [
+            { round: 'Etapa 12', meta: '22.11.2026 · Teren 2', home: { code: 'AR', crest: 'crest-ar', name: 'AFC Rapiditate', cur: true }, away: { code: 'PS', crest: 'crest-ps', name: 'Progresul Sud' }, score: '2 – 0', outcome: 'W' },
+            { round: 'Etapa 11', meta: '15.11.2026 · Teren 3', home: { code: 'GN', crest: 'crest-gn', name: 'AS Gloria Nouă' }, away: { code: 'AR', crest: 'crest-ar', name: 'AFC Rapiditate', cur: true }, score: '1 – 3', outcome: 'W' },
+            { round: 'Etapa 10', meta: '07.11.2026 · Teren 2', home: { code: 'AR', crest: 'crest-ar', name: 'AFC Rapiditate', cur: true }, away: { code: 'UD', crest: 'crest-ud', name: 'Unirea Dealul' }, score: '2 – 0', outcome: 'W' },
+            { round: 'Etapa 9', meta: '31.10.2026 · Teren 1', home: { code: 'VN', crest: 'crest-vn', name: 'FC Vulturii Nord' }, away: { code: 'AR', crest: 'crest-ar', name: 'AFC Rapiditate', cur: true }, score: '3 – 1', outcome: 'L' }
+          ],
+          squad: [
+            { num: 1, name: 'Lucian Dumitru', flag: FLAG_RO, pos: 'Portar', mj: 10, goals: 0, yc: 0, rc: 0, status: 'eligible' },
+            { num: 4, name: 'Gabriel Voicu', flag: FLAG_RO, pos: 'Fundaș', mj: 10, goals: 2, yc: 2, rc: 0, status: 'eligible' },
+            { num: 9, name: 'Răzvan Munteanu', flag: FLAG_RO, captain: true, pos: 'Atacant', mj: 10, goals: 6, yc: 1, rc: 0, status: 'eligible' },
+            { num: 11, name: 'Ovidiu Popescu', flag: FLAG_RO, pos: 'Mijlocaș', mj: 9, goals: 4, yc: 1, rc: 0, status: 'eligible' }
+          ],
+          transfers: [
+            { season: '2025–2026', player: 'Ovidiu Popescu', flag: FLAG_RO, type: 'in', from: { code: 'RV', crest: 'crest-rv', name: 'Recolta Veche' }, to: { code: 'AR', crest: 'crest-ar', name: 'AFC Rapiditate' }, history: 'Păstrat · 2024–2025' },
+            { season: '2025–2026', player: 'Florin Lazar', flag: FLAG_RO, type: 'out', from: { code: 'AR', crest: 'crest-ar', name: 'AFC Rapiditate' }, to: { code: 'AS', crest: 'crest-as', name: 'AS Stejarul' }, history: 'Păstrat · 2024–2025' }
+          ]
+        }
+      };
+
+      const TAB_META = {
+        rezultate: { title: 'Rezultate', unit: 'meciuri' },
+        lot: { title: 'Lot', unit: 'jucători' },
+        transferuri: { title: 'Transferuri', unit: 'transferuri' }
+      };
+
+      const validTabs = ['rezultate', 'lot', 'transferuri'];
+      const urlTab = params.get('tab');
+      const urlTeam = params.get('team');
+      let currentTabKey = validTabs.includes(urlTab) ? urlTab : 'rezultate';
+      let currentTeamKey = TEAMS[urlTeam] ? urlTeam : 'vn';
+
+      const tabList = document.querySelector('.panel-tabs[role="tablist"]');
+      const tabIndicator = document.getElementById('panel-tabs-indicator');
+      const tabButtons = Array.from(document.querySelectorAll('.panel-tab[role="tab"]'));
+      const tabPanels = Array.from(document.querySelectorAll('.tab-panel[role="tabpanel"]'));
+      const navSubLinks = Array.from(document.querySelectorAll('[data-nav-subtab]'));
+      const panelTitleText = document.getElementById('panel-title-text');
+      const panelCountPill = document.getElementById('panel-count-pill');
+      const teamSelect = document.getElementById('team-select');
+
+      function renderTeam(teamKey) {
+        const t = TEAMS[teamKey] || TEAMS.vn;
+        currentTeamKey = teamKey;
+        teamSelect.value = teamKey;
+
+        const heroCrest = document.getElementById('hero-crest');
+        heroCrest.className = 'team-crest-lg ' + t.crest;
+        heroCrest.textContent = t.code;
+        document.getElementById('team-heading').textContent = t.name;
+        document.getElementById('hero-meta').textContent = 'Sezon 2025–2026 · Teren gazdă: ' + t.pitch + ' · Căpitan: ' + t.captain;
+        document.getElementById('kpi-rank').textContent = t.rank;
+        document.getElementById('kpi-pts').textContent = t.pts;
+        document.getElementById('kpi-record').textContent = t.record;
+
+        // Render Rezultate
+        document.getElementById('tbody-rezultate').innerHTML = t.results.map(function (m) {
+          const outcomeHtml = m.outcome === 'scheduled'
+            ? '<span class="status-badge status-scheduled">Programat</span>'
+            : '<span class="form-tile form-' + m.outcome.toLowerCase() + '" aria-label="' + (m.outcome === 'W' ? 'Victorie' : m.outcome === 'D' ? 'Egal' : 'Înfrângere') + '">' + m.outcome + '</span>';
+          const scoreClass = m.outcome === 'scheduled' ? 'score-pill upcoming tabular' : 'score-pill tabular';
+          return '<tr>' +
+            '<td><span class="round-tag">' + m.round + '</span><span class="sub-meta tabular">' + m.meta + '</span></td>' +
+            '<td><div class="fixture-inline">' +
+              '<span class="fixture-side fixture-side-home"><span class="fixture-team' + (m.home.cur ? ' is-current' : '') + '">' + m.home.name + '</span><span class="team-crest team-crest-xs ' + m.home.crest + '" aria-hidden="true">' + m.home.code + '</span></span>' +
+              '<span class="' + scoreClass + '">' + m.score + '</span>' +
+              '<span class="fixture-side fixture-side-away"><span class="team-crest team-crest-xs ' + m.away.crest + '" aria-hidden="true">' + m.away.code + '</span><span class="fixture-team' + (m.away.cur ? ' is-current' : '') + '">' + m.away.name + '</span></span>' +
+            '</div></td>' +
+            '<td class="col-center">' + outcomeHtml + '</td>' +
+            '<td class="col-num col-hide-sm"><a class="detail-link" href="DS-p19-match-detail.html">Detalii <span class="arrow-glide" aria-hidden="true">→</span></a></td>' +
+          '</tr>';
+        }).join('');
+
+        // Render Lot
+        document.getElementById('tbody-lot').innerHTML = t.squad.map(function (p) {
+          const cards = [];
+          if (p.yc > 0) cards.push('<span class="card-count card-count-yellow tabular" aria-label="' + p.yc + ' cartonașe galbene"><span class="card-glyph card-glyph-yellow" aria-hidden="true"></span>' + p.yc + '</span>');
+          if (p.rc > 0) cards.push('<span class="card-count card-count-red tabular" aria-label="' + p.rc + ' cartonașe roșii"><span class="card-glyph card-glyph-red" aria-hidden="true"></span>' + p.rc + '</span>');
+          const cardsHtml = cards.length ? '<span class="cards-inline">' + cards.join('') + '</span>' : '<span style="color:var(--text-muted);">—</span>';
+          const statusHtml = p.status === 'suspended'
+            ? '<span class="status-badge status-suspended">' + p.ban + '</span>'
+            : '<span class="status-badge status-eligible">Eligibil</span>';
+          return '<tr>' +
+            '<td class="col-center"><span class="jersey-num tabular">' + p.num + '</span></td>' +
+            '<td><div class="player-cell">' + p.flag + '<span class="player-name">' + p.name + '</span>' + (p.captain ? '<span class="captain-tag" aria-label="Căpitan">C</span>' : '') + '</div></td>' +
+            '<td class="col-hide-sm">' + p.pos + '</td>' +
+            '<td class="col-num tabular">' + p.mj + '</td>' +
+            '<td class="col-num tabular"><strong>' + p.goals + '</strong></td>' +
+            '<td class="col-center col-hide-sm">' + cardsHtml + '</td>' +
+            '<td class="col-num">' + statusHtml + '</td>' +
+          '</tr>';
+        }).join('');
+
+        // Render Transferuri
+        document.getElementById('tbody-transferuri').innerHTML = t.transfers.map(function (tr) {
+          const typeHtml = tr.type === 'in'
+            ? '<span class="status-badge status-in">Intrare</span>'
+            : '<span class="status-badge status-out">Ieșire</span>';
+          return '<tr>' +
+            '<td class="tabular"><span class="round-tag">' + tr.season + '</span></td>' +
+            '<td><div class="player-cell">' + tr.flag + '<span class="player-name">' + tr.player + '</span></div></td>' +
+            '<td class="col-center">' + typeHtml + '</td>' +
+            '<td><span class="transfer-route">' +
+              '<span class="team-crest team-crest-xs ' + tr.from.crest + '" aria-hidden="true">' + tr.from.code + '</span><span>' + tr.from.name + '</span>' +
+              '<span class="transfer-arrow" aria-hidden="true">→</span>' +
+              '<span class="team-crest team-crest-xs ' + tr.to.crest + '" aria-hidden="true">' + tr.to.code + '</span><span>' + tr.to.name + '</span>' +
+            '</span></td>' +
+            '<td class="col-num col-hide-sm"><span class="status-badge status-info">' + tr.history + '</span></td>' +
+          '</tr>';
+        }).join('');
+
+        // Render Sidebar Summary
+        document.getElementById('team-summary-list').innerHTML =
+          '<div class="summary-row"><span class="summary-label">Poziție clasament</span><span class="summary-val tabular">' + t.rank + '</span></div>' +
+          '<div class="summary-row"><span class="summary-label">Golaveraj</span><span class="summary-val tabular">' + t.gd + '</span></div>' +
+          '<div class="summary-row"><span class="summary-label">Golgheter echipă</span><span class="summary-val">' + t.topScorer + '</span></div>' +
+          '<div class="summary-row"><span class="summary-label">Căpitan</span><span class="summary-val">' + t.captain + '</span></div>' +
+          '<div class="summary-row"><span class="summary-label">Următorul meci</span><span class="summary-val">' + t.nextMatch + '</span></div>';
+
+        // Render Team Directory
+        document.getElementById('team-directory').innerHTML = Object.keys(TEAMS).map(function (key) {
+          const item = TEAMS[key];
+          const selected = key === teamKey;
+          return '<button type="button" class="team-dir-btn' + (selected ? ' is-selected' : '') + '" data-dir-team="' + key + '" aria-pressed="' + String(selected) + '">' +
+            '<span class="team-dir-left"><span class="team-crest ' + item.crest + '" aria-hidden="true">' + item.code + '</span><span class="team-dir-name">' + item.name + '</span></span>' +
+            '<span class="team-dir-rank tabular">' + item.rank + ' · ' + item.pts + '</span>' +
+          '</button>';
+        }).join('');
+
+        document.querySelectorAll('[data-dir-team]').forEach(function (dirBtn) {
+          dirBtn.addEventListener('click', function () {
+            renderTeam(dirBtn.dataset.dirTeam);
+            updateCountPill(currentTabKey);
+          });
+        });
+
+        updateCountPill(currentTabKey);
+      }
+
+      function updateCountPill(tabKey) {
+        const t = TEAMS[currentTeamKey] || TEAMS.vn;
+        const count = tabKey === 'rezultate' ? t.results.length : tabKey === 'lot' ? t.squad.length : t.transfers.length;
+        panelCountPill.textContent = count + ' ' + TAB_META[tabKey].unit;
+      }
+
+      function positionTabIndicator(activeBtn, animate) {
+        if (!tabList || !tabIndicator || !activeBtn) return;
+        const x = activeBtn.offsetLeft;
+        const y = activeBtn.offsetTop;
+        const w = activeBtn.offsetWidth;
+        const h = activeBtn.offsetHeight;
+
+        if (!animate) tabList.classList.remove('is-animated');
+
+        tabIndicator.style.width = w + 'px';
+        tabIndicator.style.height = h + 'px';
+        tabIndicator.style.transform = 'translate3d(' + x + 'px, ' + y + 'px, 0)';
+        tabList.classList.add('has-indicator');
+
+        if (animate) {
+          tabIndicator.classList.remove('is-gliding');
+          void tabIndicator.offsetWidth;
+          tabIndicator.classList.add('is-gliding');
+        } else {
+          void tabIndicator.offsetWidth;
+          requestAnimationFrame(function () {
+            tabList.classList.add('is-animated');
+          });
+        }
+      }
+
+      function activateTab(tabKey, focusTab, animate) {
+        if (!validTabs.includes(tabKey)) tabKey = 'rezultate';
+        const changed = tabKey !== currentTabKey;
+        currentTabKey = tabKey;
+        let selectedBtn = null;
+
+        tabButtons.forEach(function (btnEl) {
+          const selected = btnEl.dataset.tab === tabKey;
+          btnEl.setAttribute('aria-selected', String(selected));
+          btnEl.setAttribute('tabindex', selected ? '0' : '-1');
+          if (selected) {
+            selectedBtn = btnEl;
+            if (focusTab) btnEl.focus();
+          }
+        });
+
+        navSubLinks.forEach(function (linkEl) {
+          linkEl.classList.toggle('is-active', linkEl.dataset.navSubtab === tabKey);
+        });
+
+        positionTabIndicator(selectedBtn, animate !== false && changed);
+
+        tabPanels.forEach(function (panelEl) {
+          panelEl.hidden = panelEl.dataset.tabPanel !== tabKey;
+        });
+
+        panelTitleText.textContent = TAB_META[tabKey].title;
+        updateCountPill(tabKey);
+
+        try {
+          const nextUrl = new URL(window.location.href);
+          nextUrl.searchParams.set('tab', tabKey);
+          window.history.replaceState(null, '', nextUrl.toString());
+        } catch (_) {}
+      }
+
+      renderTeam(currentTeamKey);
+      activateTab(currentTabKey, false, false);
+
+      teamSelect.addEventListener('change', function () {
+        renderTeam(teamSelect.value);
+      });
+
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(function () {
+          const curBtn = tabButtons.find(function (b) { return b.dataset.tab === currentTabKey; });
+          positionTabIndicator(curBtn, false);
+        });
+      }
+
+      if (typeof ResizeObserver !== 'undefined' && tabList) {
+        new ResizeObserver(function () {
+          const curBtn = tabButtons.find(function (b) { return b.dataset.tab === currentTabKey; });
+          positionTabIndicator(curBtn, false);
+        }).observe(tabList);
+      }
+
+      tabButtons.forEach(function (btnEl, idx) {
+        btnEl.addEventListener('click', function () {
+          activateTab(btnEl.dataset.tab, false, true);
+        });
+        btnEl.addEventListener('keydown', function (e) {
+          let nextIdx = null;
+          if (e.key === 'ArrowRight') nextIdx = (idx + 1) % tabButtons.length;
+          else if (e.key === 'ArrowLeft') nextIdx = (idx - 1 + tabButtons.length) % tabButtons.length;
+          else if (e.key === 'Home') nextIdx = 0;
+          else if (e.key === 'End') nextIdx = tabButtons.length - 1;
+          if (nextIdx !== null) {
+            e.preventDefault();
+            activateTab(tabButtons[nextIdx].dataset.tab, true, true);
+          }
+        });
+      });
+
+      // Dropdown menu keyboard & in-page subtab switching
+      const dropdown = document.querySelector('[data-nav-dropdown]');
+      if (dropdown) {
+        const trigger = dropdown.querySelector('.nav-dropdown-trigger');
+        navSubLinks.forEach(function (linkEl) {
+          linkEl.addEventListener('click', function (e) {
+            e.preventDefault();
+            activateTab(linkEl.dataset.navSubtab, false, true);
+            dropdown.classList.remove('is-open');
+            trigger.setAttribute('aria-expanded', 'false');
+            linkEl.blur();
+          });
+        });
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape') {
+            dropdown.classList.remove('is-open');
+            trigger.setAttribute('aria-expanded', 'false');
+          }
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

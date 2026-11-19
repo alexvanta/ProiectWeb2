@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="ro" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FC Vulturii Nord 3–2 AS Stejarul · Detaliu meci — Liga de Amatori P19</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-canvas: #F7F8F6;
+      --bg-surface: #FFFFFF;
+      --bg-subtle: #EEF1EE;
+      --bg-header-glass: rgba(255, 255, 255, 0.84);
+      --surface-highlight: rgba(255, 255, 255, 0.80);
+      --hero-glow: radial-gradient(ellipse at 50% 0%, rgba(21, 104, 66, 0.09) 0%, transparent 68%);
+      --text-primary: #0F172A;
+      --text-secondary: #334155;
+      --text-muted: #526071;
+      --border-subtle: #DCE2E8;
+      --border-strong: #768596;
+      --accent-primary: #156842;
+      --accent-primary-hover: #0F5132;
+      --accent-primary-fg: #FFFFFF;
+      --focus-ring: #156842;
+
+      --status-win-bg: #DCFCE7;
+      --status-win-fg: #14532D;
+      --status-win-solid: #15803D;
+      --status-win-solid-fg: #FFFFFF;
+      --status-draw-bg: #E2E8F0;
+      --status-draw-fg: #334155;
+      --status-draw-solid: #475569;
+      --status-draw-solid-fg: #FFFFFF;
+      --status-loss-bg: #FEE2E2;
+      --status-loss-fg: #991B1B;
+      --status-loss-solid: #B91C1C;
+      --status-loss-solid-fg: #FFFFFF;
+
+      --card-yellow-fill: #FACC15;
+      --card-yellow-border: #A16207;
+      --card-yellow-bg: #FEF3C7;
+      --card-yellow-fg: #713F12;
+      --card-red-fill: #DC2626;
+      --card-red-bg: #FEE2E2;
+      --card-red-fg: #991B1B;
+
+      --alert-retro-bg: #FFEDD5;
+      --alert-retro-fg: #7C2D12;
+      --alert-retro-border: #C2410C;
+      --alert-retro-btn-fg: #FFFFFF;
+      --info-bg: #DBEAFE;
+      --info-fg: #1E3A8A;
+      --tooltip-bg: #0F172A;
+      --tooltip-fg: #F8FAFC;
+      --tooltip-muted: #94A3B8;
+      --tooltip-border: #1E293B;
+
+      --font-display: 'Barlow Semi Condensed', system-ui, -apple-system, sans-serif;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 20px;
+      --space-6: 24px;
+      --space-8: 32px;
+      --space-12: 48px;
+      --container-max: 1200px;
+
+      --radius-sm: 4px;
+      --radius-md: 6px;
+      --radius-lg: 12px;
+      --radius-full: 9999px;
+
+      --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 10px 26px rgba(15, 23, 42, 0.12);
+      --motion-fast: 140ms cubic-bezier(0.22, 1, 0.36, 1);
+      --motion-base: 240ms cubic-bezier(0.22, 1, 0.36, 1);
+      --motion-enter: 360ms cubic-bezier(0.22, 1, 0.36, 1);
+      --motion-pulse: 2.2s ease-in-out infinite;
+    }
+
+    [data-theme="dark"] {
+      --bg-canvas: #0C1116;
+      --bg-surface: #141B22;
+      --bg-subtle: #1C2630;
+      --bg-header-glass: rgba(20, 27, 34, 0.80);
+      --surface-highlight: rgba(255, 255, 255, 0.06);
+      --hero-glow: radial-gradient(ellipse at 50% 0%, rgba(52, 211, 153, 0.14) 0%, transparent 68%);
+      --text-primary: #F1F5F9;
+      --text-secondary: #CBD5E1;
+      --text-muted: #94A3B8;
+      --border-subtle: #24303C;
+      --border-strong: #5E7083;
+      --accent-primary: #34D399;
+      --accent-primary-hover: #6EE7B7;
+      --accent-primary-fg: #062315;
+      --focus-ring: #34D399;
+
+      --status-win-bg: #102E20;
+      --status-win-fg: #86EFAC;
+      --status-win-solid: #4ADE80;
+      --status-win-solid-fg: #052E16;
+      --status-draw-bg: #25313E;
+      --status-draw-fg: #CBD5E1;
+      --status-draw-solid: #CBD5E1;
+      --status-draw-solid-fg: #0F172A;
+      --status-loss-bg: #3B1519;
+      --status-loss-fg: #FCA5A5;
+      --status-loss-solid: #DC2626;
+      --status-loss-solid-fg: #FFFFFF;
+
+      --card-yellow-fill: #FACC15;
+      --card-yellow-border: #FDE047;
+      --card-yellow-bg: #332609;
+      --card-yellow-fg: #FDE047;
+      --card-red-fill: #F87171;
+      --card-red-bg: #3B1519;
+      --card-red-fg: #FCA5A5;
+
+      --alert-retro-bg: #3B1F0B;
+      --alert-retro-fg: #FDBA74;
+      --alert-retro-border: #FB923C;
+      --alert-retro-btn-fg: #0C1116;
+      --info-bg: #13294B;
+      --info-fg: #93C5FD;
+      --tooltip-bg: #263341;
+      --tooltip-fg: #F8FAFC;
+      --tooltip-muted: #CBD5E1;
+      --tooltip-border: #475569;
+
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.40);
+      --shadow-md: 0 10px 28px rgba(0, 0, 0, 0.52);
+    }
+
+    @keyframes enterUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulseRing {
+      0%, 100% { transform: scale(1); opacity: 0.75; }
+      50% { transform: scale(2.1); opacity: 0; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition-duration: 0ms !important;
+        animation-duration: 0ms !important;
+        animation-iteration-count: 1 !important;
+      }
+      .animate-enter, .tl-item { opacity: 1 !important; transform: none !important; }
+      .pulse-alert-dot::after { display: none !important; }
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg-canvas);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      line-height: 20px;
+      -webkit-font-smoothing: antialiased;
+      transition: background-color var(--motion-base), color var(--motion-base);
+    }
+
+    a { color: inherit; text-decoration: none; }
+    :focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+    .tabular { font-variant-numeric: tabular-nums lining-nums; }
+    .mono { font-family: var(--font-mono); font-size: 12px; line-height: 18px; }
+    .animate-enter { animation: enterUp var(--motion-enter) both; }
+
+    /* Distinct Club Crests */
+    .crest-vn { background: linear-gradient(135deg, #156842 0%, #0D4A2E 100%); }
+    .crest-as { background: linear-gradient(135deg, #1D4ED8 0%, #1E3A8A 100%); }
+
+    /* Header (Glassmorphism + Active Indicator) */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: var(--bg-header-glass);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-subtle);
+      box-shadow: var(--shadow-sm);
+      transition: background-color var(--motion-base), border-color var(--motion-base);
+    }
+
+    .header-inner {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: var(--space-2) var(--space-4);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-4);
+      flex-wrap: wrap;
+    }
+
+    .brand-group { display: flex; align-items: center; gap: var(--space-3); }
+    .brand-mark {
+      width: 34px; height: 34px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-primary-hover) 100%);
+      color: var(--accent-primary-fg);
+      font-family: var(--font-display);
+      font-weight: 700; font-size: 16px;
+      display: inline-flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+    }
+    .brand-title { font-family: var(--font-display); font-size: 18px; line-height: 20px; font-weight: 700; }
+    .brand-sub { font-size: 12px; line-height: 16px; color: var(--text-muted); display: block; }
+
+    .main-nav { display: flex; align-items: center; gap: var(--space-1); flex-wrap: wrap; }
+    .nav-link {
+      position: relative;
+      display: inline-flex; align-items: center; gap: 5px; min-height: 36px;
+      padding: 0 var(--space-3); border-radius: var(--radius-md);
+      font-size: 14px; font-weight: 500; color: var(--text-secondary);
+      transition: background var(--motion-fast), color var(--motion-fast);
+    }
+    .nav-link:hover { background: var(--bg-subtle); color: var(--text-primary); }
+    .nav-link.active {
+      background: color-mix(in srgb, var(--accent-primary) 11%, transparent);
+      color: var(--accent-primary);
+      font-weight: 600;
+    }
+    .nav-link.active::after {
+      content: "";
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      bottom: -9px;
+      height: 2px;
+      border-radius: var(--radius-full);
+      background: var(--accent-primary);
+    }
+    .nav-dropdown { position: relative; display: inline-flex; align-items: center; }
+    .nav-dropdown::after { content: ""; position: absolute; left: 0; right: 0; top: 100%; height: 10px; }
+    .nav-chevron { width: 14px; height: 14px; flex-shrink: 0; transition: transform var(--motion-fast); }
+    .nav-dropdown:hover .nav-chevron,
+    .nav-dropdown:focus-within .nav-chevron { transform: rotate(180deg); }
+    .nav-dropdown-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      min-width: 172px;
+      padding: var(--space-1);
+      border-radius: var(--radius-lg);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      box-shadow: inset 0 1px 0 var(--surface-highlight), var(--shadow-md);
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translateY(-4px);
+      transition: opacity var(--motion-base), transform var(--motion-base), visibility var(--motion-base);
+      z-index: 50;
+    }
+    .nav-dropdown:hover .nav-dropdown-menu,
+    .nav-dropdown:focus-within .nav-dropdown-menu {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+    .nav-dropdown-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 36px;
+      padding: 0 var(--space-3);
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      transition: background var(--motion-fast), color var(--motion-fast);
+    }
+    .nav-dropdown-item:hover,
+    .nav-dropdown-item:focus-visible { background: var(--bg-subtle); color: var(--text-primary); }
+
+    .header-actions { display: flex; align-items: center; gap: var(--space-2); }
+
+    .select-control {
+      min-height: 36px; padding: 0 var(--space-3);
+      border-radius: var(--radius-md); border: 1px solid var(--border-strong);
+      background: var(--bg-surface); color: var(--text-primary);
+      font-family: var(--font-sans); font-size: 13px; font-weight: 500;
+      transition: background-color var(--motion-base), border-color var(--motion-fast), color var(--motion-base);
+    }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+      min-height: 36px; padding: 0 var(--space-3);
+      border-radius: var(--radius-md); border: 1px solid transparent;
+      font-family: var(--font-sans); font-size: 13px; font-weight: 600; cursor: pointer;
+      transition: background var(--motion-fast), border-color var(--motion-fast), color var(--motion-fast), transform var(--motion-fast);
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-secondary { background: var(--bg-surface); border-color: var(--border-strong); color: var(--text-primary); }
+    .btn-secondary:hover { background: var(--bg-subtle); }
+    .btn-primary { background: var(--accent-primary); color: var(--accent-primary-fg); }
+    .btn-primary:hover { background: var(--accent-primary-hover); }
+    .btn-alert {
+      background: var(--alert-retro-border);
+      color: var(--alert-retro-btn-fg);
+    }
+    .btn-alert:hover { filter: brightness(1.06); }
+    .icon-sm { width: 16px; height: 16px; flex-shrink: 0; }
+    .theme-icon { transition: transform var(--motion-base); }
+
+    /* Container & Breadcrumb */
+    .container {
+      max-width: var(--container-max);
+      margin: 0 auto;
+      padding: var(--space-5) var(--space-4) var(--space-12);
+    }
+
+    .breadcrumb {
+      display: flex; align-items: center; gap: var(--space-2);
+      font-size: 13px; color: var(--text-muted); margin-bottom: var(--space-4); flex-wrap: wrap;
+    }
+    .breadcrumb a { color: var(--accent-primary); font-weight: 500; }
+    .breadcrumb a:hover { text-decoration: underline; }
+
+    /* Scoreboard Hero with Stadium Radial Gradient & 46px Score */
+    .scoreboard {
+      background-color: var(--bg-surface);
+      background-image: var(--hero-glow);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      box-shadow: inset 0 1px 0 var(--surface-highlight), var(--shadow-sm);
+      margin-bottom: var(--space-5);
+      overflow: hidden;
+      transition: background-color var(--motion-base), border-color var(--motion-base);
+    }
+
+    .scoreboard-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+      padding: var(--space-3) var(--space-5);
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .scoreboard-badges { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+
+    .scoreboard-main {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      align-items: center;
+      gap: var(--space-6);
+      padding: var(--space-8) var(--space-5);
+    }
+
+    .sb-team { display: flex; flex-direction: column; gap: var(--space-2); }
+    .sb-team-home { align-items: flex-end; text-align: right; }
+    .sb-team-away { align-items: flex-start; text-align: left; }
+
+    .sb-team-row { display: flex; align-items: center; gap: var(--space-3); }
+
+    .sb-crest {
+      width: 52px;
+      height: 52px;
+      border-radius: var(--radius-lg);
+      color: #FFFFFF;
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 6px 14px rgba(0, 0, 0, 0.18);
+    }
+
+    .mini-crest {
+      width: 22px;
+      height: 22px;
+      border-radius: var(--radius-sm);
+      color: #FFFFFF;
+      font-family: var(--font-display);
+      font-size: 10px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    h1.match-title {
+      margin: 0;
+      position: absolute;
+      width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0);
+    }
+
+    .sb-team-name {
+      font-family: var(--font-display);
+      font-size: 28px;
+      line-height: 32px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .sb-score-block {
+      text-align: center;
+      padding: var(--space-3) var(--space-6);
+      border-radius: var(--radius-lg);
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+      box-shadow: inset 0 1px 0 var(--surface-highlight);
+    }
+
+    .sb-score {
+      font-family: var(--font-display);
+      font-size: 46px;
+      line-height: 48px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--text-primary);
+    }
+
+    .sb-score-sep {
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .sb-halftime {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    .scoreboard-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+      padding: var(--space-3) var(--space-5);
+      border-top: 1px solid var(--border-subtle);
+      background: color-mix(in srgb, var(--bg-subtle) 55%, transparent);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Badges & Cards */
+    .form-strip { display: inline-flex; align-items: center; gap: 3px; }
+    .form-tile {
+      width: 22px; height: 22px; border-radius: var(--radius-sm);
+      font-size: 11px; line-height: 22px; font-weight: 700; text-align: center;
+      cursor: default;
+      transition: transform var(--motion-fast), box-shadow var(--motion-fast);
+    }
+    .form-tile:hover,
+    .form-tile:focus-visible { transform: scale(1.12); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.22); }
+
+    /* Custom 2-line floating tooltip (portal on <body>, immune to overflow:hidden) */
+    .form-tooltip {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 80;
+      pointer-events: none;
+      padding: 6px 10px;
+      border-radius: var(--radius-md);
+      background: var(--tooltip-bg);
+      color: var(--tooltip-fg);
+      border: 1px solid var(--tooltip-border);
+      box-shadow: var(--shadow-md);
+      font-family: var(--font-sans);
+      text-align: center;
+      white-space: nowrap;
+      opacity: 0;
+      transform: translateY(-4px);
+      visibility: hidden;
+      transition: opacity 150ms ease-out, transform 150ms ease-out, visibility 150ms ease-out;
+    }
+
+    .form-tooltip.visible {
+      opacity: 1;
+      transform: translateY(0);
+      visibility: visible;
+    }
+
+    .form-tooltip::before {
+      content: "";
+      position: absolute;
+      top: -5px;
+      left: var(--arrow-x, 50%);
+      width: 8px;
+      height: 8px;
+      transform: translateX(-50%) rotate(45deg);
+      background: var(--tooltip-bg);
+      border-top: 1px solid var(--tooltip-border);
+      border-left: 1px solid var(--tooltip-border);
+    }
+
+    .form-tooltip-result {
+      display: block;
+      font-size: 12px;
+      line-height: 16px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums lining-nums;
+      color: var(--tooltip-fg);
+    }
+
+    .form-tooltip-meta {
+      display: block;
+      margin-top: 1px;
+      font-size: 10.5px;
+      line-height: 14px;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums lining-nums;
+      color: var(--tooltip-muted);
+    }
+    .form-w { background: var(--status-win-solid); color: var(--status-win-solid-fg); }
+    .form-d { background: var(--status-draw-solid); color: var(--status-draw-solid-fg); }
+    .form-l { background: var(--status-loss-solid); color: var(--status-loss-solid-fg); }
+
+    .status-badge {
+      display: inline-flex; align-items: center; gap: var(--space-1);
+      padding: 2px var(--space-2); border-radius: var(--radius-md);
+      font-size: 12px; line-height: 16px; font-weight: 600; white-space: nowrap;
+    }
+    .status-played { background: var(--status-win-bg); color: var(--status-win-fg); }
+    .status-corrected { background: var(--info-bg); color: var(--info-fg); }
+    .status-suspended { background: var(--card-red-bg); color: var(--card-red-fg); }
+    .status-neutral { background: var(--bg-subtle); color: var(--text-secondary); }
+
+    .card-glyph {
+      width: 10px; height: 14px; border-radius: 2px; display: inline-block; flex-shrink: 0;
+    }
+    .card-glyph-yellow { background: var(--card-yellow-fill); border: 1px solid var(--card-yellow-border); }
+    .card-glyph-red { background: var(--card-red-fill); }
+
+    /* Retroactive Suspension Alert Banner with Pulse Dot (D-005) */
+    .alert-retro {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: var(--space-4);
+      flex-wrap: wrap;
+      padding: var(--space-4);
+      margin-bottom: var(--space-5);
+      border-radius: var(--radius-lg);
+      background: var(--alert-retro-bg);
+      color: var(--alert-retro-fg);
+      border: 1px solid var(--alert-retro-border);
+      border-left: 5px solid var(--alert-retro-border);
+      box-shadow: inset 0 1px 0 var(--surface-highlight), var(--shadow-sm);
+    }
+
+    .alert-retro-content { display: flex; align-items: flex-start; gap: var(--space-3); max-width: 780px; }
+
+    .alert-retro-title {
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      flex-wrap: wrap;
+    }
+
+    .pulse-alert-dot {
+      position: relative;
+      width: 8px;
+      height: 8px;
+      border-radius: var(--radius-full);
+      background: var(--alert-retro-border);
+      display: inline-block;
+      flex-shrink: 0;
+    }
+
+    .pulse-alert-dot::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius-full);
+      background: var(--alert-retro-border);
+      animation: pulseRing var(--motion-pulse);
+    }
+
+    .role-chip {
+      font-size: 11px; font-weight: 600; padding: 1px 6px;
+      border-radius: var(--radius-sm); border: 1px solid var(--alert-retro-border);
+    }
+
+    .alert-retro p { margin: 0; font-size: 13px; line-height: 19px; }
+
+    /* Sections Grid */
+    .detail-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.15fr);
+      gap: var(--space-6);
+      align-items: start;
+      margin-bottom: var(--space-6);
+    }
+
+    .panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      box-shadow: inset 0 1px 0 var(--surface-highlight), var(--shadow-sm);
+      overflow: hidden;
+      transition: background-color var(--motion-base), border-color var(--motion-base);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-3);
+      padding: var(--space-3) var(--space-4);
+      border-bottom: 1px solid var(--border-subtle);
+      background: var(--bg-subtle);
+      transition: background-color var(--motion-base);
+    }
+
+    .panel-title {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: 20px;
+      line-height: 24px;
+      font-weight: 600;
+    }
+
+    /* ==========================================================================
+       Centered Vertical Event Timeline (Gazde stânga | Minut centru | Oaspeți dreapta)
+       ========================================================================== */
+    .timeline-header {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      padding: var(--space-2) var(--space-4);
+      border-bottom: 1px solid var(--border-subtle);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .tl-head-home { text-align: right; padding-right: var(--space-4); }
+    .tl-head-away { text-align: left; padding-left: var(--space-4); }
+
+    .timeline {
+      position: relative;
+      list-style: none;
+      margin: 0;
+      padding: var(--space-4) var(--space-4);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+    }
+
+    .timeline::before {
+      content: "";
+      position: absolute;
+      top: var(--space-4);
+      bottom: var(--space-4);
+      left: 50%;
+      width: 2px;
+      transform: translateX(-50%);
+      background: var(--border-subtle);
+    }
+
+    .tl-item {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 48px minmax(0, 1fr);
+      align-items: center;
+      gap: var(--space-3);
+      animation: enterUp var(--motion-enter) both;
+    }
+
+    .tl-item:nth-child(1) { animation-delay: 40ms; }
+    .tl-item:nth-child(2) { animation-delay: 75ms; }
+    .tl-item:nth-child(3) { animation-delay: 110ms; }
+    .tl-item:nth-child(4) { animation-delay: 145ms; }
+    .tl-item:nth-child(5) { animation-delay: 180ms; }
+    .tl-item:nth-child(6) { animation-delay: 215ms; }
+    .tl-item:nth-child(7) { animation-delay: 250ms; }
+    .tl-item:nth-child(8) { animation-delay: 285ms; }
+    .tl-item:nth-child(9) { animation-delay: 320ms; }
+
+    .tl-min {
+      justify-self: center;
+      min-width: 40px;
+      height: 26px;
+      padding: 0 6px;
+      border-radius: var(--radius-full);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-strong);
+      color: var(--text-primary);
+      font-size: 12px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .tl-card {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: 7px var(--space-3);
+      border-radius: var(--radius-md);
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+      max-width: 100%;
+      transition: border-color var(--motion-fast), background-color var(--motion-fast);
+    }
+
+    .tl-card:hover {
+      border-color: var(--border-strong);
+    }
+
+    .tl-slot-home {
+      display: flex;
+      justify-content: flex-end;
+      text-align: right;
+    }
+
+    .tl-slot-home .tl-card {
+      flex-direction: row-reverse;
+    }
+
+    .tl-slot-away {
+      display: flex;
+      justify-content: flex-start;
+      text-align: left;
+    }
+
+    .tl-player {
+      font-weight: 600;
+      font-size: 13px;
+      color: var(--text-primary);
+      display: block;
+    }
+
+    .tl-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: block;
+    }
+
+    .goal-dot {
+      width: 20px;
+      height: 20px;
+      border-radius: var(--radius-full);
+      background: var(--status-win-bg);
+      color: var(--status-win-fg);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .tl-score-chip {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+
+    .tl-divider {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: center;
+      padding: var(--space-1) 0;
+    }
+
+    .tl-divider-pill {
+      padding: 2px var(--space-3);
+      border-radius: var(--radius-full);
+      background: var(--bg-subtle);
+      border: 1px solid var(--border-subtle);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.02em;
+    }
+
+    /* Match Sheets (Foi de meci) */
+    .sheets-grid { display: grid; grid-template-columns: 1fr 1fr; }
+    .sheet-col { border-right: 1px solid var(--border-subtle); }
+    .sheet-col:last-child { border-right: none; }
+
+    .sheet-team-head {
+      padding: var(--space-3) var(--space-4);
+      font-weight: 700;
+      font-size: 14px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-2);
+    }
+
+    .sheet-team-label { display: inline-flex; align-items: center; gap: var(--space-2); }
+
+    table.roster { width: 100%; border-collapse: collapse; font-size: 13px; }
+    table.roster td { padding: 8px var(--space-3); border-bottom: 1px solid var(--border-subtle); vertical-align: middle; }
+    table.roster tr:last-child td { border-bottom: none; }
+    table.roster tbody tr:hover { background: var(--bg-subtle); }
+
+    .jersey { width: 32px; text-align: right; color: var(--text-muted); font-weight: 600; }
+    .player-name { color: var(--text-primary); font-weight: 500; }
+    .captain-tag {
+      font-size: 11px; font-weight: 700; padding: 0 5px;
+      border-radius: var(--radius-sm); background: var(--bg-subtle); color: var(--text-secondary); margin-left: 4px;
+    }
+    .sheet-events { text-align: right; white-space: nowrap; }
+
+    .sheet-blocked {
+      padding: var(--space-3) var(--space-4);
+      background: var(--card-red-bg);
+      color: var(--card-red-fg);
+      border-top: 1px solid var(--border-subtle);
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-2);
+      flex-wrap: wrap;
+    }
+
+    /* Audit Correction History (D-005) */
+    .audit-body { padding: var(--space-4); }
+    .audit-meta {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-3); font-size: 13px;
+    }
+    .audit-reason {
+      margin: 0 0 var(--space-4); padding: var(--space-3);
+      border-radius: var(--radius-md); background: var(--bg-subtle); color: var(--text-primary); font-size: 13px;
+    }
+
+    table.diff-table {
+      width: 100%; border-collapse: collapse; font-size: 13px;
+      border: 1px solid var(--border-subtle); border-radius: var(--radius-md); overflow: hidden;
+    }
+    table.diff-table th, table.diff-table td {
+      padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--border-subtle); text-align: left;
+    }
+    table.diff-table th { background: var(--bg-subtle); color: var(--text-secondary); font-size: 12px; font-weight: 600; }
+    table.diff-table tr:last-child td { border-bottom: none; }
+    .diff-before { background: var(--status-loss-bg); color: var(--status-loss-fg); }
+    .diff-after { background: var(--status-win-bg); color: var(--status-win-fg); }
+
+    /* Responsive */
+    @media (max-width: 1023px) {
+      .detail-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 767px) {
+      .header-inner { padding: var(--space-2) var(--space-3); }
+      .nav-link, .btn, .select-control { min-height: 44px; }
+      .nav-dropdown-item { min-height: 44px; }
+      .nav-link.active::after { bottom: 2px; }
+      .container { padding: var(--space-4) var(--space-3) var(--space-8); }
+
+      .scoreboard-main { grid-template-columns: 1fr; gap: var(--space-4); padding: var(--space-5) var(--space-4); }
+      .sb-team-home, .sb-team-away { align-items: center; text-align: center; }
+      .sb-team-home .sb-team-row { flex-direction: row-reverse; }
+
+      .sheets-grid { grid-template-columns: 1fr; }
+      .sheet-col { border-right: none; border-bottom: 1px solid var(--border-subtle); }
+      .sheet-col:last-child { border-bottom: none; }
+
+      table.diff-table th, table.diff-table td { padding: var(--space-2); font-size: 12px; }
+    }
+
+    /* Clean left-spine timeline on narrow phones (zero horizontal overflow at 360px) */
+    @media (max-width: 639px) {
+      .timeline-header { display: none; }
+      .timeline::before { left: 36px; transform: none; }
+      .tl-item {
+        grid-template-columns: 44px minmax(0, 1fr);
+        gap: var(--space-2);
+      }
+      .tl-min { grid-column: 1; grid-row: 1; }
+      .tl-slot-home, .tl-slot-away {
+        grid-column: 2;
+        grid-row: 1;
+        justify-content: flex-start;
+        text-align: left;
+      }
+      .tl-slot-home:empty, .tl-slot-away:empty { display: none; }
+      .tl-slot-home .tl-card { flex-direction: row; }
+      .tl-card { width: 100%; }
+      .tl-divider { justify-content: flex-start; padding-left: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand-group">
+        <a href="DS-p19-home-standings.html" class="brand-group" aria-label="Liga de Amatori P19 — Acasă">
+          <span class="brand-mark" aria-hidden="true">P19</span>
+          <span>
+            <span class="brand-title">Liga de Amatori</span>
+            <span class="brand-sub">Mock design · DS-p19-match-detail</span>
+          </span>
+        </a>
+      </div>
+
+      <nav class="main-nav" aria-label="Navigație principală">
+        <a class="nav-link" href="DS-p19-home-standings.html">Clasament</a>
+        <a class="nav-link" href="DS-p19-fixtures.html">Program</a>
+        <a class="nav-link active" href="DS-p19-match-detail.html" aria-current="page">Detaliu meci</a>
+        <div class="nav-dropdown">
+          <a class="nav-link nav-dropdown-trigger" href="DS-p19-team-profile.html" aria-haspopup="true">
+            <span>Echipe</span>
+            <svg class="nav-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 6l4 4 4-4"/>
+            </svg>
+          </a>
+          <div class="nav-dropdown-menu" role="menu" aria-label="Subcategorii Echipe">
+            <a class="nav-dropdown-item" role="menuitem" href="DS-p19-team-profile.html?tab=rezultate">Rezultate</a>
+            <a class="nav-dropdown-item" role="menuitem" href="DS-p19-team-profile.html?tab=lot">Lot</a>
+            <a class="nav-dropdown-item" role="menuitem" href="DS-p19-team-profile.html?tab=transferuri">Transferuri</a>
+          </div>
+        </div>
+      </nav>
+
+      <div class="header-actions">
+        <select class="select-control" aria-label="Selectează sezon">
+          <option selected>Sezon 2025–2026</option>
+          <option>Sezon 2024–2025</option>
+        </select>
+        <button id="theme-toggle" type="button" class="btn btn-secondary" aria-pressed="false" aria-label="Comută între modul luminos și modul întunecat">
+          <svg id="theme-icon" class="icon-sm theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+          <span id="theme-label">Dark</span>
+        </button>
+        <a href="#autentificare" class="btn btn-primary">Autentificare</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <h1 class="match-title">FC Vulturii Nord 3–2 AS Stejarul — Detaliu meci</h1>
+
+    <nav class="breadcrumb animate-enter" aria-label="Cale de navigare">
+      <a href="DS-p19-fixtures.html">Program meciuri</a>
+      <span aria-hidden="true">/</span>
+      <a href="DS-p19-fixtures.html">Etapa 12</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">FC Vulturii Nord – AS Stejarul</span>
+    </nav>
+
+    <!-- Scoreboard Hero (Stadium Glow + 46px Score + Colored Crests) -->
+    <section class="scoreboard animate-enter" style="animation-delay:40ms;" aria-label="Rezumat scor meci">
+      <div class="scoreboard-top">
+        <span class="tabular">Sezon 2025–2026 · Etapa 12 · Sâmbătă, 22 nov 2026, 11:00 · Teren 1 — Parc Nord</span>
+        <div class="scoreboard-badges">
+          <span class="status-badge status-played">Jucat</span>
+          <span class="status-badge status-corrected">1 corecție rezultat</span>
+        </div>
+      </div>
+
+      <div class="scoreboard-main">
+        <div class="sb-team sb-team-home">
+          <div class="sb-team-row">
+            <span class="sb-team-name">FC Vulturii Nord</span>
+            <span class="sb-crest crest-vn" aria-hidden="true">VN</span>
+          </div>
+          <div class="form-strip" aria-label="Formă FC Vulturii Nord: Victorie, Victorie, Egal, Înfrângere, Victorie">
+            <span class="form-tile form-w" tabindex="0" data-tooltip-result="3-1 (FC Vulturii Nord - Unirea Dealul)" data-tooltip-meta="Etapa 7 · 18.10.2026" aria-label="Victorie: 3-1 (FC Vulturii Nord - Unirea Dealul), Etapa 7, 18.10.2026">W</span>
+            <span class="form-tile form-w" tabindex="0" data-tooltip-result="0-2 (Sporting Cartier - FC Vulturii Nord)" data-tooltip-meta="Etapa 8 · 25.10.2026" aria-label="Victorie: 0-2 (Sporting Cartier - FC Vulturii Nord), Etapa 8, 25.10.2026">W</span>
+            <span class="form-tile form-d" tabindex="0" data-tooltip-result="1-1 (FC Vulturii Nord - CS Viitorul Parc)" data-tooltip-meta="Etapa 9 · 01.11.2026" aria-label="Egal: 1-1 (FC Vulturii Nord - CS Viitorul Parc), Etapa 9, 01.11.2026">D</span>
+            <span class="form-tile form-l" tabindex="0" data-tooltip-result="2-1 (AS Stejarul - FC Vulturii Nord)" data-tooltip-meta="Etapa 10 · 07.11.2026" aria-label="Înfrângere: 2-1 (AS Stejarul - FC Vulturii Nord), Etapa 10, 07.11.2026">L</span>
+            <span class="form-tile form-w" tabindex="0" data-tooltip-result="0-4 (AS Gloria Nouă - FC Vulturii Nord)" data-tooltip-meta="Etapa 11 · 15.11.2026" aria-label="Victorie: 0-4 (AS Gloria Nouă - FC Vulturii Nord), Etapa 11, 15.11.2026">W</span>
+          </div>
+        </div>
+
+        <div class="sb-score-block">
+          <div class="sb-score tabular">3 <span class="sb-score-sep">–</span> 2</div>
+          <div class="sb-halftime tabular">Pauză: 1 – 1</div>
+        </div>
+
+        <div class="sb-team sb-team-away">
+          <div class="sb-team-row">
+            <span class="sb-crest crest-as" aria-hidden="true">AS</span>
+            <span class="sb-team-name">AS Stejarul</span>
+          </div>
+          <div class="form-strip" aria-label="Formă AS Stejarul: Victorie, Înfrângere, Victorie, Victorie, Egal">
+            <span class="form-tile form-w" tabindex="0" data-tooltip-result="2-0 (AS Stejarul - Progresul Sud)" data-tooltip-meta="Etapa 7 · 17.10.2026" aria-label="Victorie: 2-0 (AS Stejarul - Progresul Sud), Etapa 7, 17.10.2026">W</span>
+            <span class="form-tile form-l" tabindex="0" data-tooltip-result="2-1 (CS Viitorul Parc - AS Stejarul)" data-tooltip-meta="Etapa 8 · 24.10.2026" aria-label="Înfrângere: 2-1 (CS Viitorul Parc - AS Stejarul), Etapa 8, 24.10.2026">L</span>
+            <span class="form-tile form-w" tabindex="0" data-tooltip-result="3-0 (AS Stejarul - Recolta Veche)" data-tooltip-meta="Etapa 9 · 31.10.2026" aria-label="Victorie: 3-0 (AS Stejarul - Recolta Veche), Etapa 9, 31.10.2026">W</span>
+            <span class="form-tile form-w" tabindex="0" data-tooltip-result="2-1 (AS Stejarul - FC Vulturii Nord)" data-tooltip-meta="Etapa 10 · 07.11.2026" aria-label="Victorie: 2-1 (AS Stejarul - FC Vulturii Nord), Etapa 10, 07.11.2026">W</span>
+            <span class="form-tile form-d" tabindex="0" data-tooltip-result="1-1 (AS Stejarul - AFC Rapiditate)" data-tooltip-meta="Etapa 11 · 15.11.2026" aria-label="Egal: 1-1 (AS Stejarul - AFC Rapiditate), Etapa 11, 15.11.2026">D</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="scoreboard-foot">
+        <span>Arbitru / Organizator: <strong>Radu Ionescu</strong></span>
+        <span class="mono">Ultima actualizare: 2026-11-22 14:18:04</span>
+      </div>
+    </section>
+
+    <!-- Alertă suspendare retroactivă cu pulse dot (D-005) -->
+    <section class="alert-retro animate-enter" style="animation-delay:80ms;" role="alert" aria-label="Alertă suspendare retroactivă">
+      <div class="alert-retro-content">
+        <svg class="icon-sm" style="margin-top:2px;width:20px;height:20px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/>
+          <line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+        <div>
+          <div class="alert-retro-title">
+            <span class="pulse-alert-dot" aria-hidden="true"></span>
+            <span>Alertă suspendare retroactivă</span>
+            <span class="role-chip">Vizibil: Arbitru / Organizator &amp; Admin</span>
+          </div>
+          <p>
+            În urma unei corecții de rezultat din Etapa 11, jucătorul <strong>Mihai Dobre</strong> (AS Stejarul) a atins retroactiv pragul de suspendare înainte de acest meci.
+            <strong>Scorul de 3–2 nu a fost anulat automat</strong> — cazul necesită revizuire manuală.
+          </p>
+        </div>
+      </div>
+      <a href="#istoric-corectii" class="btn btn-alert">Revizuiește cazul</a>
+    </section>
+
+    <!-- Timeline vertical central + Foi de meci -->
+    <div class="detail-grid">
+      <section class="panel animate-enter" style="animation-delay:120ms;" aria-labelledby="events-heading">
+        <div class="panel-header">
+          <h2 id="events-heading" class="panel-title">Evenimente de meci</h2>
+          <span class="status-badge status-neutral tabular">8 evenimente</span>
+        </div>
+
+        <div class="timeline-header" aria-hidden="true">
+          <span class="tl-head-home">FC Vulturii Nord</span>
+          <span>Min.</span>
+          <span class="tl-head-away">AS Stejarul</span>
+        </div>
+
+        <ol class="timeline">
+          <!-- 14' Home goal -->
+          <li class="tl-item">
+            <div class="tl-slot-home">
+              <div class="tl-card">
+                <span class="goal-dot" aria-label="Gol">G</span>
+                <div>
+                  <span class="tl-player">Alexandru Stoica</span>
+                  <span class="tl-sub">Gol · FC Vulturii Nord</span>
+                </div>
+                <span class="tl-score-chip tabular">1 – 0</span>
+              </div>
+            </div>
+            <span class="tl-min tabular">14'</span>
+            <div class="tl-slot-away"></div>
+          </li>
+
+          <!-- 29' Away yellow -->
+          <li class="tl-item">
+            <div class="tl-slot-home"></div>
+            <span class="tl-min tabular">29'</span>
+            <div class="tl-slot-away">
+              <div class="tl-card">
+                <span class="card-glyph card-glyph-yellow" aria-label="Cartonaș galben"></span>
+                <div>
+                  <span class="tl-player">Mihai Dobre</span>
+                  <span class="tl-sub">Cartonaș galben · AS Stejarul</span>
+                </div>
+              </div>
+            </div>
+          </li>
+
+          <!-- 38' Away goal -->
+          <li class="tl-item">
+            <div class="tl-slot-home"></div>
+            <span class="tl-min tabular">38'</span>
+            <div class="tl-slot-away">
+              <div class="tl-card">
+                <span class="goal-dot" aria-label="Gol">G</span>
+                <div>
+                  <span class="tl-player">Bogdan Neagu</span>
+                  <span class="tl-sub">Gol · AS Stejarul</span>
+                </div>
+                <span class="tl-score-chip tabular">1 – 1</span>
+              </div>
+            </div>
+          </li>
+
+          <!-- Half-time divider -->
+          <li class="tl-divider" aria-label="Pauză, scor 1 la 1">
+            <span class="tl-divider-pill tabular">PAUZĂ · 1 – 1</span>
+          </li>
+
+          <!-- 52' Home goal -->
+          <li class="tl-item">
+            <div class="tl-slot-home">
+              <div class="tl-card">
+                <span class="goal-dot" aria-label="Gol">G</span>
+                <div>
+                  <span class="tl-player">Dan Rusu</span>
+                  <span class="tl-sub">Gol · FC Vulturii Nord</span>
+                </div>
+                <span class="tl-score-chip tabular">2 – 1</span>
+              </div>
+            </div>
+            <span class="tl-min tabular">52'</span>
+            <div class="tl-slot-away"></div>
+          </li>
+
+          <!-- 61' Home yellow (corrected) -->
+          <li class="tl-item">
+            <div class="tl-slot-home">
+              <div class="tl-card">
+                <span class="card-glyph card-glyph-yellow" aria-label="Cartonaș galben"></span>
+                <div>
+                  <span class="tl-player">George Petre</span>
+                  <span class="tl-sub">Cartonaș galben (corecție)</span>
+                </div>
+              </div>
+            </div>
+            <span class="tl-min tabular">61'</span>
+            <div class="tl-slot-away"></div>
+          </li>
+
+          <!-- 67' Away goal (corrected) -->
+          <li class="tl-item">
+            <div class="tl-slot-home"></div>
+            <span class="tl-min tabular">67'</span>
+            <div class="tl-slot-away">
+              <div class="tl-card">
+                <span class="goal-dot" aria-label="Gol">G</span>
+                <div>
+                  <span class="tl-player">Florin Lazar</span>
+                  <span class="tl-sub">Gol (marcator corectat)</span>
+                </div>
+                <span class="tl-score-chip tabular">2 – 2</span>
+              </div>
+            </div>
+          </li>
+
+          <!-- 79' Away direct red -->
+          <li class="tl-item">
+            <div class="tl-slot-home"></div>
+            <span class="tl-min tabular">79'</span>
+            <div class="tl-slot-away">
+              <div class="tl-card">
+                <span class="card-glyph card-glyph-red" aria-label="Cartonaș roșu"></span>
+                <div>
+                  <span class="tl-player">Sorin Vasile</span>
+                  <span class="tl-sub">Roșu direct · decizie comisie</span>
+                </div>
+              </div>
+            </div>
+          </li>
+
+          <!-- 84' Home winning goal -->
+          <li class="tl-item">
+            <div class="tl-slot-home">
+              <div class="tl-card">
+                <span class="goal-dot" aria-label="Gol">G</span>
+                <div>
+                  <span class="tl-player">Alexandru Stoica</span>
+                  <span class="tl-sub">Gol · FC Vulturii Nord</span>
+                </div>
+                <span class="tl-score-chip tabular">3 – 2</span>
+              </div>
+            </div>
+            <span class="tl-min tabular">84'</span>
+            <div class="tl-slot-away"></div>
+          </li>
+        </ol>
+      </section>
+
+      <!-- Foi de meci -->
+      <section class="panel animate-enter" style="animation-delay:160ms;" aria-labelledby="sheets-heading">
+        <div class="panel-header">
+          <h2 id="sheets-heading" class="panel-title">Foi de meci validate</h2>
+          <span class="status-badge status-played">Eligibilitate verificată pe server</span>
+        </div>
+
+        <div class="sheets-grid">
+          <div class="sheet-col">
+            <div class="sheet-team-head">
+              <span class="sheet-team-label">
+                <span class="mini-crest crest-vn" aria-hidden="true">VN</span>
+                <span>FC Vulturii Nord</span>
+              </span>
+              <span class="status-badge status-neutral tabular">7 jucători</span>
+            </div>
+            <table class="roster">
+              <tbody>
+                <tr>
+                  <td class="jersey tabular">1</td>
+                  <td class="player-name">Ionuț Preda</td>
+                  <td class="sheet-events"></td>
+                </tr>
+                <tr>
+                  <td class="jersey tabular">4</td>
+                  <td class="player-name">George Petre <span class="captain-tag">C</span></td>
+                  <td class="sheet-events"><span class="card-glyph card-glyph-yellow" title="Cartonaș galben 61'" aria-label="Cartonaș galben"></span></td>
+                </tr>
+                <tr>
+                  <td class="jersey tabular">7</td>
+                  <td class="player-name">Dan Rusu</td>
+                  <td class="sheet-events tabular"><strong>1G</strong></td>
+                </tr>
+                <tr>
+                  <td class="jersey tabular">9</td>
+                  <td class="player-name">Alexandru Stoica</td>
+                  <td class="sheet-events tabular"><strong>2G</strong></td>
+                </tr>
+                <tr>
+                  <td class="jersey tabular">11</td>
+                  <td class="player-name">Marius Sava</td>
+                  <td class="sheet-events"></td>
+                </tr>
+                <tr>
+                  <td class="jersey tabular">14</td>
+                  <td class="player-name">Cătălin Tudor</td>
+                  <td class="sheet-events"></td>
+                </tr>
+                <tr>
+                  <td class="jersey tabular">18</td>
+                  <td class="player-name">Robert Albu (Rez.)</td>
+                  <td class="sheet-events"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="sheet-col">
+            <div class="sheet-team-head">
+              <span class="sheet-team-label">
+                <span class="mini-crest crest-as" aria-hidden="true">AS</span>
+                <span>AS Stejarul</span>
+              </span>
+              <span class="status-badge status-neutral tabular">7 jucători</span>
+            </div>
+            <table class="roster">
+              <tbody>
+                <tr>
+                  <td class="jersey tabular">12</td>
+                  <td class="player-name">Ștefan Oprea</td>
+                  <td class="sheet-events"></td>
+                </tr>
+                <tr>
+                  <td class="jersey tabular">5</td>
+                  <td class="player-name">Mihai Dobre <span class="captain-tag">C</span></td>
+                  <td class="sheet-events"><span class="card-glyph card-glyph-yellow" title="Cartonaș galben 29'" aria-label="Cartonaș galben"></span></td>
+                </tr>
+                <tr>
+                  <td class="jersey tabular">6</td>
+                  <td class="player-name">Sorin Vasile</td>
+                  <td class="sheet-events"><span class="card-glyph card-glyph-red" title="Cartonaș roșu 79'" aria-label="Cartonaș roșu"></span></td>
+                </tr>
+                <tr>
+                  <td class="jersey tabular">8</td>
+                  <td class="player-name">Bogdan Neagu</td>
+                  <td class="sheet-events tabular"><strong>1G</strong></td>
+                </tr>
+                <tr>
+                  <td class="jersey tabular">10</td>
+                  <td class="player-name">Florin Lazar</td>
+                  <td class="sheet-events tabular"><strong>1G</strong></td>
+                </tr>
+                <tr>
+                  <td class="jersey tabular">15</td>
+                  <td class="player-name">Paul Barbu</td>
+                  <td class="sheet-events"></td>
+                </tr>
+                <tr>
+                  <td class="jersey tabular">21</td>
+                  <td class="player-name">Daniel Cristea (Rez.)</td>
+                  <td class="sheet-events"></td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="sheet-blocked">
+              <span><strong>Blocat pe foaia de meci:</strong> Andrei Popa</span>
+              <span class="status-badge status-suspended">Suspendat · 1 etapă</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Istoric corecții rezultat (D-005) -->
+    <section id="istoric-corectii" class="panel animate-enter" style="animation-delay:200ms;" aria-labelledby="audit-heading">
+      <div class="panel-header">
+        <h2 id="audit-heading" class="panel-title">Istoric corecții rezultat</h2>
+        <span class="status-badge status-corrected">Audit imutabil (before / after)</span>
+      </div>
+
+      <div class="audit-body">
+        <div class="audit-meta">
+          <span><strong>Corecție #1</strong> · Autor: <strong>Radu Ionescu</strong> (Arbitru / Organizator)</span>
+          <span class="mono">2026-11-22 14:18:04 EET</span>
+        </div>
+
+        <p class="audit-reason">
+          <strong>Motiv:</strong> Corectare marcator pentru golul oaspeților din minutul 67 și adăugare cartonaș galben omis la introducerea inițială, confirmat cu ambii căpitani. Cache-ul clasamentului pentru Sezon 2025–2026 a fost invalidat automat.
+        </p>
+
+        <table class="diff-table">
+          <thead>
+            <tr>
+              <th scope="col">Câmp modificat</th>
+              <th scope="col">Înainte (before)</th>
+              <th scope="col">După (after)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Scor final</strong></td>
+              <td class="mono">3 – 2 (neschimbat)</td>
+              <td class="mono">3 – 2 (neschimbat)</td>
+            </tr>
+            <tr>
+              <td><strong>Marcator min. 67 (AS Stejarul)</strong></td>
+              <td class="mono diff-before">Bogdan Neagu (#8)</td>
+              <td class="mono diff-after">Florin Lazar (#10)</td>
+            </tr>
+            <tr>
+              <td><strong>Cartonaș galben min. 61</strong></td>
+              <td class="mono diff-before">— (neînregistrat)</td>
+              <td class="mono diff-after">George Petre (#4, FC Vulturii Nord)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (function () {
+      const root = document.documentElement;
+      const btn = document.getElementById('theme-toggle');
+      const label = document.getElementById('theme-label');
+      const icon = document.getElementById('theme-icon');
+      let rotation = 0;
+
+      const moonPath = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+      const sunPath = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+
+      function applyTheme(theme, animateIcon) {
+        root.setAttribute('data-theme', theme);
+        const isDark = theme === 'dark';
+        btn.setAttribute('aria-pressed', String(isDark));
+        label.textContent = isDark ? 'Light' : 'Dark';
+        icon.innerHTML = isDark ? sunPath : moonPath;
+        if (animateIcon) {
+          rotation += 180;
+          icon.style.transform = 'rotate(' + rotation + 'deg)';
+        }
+        try { localStorage.setItem('p19-mock-theme', theme); } catch (_) {}
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      const urlTheme = params.get('theme');
+      let saved = null;
+      try { saved = localStorage.getItem('p19-mock-theme'); } catch (_) {}
+      applyTheme((urlTheme === 'dark' || urlTheme === 'light') ? urlTheme : (saved || 'light'), false);
+
+      btn.addEventListener('click', function () {
+        applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark', true);
+      });
+
+      // Custom 2-line floating tooltip for W/D/L form badges (portal on <body>, immune to overflow:hidden)
+      const tip = document.createElement('div');
+      tip.id = 'form-tooltip';
+      tip.className = 'form-tooltip';
+      tip.setAttribute('role', 'tooltip');
+      tip.setAttribute('aria-hidden', 'true');
+
+      const tipResult = document.createElement('span');
+      tipResult.className = 'form-tooltip-result';
+      const tipMeta = document.createElement('span');
+      tipMeta.className = 'form-tooltip-meta';
+      tip.appendChild(tipResult);
+      tip.appendChild(tipMeta);
+      document.body.appendChild(tip);
+
+      let activeTile = null;
+
+      function hideTooltip() {
+        if (activeTile) {
+          activeTile.removeAttribute('aria-describedby');
+          activeTile = null;
+        }
+        tip.classList.remove('visible');
+        tip.setAttribute('aria-hidden', 'true');
+      }
+
+      function showTooltip(tile) {
+        const res = tile.getAttribute('data-tooltip-result');
+        const meta = tile.getAttribute('data-tooltip-meta');
+        if (!res) return;
+
+        tipResult.textContent = res;
+        tipMeta.textContent = meta || '';
+
+        const rect = tile.getBoundingClientRect();
+        const tipWidth = tip.offsetWidth;
+        const pad = 10;
+        const centerX = rect.left + rect.width / 2;
+        const left = Math.max(pad, Math.min(centerX - tipWidth / 2, window.innerWidth - tipWidth - pad));
+        const top = rect.bottom + 8;
+        const arrowX = Math.max(12, Math.min(tipWidth - 12, centerX - left));
+
+        tip.style.left = left + 'px';
+        tip.style.top = top + 'px';
+        tip.style.setProperty('--arrow-x', arrowX + 'px');
+        tip.setAttribute('aria-hidden', 'false');
+        tip.classList.add('visible');
+
+        if (activeTile && activeTile !== tile) activeTile.removeAttribute('aria-describedby');
+        activeTile = tile;
+        tile.setAttribute('aria-describedby', 'form-tooltip');
+      }
+
+      document.querySelectorAll('.form-tile[data-tooltip-result]').forEach(function (tile) {
+        tile.addEventListener('mouseenter', function () { showTooltip(tile); });
+        tile.addEventListener('mouseleave', hideTooltip);
+        tile.addEventListener('focus', function () { showTooltip(tile); });
+        tile.addEventListener('blur', hideTooltip);
+      });
+
+      window.addEventListener('scroll', hideTooltip, { passive: true });
+      window.addEventListener('resize', hideTooltip, { passive: true });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') hideTooltip();
+      });
+    })();
+  </script>
+</body>
+</html>
