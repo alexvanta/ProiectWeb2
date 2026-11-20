@@ -1,0 +1,215 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   P19 Design Tokens — docs/design/DESIGN.md (Light & Dark themes)
+   ========================================================================== */
+
+:root {
+  /* Surface & Canvas */
+  --bg-canvas: #F7F8F6;
+  --bg-surface: #FFFFFF;
+  --bg-subtle: #EEF1EE;
+  --bg-header-glass: rgba(255, 255, 255, 0.84);
+  --surface-highlight: rgba(255, 255, 255, 0.80);
+  --hero-glow: radial-gradient(ellipse at 50% 0%, rgba(21, 104, 66, 0.09) 0%, transparent 68%);
+
+  /* Text */
+  --text-primary: #0F172A;
+  --text-secondary: #334155;
+  --text-muted: #526071;
+
+  /* Borders */
+  --border-subtle: #DCE2E8;
+  --border-strong: #768596;
+
+  /* Accent & Focus */
+  --accent-primary: #156842;
+  --accent-primary-hover: #0F5132;
+  --accent-primary-fg: #FFFFFF;
+  --focus-ring: #156842;
+
+  /* W / D / L Status */
+  --status-win-bg: #DCFCE7;
+  --status-win-fg: #14532D;
+  --status-win-solid: #15803D;
+  --status-win-solid-fg: #FFFFFF;
+
+  --status-draw-bg: #E2E8F0;
+  --status-draw-fg: #334155;
+  --status-draw-solid: #475569;
+  --status-draw-solid-fg: #FFFFFF;
+
+  --status-loss-bg: #FEE2E2;
+  --status-loss-fg: #991B1B;
+  --status-loss-solid: #B91C1C;
+  --status-loss-solid-fg: #FFFFFF;
+
+  /* Cards & Suspensions */
+  --card-yellow-fill: #FACC15;
+  --card-yellow-border: #A16207;
+  --card-yellow-bg: #FEF3C7;
+  --card-yellow-fg: #713F12;
+
+  --card-red-fill: #DC2626;
+  --card-red-bg: #FEE2E2;
+  --card-red-fg: #991B1B;
+
+  /* Retroactive Suspension Alert (D-005) */
+  --alert-retro-bg: #FFEDD5;
+  --alert-retro-fg: #7C2D12;
+  --alert-retro-border: #C2410C;
+  --alert-retro-btn-fg: #FFFFFF;
+
+  /* Reschedule Notification (D-004) */
+  --info-bg: #DBEAFE;
+  --info-fg: #1E3A8A;
+
+  /* Tooltips & Match Highlight */
+  --tooltip-bg: #0F172A;
+  --tooltip-fg: #F8FAFC;
+  --tooltip-muted: #94A3B8;
+  --tooltip-border: #1E293B;
+
+  --match-hl-self-bg: rgba(21, 104, 66, 0.11);
+  --match-hl-opp-bg: rgba(30, 58, 138, 0.08);
+  --match-hl-opp-accent: #1D4ED8;
+
+  /* Top Scorers Rank Badges */
+  --scorer-rank-1: #00380C;
+  --scorer-rank-2: #008C1E;
+  --scorer-rank-3: #00E331;
+  --scorer-rank-fg: #FFFFFF;
+
+  /* Typography */
+  --font-display: "Barlow Semi Condensed", system-ui, -apple-system, sans-serif;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --row-height-dense: 38px;
+  --container-max: 1200px;
+
+  /* Radius */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 12px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 10px 26px rgba(15, 23, 42, 0.12);
+
+  /* Motion */
+  --motion-fast: 140ms cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-base: 240ms cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-enter: 360ms cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-pulse: 2.2s ease-in-out infinite;
+}
+
+[data-theme="dark"] {
+  --bg-canvas: #0C1116;
+  --bg-surface: #141B22;
+  --bg-subtle: #1C2630;
+  --bg-header-glass: rgba(20, 27, 34, 0.80);
+  --surface-highlight: rgba(255, 255, 255, 0.06);
+  --hero-glow: radial-gradient(ellipse at 50% 0%, rgba(52, 211, 153, 0.14) 0%, transparent 68%);
+
+  --text-primary: #F1F5F9;
+  --text-secondary: #CBD5E1;
+  --text-muted: #94A3B8;
+
+  --border-subtle: #24303C;
+  --border-strong: #5E7083;
+
+  --accent-primary: #34D399;
+  --accent-primary-hover: #6EE7B7;
+  --accent-primary-fg: #062315;
+  --focus-ring: #34D399;
+
+  --status-win-bg: #102E20;
+  --status-win-fg: #86EFAC;
+  --status-win-solid: #4ADE80;
+  --status-win-solid-fg: #052E16;
+
+  --status-draw-bg: #25313E;
+  --status-draw-fg: #CBD5E1;
+  --status-draw-solid: #CBD5E1;
+  --status-draw-solid-fg: #0F172A;
+
+  --status-loss-bg: #3B1519;
+  --status-loss-fg: #FCA5A5;
+  --status-loss-solid: #DC2626;
+  --status-loss-solid-fg: #FFFFFF;
+
+  --card-yellow-fill: #FACC15;
+  --card-yellow-border: #FDE047;
+  --card-yellow-bg: #332609;
+  --card-yellow-fg: #FDE047;
+
+  --card-red-fill: #F87171;
+  --card-red-bg: #3B1519;
+  --card-red-fg: #FCA5A5;
+
+  --alert-retro-bg: #3B1F0B;
+  --alert-retro-fg: #FDBA74;
+  --alert-retro-border: #FB923C;
+  --alert-retro-btn-fg: #0C1116;
+
+  --info-bg: #13294B;
+  --info-fg: #93C5FD;
+
+  --tooltip-bg: #263341;
+  --tooltip-fg: #F8FAFC;
+  --tooltip-muted: #CBD5E1;
+  --tooltip-border: #475569;
+
+  --match-hl-self-bg: rgba(52, 211, 153, 0.14);
+  --match-hl-opp-bg: rgba(147, 197, 253, 0.13);
+  --match-hl-opp-accent: #60A5FA;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.40);
+  --shadow-md: 0 10px 28px rgba(0, 0, 0, 0.52);
+}
+
+html {
+  background-color: var(--bg-canvas);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--bg-canvas);
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 20px;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color var(--motion-base), color var(--motion-base);
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition-duration: 0ms !important;
+  }
+}

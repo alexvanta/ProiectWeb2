@@ -1,0 +1,416 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  PLAYER
+  CAPTAIN
+  REFEREE_ORGANIZER
+  ADMIN
+}
+
+enum SeasonStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
+}
+
+enum FixtureStatus {
+  SCHEDULED
+  PLAYED
+  POSTPONED
+  INTERRUPTED_REPLAY
+}
+
+enum MatchEventType {
+  GOAL
+  OWN_GOAL
+  YELLOW_CARD
+  SECOND_YELLOW_RED
+  DIRECT_RED
+}
+
+enum SuspensionReason {
+  YELLOW_ACCUMULATION
+  INDIRECT_RED
+  DIRECT_RED
+  COMMITTEE_DECISION
+}
+
+enum RetroactiveAlertStatus {
+  OPEN
+  REVIEWED
+  DISMISSED
+}
+
+model League {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  seasons Season[]
+}
+
+model Season {
+  id       String       @id @default(cuid())
+  leagueId String
+  name     String
+  slug     String       @unique
+  status   SeasonStatus @default(DRAFT)
+  isActive Boolean      @default(false)
+
+  // Competition format & scoring (ROAF Art. 8, 10, 21, 23, 45, 48, 60, 63)
+  pointsWin              Int @default(3)
+  pointsDraw             Int @default(1)
+  pointsLoss             Int @default(0)
+  matchDurationMinutes   Int @default(90)
+  minMatchSheetPlayers   Int @default(7)
+  maxMatchSheetStarters  Int @default(11)
+
+  // Configurable ordered tie-breaker chains (ROAF Art. 27 alin. 3 & 5)
+  intermediateTieBreakerOrder Json @default("[\"OVERALL_GD\",\"OVERALL_GF\"]")
+  tieBreakerOrder             Json @default("[\"H2H_POINTS\",\"H2H_GD\",\"H2H_GF\",\"H2H_AWAY_GF\",\"OVERALL_GD\",\"OVERALL_GF\"]")
+
+  // Configurable disciplinary thresholds (RD Art. 18, 19 alin. 3, 41, 63)
+  yellowCardThresholds   Json @default("[4,7,9]")
+  yellowCardRepeatFrom   Int  @default(10)
+  indirectRedBanRounds   Int  @default(1)
+  directRedMinRounds     Int  @default(1)
+  directRedMaxRounds     Int  @default(24)
+  directRedDefaultRounds Int  @default(2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  league                 League                     @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  seasonTeams            SeasonTeam[]
+  playerRegistrations    PlayerSeasonRegistration[]
+  fixtures               Fixture[]
+  originSuspensions      Suspension[]               @relation("SuspensionOriginSeason")
+  suspensionConsumptions SuspensionConsumption[]
+
+  @@index([leagueId, isActive])
+}
+
+model Pitch {
+  id          String   @id @default(cuid())
+  name        String
+  city        String
+  address     String?
+  sharedGroup String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  availabilities PitchAvailability[]
+  homeTeams      Team[]
+  fixtures       Fixture[]
+}
+
+model PitchAvailability {
+  id        String @id @default(cuid())
+  pitchId   String
+  /// 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  dayOfWeek Int
+  /// HH:mm (24h)
+  startTime String
+  /// HH:mm (24h)
+  endTime   String
+
+  pitch Pitch @relation(fields: [pitchId], references: [id], onDelete: Cascade)
+
+  @@unique([pitchId, dayOfWeek, startTime, endTime])
+  @@index([pitchId, dayOfWeek])
+}
+
+model Team {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  shortName   String
+  slug        String   @unique
+  crestColorA String   @default("#156842")
+  crestColorB String   @default("#0F5132")
+  homePitchId String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  homePitch           Pitch?                     @relation(fields: [homePitchId], references: [id], onDelete: SetNull)
+  seasonTeams         SeasonTeam[]
+  playerRegistrations PlayerSeasonRegistration[]
+  homeFixtures        Fixture[]                  @relation("HomeTeam")
+  awayFixtures        Fixture[]                  @relation("AwayTeam")
+  matchSheets         MatchSheet[]
+  matchEvents         MatchEvent[]
+  retroactiveAlerts   RetroactiveSuspensionAlert[]
+  users               User[]
+}
+
+model SeasonTeam {
+  id        String   @id @default(cuid())
+  seasonId  String
+  teamId    String
+  createdAt DateTime @default(now())
+
+  season Season @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([seasonId, teamId])
+  @@index([teamId])
+}
+
+model Player {
+  id        String   @id @default(cuid())
+  fullName  String
+  slug      String   @unique
+  position  String   @default("Mijlocaș")
+  birthYear Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  registrations     PlayerSeasonRegistration[]
+  matchSheetEntries MatchSheetEntry[]
+  matchEvents       MatchEvent[]
+  suspensions       Suspension[]
+  retroactiveAlerts RetroactiveSuspensionAlert[]
+  user              User?
+}
+
+model PlayerSeasonRegistration {
+  id          String    @id @default(cuid())
+  playerId    String
+  seasonId    String
+  teamId      String
+  shirtNumber Int?
+  isCaptain   Boolean   @default(false)
+  joinedAt    DateTime  @default(now())
+  leftAt      DateTime?
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  season Season @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  team   Team   @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([playerId, seasonId, teamId])
+  @@index([seasonId, teamId])
+  @@index([playerId, seasonId])
+}
+
+model Fixture {
+  id          String        @id @default(cuid())
+  seasonId    String
+  roundNumber Int
+  /// 1 = Tur, 2 = Retur
+  leg         Int           @default(1)
+  homeTeamId  String
+  awayTeamId  String
+  pitchId     String?
+  scheduledAt DateTime
+  playedAt    DateTime?
+  status      FixtureStatus @default(SCHEDULED)
+  homeGoals   Int?
+  awayGoals   Int?
+  isBye       Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  season                 Season                       @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  homeTeam               Team                         @relation("HomeTeam", fields: [homeTeamId], references: [id], onDelete: Restrict)
+  awayTeam               Team                         @relation("AwayTeam", fields: [awayTeamId], references: [id], onDelete: Restrict)
+  pitch                  Pitch?                       @relation(fields: [pitchId], references: [id], onDelete: SetNull)
+  matchSheets            MatchSheet[]
+  events                 MatchEvent[]
+  correctionAudits       ResultCorrectionAudit[]
+  originSuspensions      Suspension[]                 @relation("SuspensionOriginFixture")
+  suspensionConsumptions SuspensionConsumption[]
+  retroactiveAlerts      RetroactiveSuspensionAlert[]
+  rescheduleNotifications RescheduleNotification[]
+
+  @@index([seasonId, roundNumber])
+  @@index([seasonId, status])
+  @@index([homeTeamId])
+  @@index([awayTeamId])
+}
+
+model MatchSheet {
+  id            String   @id @default(cuid())
+  fixtureId     String
+  teamId        String
+  submittedById String
+  submittedAt   DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  fixture     Fixture           @relation(fields: [fixtureId], references: [id], onDelete: Cascade)
+  team        Team              @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  submittedBy User              @relation(fields: [submittedById], references: [id], onDelete: Restrict)
+  entries     MatchSheetEntry[]
+
+  @@unique([fixtureId, teamId])
+}
+
+model MatchSheetEntry {
+  id           String  @id @default(cuid())
+  matchSheetId String
+  playerId     String
+  isStarter    Boolean @default(true)
+  shirtNumber  Int?
+
+  matchSheet MatchSheet @relation(fields: [matchSheetId], references: [id], onDelete: Cascade)
+  player     Player     @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([matchSheetId, playerId])
+  @@index([playerId])
+}
+
+model MatchEvent {
+  id         String         @id @default(cuid())
+  fixtureId  String
+  teamId     String
+  playerId   String
+  type       MatchEventType
+  minute     Int
+  /// RD Art. 41 alin. 2.2: yellow cards from an interrupted match replayed in full are annulled
+  isAnnulled Boolean        @default(false)
+  createdAt  DateTime       @default(now())
+
+  fixture Fixture @relation(fields: [fixtureId], references: [id], onDelete: Cascade)
+  team    Team    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  player  Player  @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@index([fixtureId, minute])
+  @@index([playerId, type])
+}
+
+model ResultCorrectionAudit {
+  id             String   @id @default(cuid())
+  fixtureId      String
+  actorId        String
+  reason         String
+  beforeSnapshot Json
+  afterSnapshot  Json
+  createdAt      DateTime @default(now())
+
+  fixture           Fixture                      @relation(fields: [fixtureId], references: [id], onDelete: Cascade)
+  actor             User                         @relation(fields: [actorId], references: [id], onDelete: Restrict)
+  retroactiveAlerts RetroactiveSuspensionAlert[]
+
+  @@index([fixtureId, createdAt])
+}
+
+model Suspension {
+  id                    String           @id @default(cuid())
+  playerId              String
+  originSeasonId        String
+  originFixtureId       String?
+  reason                SuspensionReason
+  totalRounds           Int
+  remainingRounds       Int
+  carryOverToNextSeason Boolean          @default(true)
+  notes                 String?
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+
+  player        Player                  @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  originSeason  Season                  @relation("SuspensionOriginSeason", fields: [originSeasonId], references: [id], onDelete: Cascade)
+  originFixture Fixture?                @relation("SuspensionOriginFixture", fields: [originFixtureId], references: [id], onDelete: SetNull)
+  consumptions  SuspensionConsumption[]
+
+  @@index([playerId, remainingRounds])
+  @@index([originSeasonId])
+}
+
+model SuspensionConsumption {
+  id           String   @id @default(cuid())
+  suspensionId String
+  fixtureId    String
+  seasonId     String
+  consumedAt   DateTime @default(now())
+
+  suspension Suspension @relation(fields: [suspensionId], references: [id], onDelete: Cascade)
+  fixture    Fixture    @relation(fields: [fixtureId], references: [id], onDelete: Cascade)
+  season     Season     @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+
+  @@unique([suspensionId, fixtureId])
+  @@index([fixtureId])
+}
+
+model RetroactiveSuspensionAlert {
+  id                String                 @id @default(cuid())
+  correctionAuditId String
+  fixtureId         String
+  playerId          String
+  teamId            String
+  description       String
+  status            RetroactiveAlertStatus @default(OPEN)
+  reviewedById      String?
+  reviewNote        String?
+  createdAt         DateTime               @default(now())
+  reviewedAt        DateTime?
+
+  correctionAudit ResultCorrectionAudit @relation(fields: [correctionAuditId], references: [id], onDelete: Cascade)
+  fixture         Fixture               @relation(fields: [fixtureId], references: [id], onDelete: Cascade)
+  player          Player                @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  team            Team                  @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  reviewedBy      User?                 @relation(fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([fixtureId])
+}
+
+model RescheduleNotification {
+  id             String    @id @default(cuid())
+  fixtureId      String
+  userId         String
+  oldScheduledAt DateTime
+  newScheduledAt DateTime
+  oldPitchName   String?
+  newPitchName   String?
+  message        String
+  readAt         DateTime?
+  createdAt      DateTime  @default(now())
+
+  fixture Fixture @relation(fields: [fixtureId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt, createdAt])
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         UserRole
+  teamId       String?
+  playerId     String?  @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  team                    Team?                        @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  player                  Player?                      @relation(fields: [playerId], references: [id], onDelete: SetNull)
+  sessions                Session[]
+  submittedMatchSheets    MatchSheet[]
+  correctionAudits        ResultCorrectionAudit[]
+  reviewedAlerts          RetroactiveSuspensionAlert[]
+  rescheduleNotifications RescheduleNotification[]
+
+  @@index([role])
+  @@index([teamId])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}

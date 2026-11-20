@@ -2,3 +2,27 @@
 !.claude/skills/
 !.claude/agents/
 .claude/worktrees/
+
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Testing & Playwright
+coverage/
+playwright-report/
+test-results/
+blob-report/
+
+# Logs
+*.log
+npm-debug.log*

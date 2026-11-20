@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: p19-superliga-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: p19
+      POSTGRES_PASSWORD: p19_dev_password
+      POSTGRES_DB: p19_superliga
+    ports:
+      - "5432:5432"
+    volumes:
+      - p19_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U p19 -d p19_superliga"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  p19_pgdata:
