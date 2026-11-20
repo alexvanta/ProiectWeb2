@@ -62,22 +62,60 @@ Platformă web pentru competiția **SuperLiga României — sezon regular** (o s
 
 ---
 
-## Variabilele proiectului (încă deschise — `Q-`)
+## Pornire rapidă locală (Docker / PostgreSQL)
 
-Regulamentul oficial al competiției (SuperLiga României — sezon regular) este documentat în [RULES.md](RULES.md), iar întrebările `Q-007`–`Q-012` au fost închise în [docs/agents/OPEN-QUESTIONS.md](docs/agents/OPEN-QUESTIONS.md). Singura variabilă rămasă deschisă:
+```bash
+# 1. Instalează dependențele și configurează variabilele de mediu
+npm install
+cp .env.example .env
 
-| ID | Variabilă deschisă | Ce blochează |
-|---|---|---|
-| `Q-004` | Deploy / release la predare (local-only vs deploy public) | Secțiunea 5 din `AGENTS.md` |
+# 2. Pornește PostgreSQL local prin Docker Compose
+docker compose up -d
+
+# 3. Aplică migrările Prisma și încarcă datele (Sezon real 2025/2026 + Sezon activ 2026/2027)
+npx prisma migrate dev
+npm run db:seed
+
+# 4. Pornește aplicația Next.js
+npm run dev
+```
+
+Aplicația va fi disponibilă la `http://localhost:3000`.
+
+### Conturi demo pre-încărcate (`D-002`)
+| Rol | Email | Parolă | Acces principal |
+|---|---|---|---|
+| `ADMIN` | `admin@superliga.ro` | `Admin123!` | `/admin` (sezoane, echipe, transferuri, terenuri, generator program, conturi) |
+| `REFEREE_ORGANIZER` | `arbitru@superliga.ro` | `Arbitru123!` | `/arbitru` (rezultate, corecții audit, reprogramări, alerte retroactive) |
+| `CAPTAIN` (Univ. Craiova) | `capitan@craiova.ro` | `Capitan123!` | `/capitan` (foaie de meci cu blocare suspendați) & `/notificari` |
+| `PLAYER` (Univ. Craiova) | `jucator@craiova.ro` | `Jucator123!` | `/notificari` (notificări in-app reprogramare) |
+| `VISITOR` | *(neautentificat)* | — | Clasament, program + iCal, detalii meci, statistici, echipe, jucători |
+
+### Teste & verificare
+```bash
+# Teste unitare & server (Vitest — 30 teste: scheduler, clasament 3-way, sezon real 2025/2026, suspendări, RBAC, cache)
+npm test
+
+# Verificare TypeScript, ESLint, Next.js build și ledger
+npm run typecheck
+npm run lint
+npm run build
+python3 docs/agents/tools/ledger-lint.py
+
+# Teste E2E Playwright (necesită PostgreSQL pornit și baza populată cu npm run db:seed)
+npx playwright install chromium
+npm run test:e2e
+```
 
 ---
 
 ## Documentație repo
 - [AGENTS.md](AGENTS.md) — reguli de lucru și definiția de „done”
 - [CONTEXT.md](CONTEXT.md) — vocabularul aprobat al proiectului
-- [INTERVIEW.md](INTERVIEW.md) — interviul de analiză a cerințelor cu reprezentantul Departamentului Competiții (SuperLiga României)
+- [INTERVIEW.md](INTERVIEW.md) — interviul de analiză a cerințelor și validarea pe sezonul real 2025/2026
 - [RULES.md](RULES.md) — regulamentul oficial al competiției (SuperLiga României — sezon regular, ROAF FRF 2018 & RD FRF 2017)
+- [AI_LOG.md](AI_LOG.md) — jurnalul etapelor de lucru
 - [docs/agents/README.md](docs/agents/README.md) — ghid rapid pentru ledger-ul de cunoștințe
-- [docs/agents/ARCHITECTURE.md](docs/agents/ARCHITECTURE.md) — arhitectura planificată și fluxuri de date
-- [docs/agents/OPEN-QUESTIONS.md](docs/agents/OPEN-QUESTIONS.md) — întrebări deschise (`Q-`)
+- [docs/agents/ARCHITECTURE.md](docs/agents/ARCHITECTURE.md) — arhitectura implementată și fluxuri de date
+- [docs/agents/OPEN-QUESTIONS.md](docs/agents/OPEN-QUESTIONS.md) — toate întrebările `Q-001`–`Q-012` (închise)
 - [docs/design/DESIGN.md](docs/design/DESIGN.md) & [docs/design/registry.yaml](docs/design/registry.yaml) — reguli de design și registrul ecranelor (`DS-`)

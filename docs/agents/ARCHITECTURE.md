@@ -6,25 +6,28 @@
 <!-- graffino-agentic:end -->
 
 ## Overview
-Planned architecture for **P19 — Amateur Football League** (single league, multiple
-seasons; app not scaffolded yet). A Next.js App Router monolith serves 10 Romanian UI
-screens (light and dark), authenticates users via email/password HTTP-only sessions with
-server-side RBAC, executes pure TypeScript domain algorithms, and persists state in
-PostgreSQL via Prisma. League-specific rules remain configurable data (Q-007–Q-012).
+Architecture of **P19 — SuperLiga României (sezon regular)** (single league, multiple
+seasons). A Next.js 15 App Router monolith serves 10 Romanian UI screens (Light and Dark),
+authenticates users via `scrypt` email/password and HMAC-signed HTTP-only sessions with
+server-side RBAC, executes pure TypeScript domain algorithms (`src/domain/`), caches
+standings/fixtures per season in server memory, and persists state in PostgreSQL via Prisma.
+Official competition rules from `RULES.md` (ROAF FRF 2018 & RD FRF 2017) are stored as
+configurable data per season (`D-003`).
 
 ```text
 Browser (10 Romanian UI screens, Light/Dark, iCal download)
   │
   ▼
-Next.js App Router (src/app/)
-  ├── Server Auth & RBAC (src/server/auth/)  ──► HTTP-only session cookie
-  ├── Per-Season Server Cache (src/server/cache/) ──► invalidated on result write/correction
+Next.js App Router (src/app/, src/components/)
+  ├── Server Auth & RBAC (src/server/auth/)  ──► HMAC-signed HTTP-only session cookie
+  ├── Per-Season Server Cache (src/server/cache/) ──► invalidated on result write/correction/reschedule
+  ├── Server Services & Queries (src/server/services/, src/server/queries/)
   ├── Pure Domain Engine (src/domain/)
-  │     ├── scheduler   (round-robin par/impar + bye + pitch/day/home-away constraints)
-  │     ├── standings   (pure function + configurable tie-breaker chain incl. 3-way mini-table)
-  │     ├── suspensions (played-round countdown, carry-over, retroactive eligibility check)
-  │     └── ical        (.ics generator per team)
-  └── Persistence (Prisma ORM, prisma/)
+  │     ├── scheduler   (round-robin par/impar + bye + pitch/day/home-away/shared-stadium constraints)
+  │     ├── standings   (pure function + configurable ROAF Art. 27 tie-breaker chain incl. 3-way mini-table)
+  │     ├── suspensions (RD FRF played-round countdown, carry-over across transfers, retroactive conflict detector)
+  │     └── ical        (RFC 5545 .ics generator per team)
+  └── Persistence (Prisma ORM, prisma/schema.prisma)
         │
         ▼
 PostgreSQL (local instance / Docker Compose)
@@ -33,12 +36,13 @@ PostgreSQL (local instance / Docker Compose)
 ## Parts
 | Part | Path | Responsibility | Talks to |
 |---|---|---|---|
-| Web UI & API *(planned)* | `src/app/` | 10 screens (6 public, 4 authenticated), Route Handlers, Server Actions, iCal endpoint | `src/server/`, `src/domain/`, Prisma |
-| Domain engine *(planned)* | `src/domain/` | Pure functions for schedule generation, standings, suspensions, retroactive checks, iCal | None (pure TypeScript) |
-| Auth & RBAC *(planned)* | `src/server/auth/` | Email/password hashing, HTTP-only session validation, 5-role RBAC enforcement | Prisma |
-| Season cache *(planned)* | `src/server/cache/` | Per-season cached standings/results with deterministic invalidation (no Redis) | `src/domain/`, Prisma |
-| Persistence *(planned)* | `prisma/` | Schema, migrations, demo accounts, and real-league seed script (Q-008) | PostgreSQL |
-| Tests *(planned)* | `tests/` | Vitest unit/integration tests and Playwright E2E + light/dark screenshot scripts | `src/domain/`, Next.js app |
+| Web UI & API | `src/app/`, `src/components/` | 10 screens (6 public, 4 authenticated), 19 API Route Handlers, iCal endpoint | `src/server/`, `src/domain/`, Prisma |
+| Domain engine | `src/domain/` | Pure functions for schedule generation, standings, suspensions, retroactive checks, iCal | None (pure TypeScript) |
+| Auth & RBAC | `src/server/auth/`, `src/lib/password.ts` | `scrypt` password hashing, HMAC HTTP-only session validation, 5-role RBAC enforcement | Prisma |
+| Season cache | `src/server/cache/seasonCache.ts` | Per-season cached standings/fixtures with deterministic invalidation (no Redis) | `src/domain/`, Prisma |
+| Business services | `src/server/services/`, `src/server/queries/` | Standings, server-enforced match sheets, audited results, rescheduling/notifications, admin CRUD | `src/domain/`, `src/server/cache/`, Prisma |
+| Persistence | `prisma/` | `schema.prisma`, migrations, `seed.ts` (real 2025/2026 + generated 2026/2027), demo accounts | PostgreSQL |
+| Tests | `tests/` | Vitest domain/server suites (`tests/domain/`, `tests/server/`) and Playwright E2E (`tests/e2e/`) | `src/domain/`, `src/server/`, Next.js app |
 
 ## Data flow
 1. **Schedule generation:** Admin configures season, teams, and pitch availabilities → `src/domain/scheduler` generates a constrained round-robin schedule (par/impar with `bye`, max 1 fixture/team/day, pitch slots, home/away balance) → preview shown → Admin confirms → fixtures saved to PostgreSQL.

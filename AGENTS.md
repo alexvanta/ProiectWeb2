@@ -77,33 +77,51 @@ without new evidence. A rejected proposal is added there with the reason.
 <!-- graffino-agentic:end -->
 
 ## 1. What this repo is
-P19 amateur football league platform (single league, multiple seasons): round-robin
-fixtures with pitch constraints, audited result entry, live standings with configurable
-tie-breakers, suspensions enforced on match sheets, stats, iCal export, and in-app
-reschedule notifications. Real league rules and seed data are open (Q-007–Q-012).
+P19 **SuperLiga României (sezon regular)** web platform (single league, multiple seasons):
+round-robin fixtures with pitch constraints, audited result entry, live standings with
+configurable tie-breakers (ROAF Art. 27), suspensions enforced on match sheets (RD FRF),
+stats, iCal export, and in-app reschedule notifications. Official rules and requirements
+are documented in `RULES.md` and `INTERVIEW.md` (`Q-001`–`Q-012` all answered).
 
 ## 2. Stack and commands
-Next.js (App Router), TypeScript (strict), Tailwind CSS, Prisma, PostgreSQL, Vitest, Playwright.
+Next.js 15 (App Router), TypeScript (strict), Tailwind CSS v4, Prisma, PostgreSQL, Vitest, Playwright.
 
 ```bash
 # Ledger check (verified)
 python3 docs/agents/tools/ledger-lint.py
 
-# Install, dev, build, lint, type-check, Vitest — not run: app not scaffolded yet
-# Playwright screenshots (light & dark) — not run: app not scaffolded yet (Q-006)
+# Install & Database (local PostgreSQL via Docker Compose)
+npm install
+docker compose up -d
+npx prisma migrate dev
+npm run db:seed
+
+# Verify (all verified)
+npm test               # Vitest (30 domain + server tests)
+npm run typecheck      # tsc --noEmit
+npm run lint           # next lint
+npm run build          # Next.js production build
+
+# Local dev & Playwright E2E (requires local PostgreSQL running)
+npm run dev
+npm run test:e2e
 ```
 
 ## 3. Layout
 - `.claude/` — repo-local agent skills (`/plan`, `/build`) and subagents (`planner`, `builder`).
 - `docs/agents/` — knowledge ledger, architecture, and `ledger-lint.py`.
 - `docs/design/` — design guardrails, token tables, `registry.yaml`, `mocks/`, and `screens/`.
-- `README.md` — project scope, stack, roles, and open league variables.
-- Planned app folders (`src/app/`, `src/domain/`, `src/server/`, `prisma/`, `tests/`) — not scaffolded yet.
+- `RULES.md`, `INTERVIEW.md`, `README.md`, `CONTEXT.md`, `AI_LOG.md` — rules, organizer interview, scope, vocabulary, and AI log.
+- `src/domain/` — pure, unit-tested TypeScript domain engine (`scheduler`, `standings`, `suspensions`, `ical`).
+- `src/server/` — HTTP-only auth & RBAC (`auth/`), per-season server cache (`cache/`), business services (`services/`), and server queries (`queries/`).
+- `src/app/` & `src/components/` — all 10 Romanian Light/Dark UI screens and 19 API Route Handlers.
+- `prisma/` — `schema.prisma`, migrations, `seed.ts`, and `seed-data/superliga-2025-2026.json` + `official-standings-2025-2026.txt`.
+- `tests/` — Vitest suites (`tests/domain/`, `tests/server/`) and Playwright E2E suites (`tests/e2e/`).
 
 ## 4. Rules for this repo
 - UI copy is in Romanian; code, tests, and `docs/agents/` stay in English.
-- Never invent real-league rules, thresholds, pitch schedules, or seed data (see Q-007–Q-012).
-- Keep standings and schedule generation as pure, unit-tested TypeScript functions.
+- Competition rules follow `RULES.md` (ROAF FRF 2018 & RD FRF 2017) stored as configurable season data (`D-003`).
+- Keep standings, suspensions, iCal, and schedule generation as pure, unit-tested TypeScript functions.
 
 ## 5. Release
 - Default branch: `main`. Remote `origin`: `https://github.com/alexvanta/ProiectWeb2.git`.
@@ -112,7 +130,7 @@ python3 docs/agents/tools/ledger-lint.py
 
 ## 6. Definition of done
 - `python3 docs/agents/tools/ledger-lint.py` passes.
-- Vitest suite passes (once scaffolded).
-- Next.js build, lint, and TypeScript type-check pass (once scaffolded).
-- Playwright light and dark screenshots of every changed screen compared with `docs/design/DESIGN.md` (once scaffolded).
+- `npm test` (Vitest) passes.
+- `npm run typecheck`, `npm run lint`, and `npm run build` pass.
+- `npm run test:e2e` (Playwright Light & Dark E2E) verified locally against PostgreSQL.
 - New practices recorded as candidate patterns; open points recorded as Q- entries.

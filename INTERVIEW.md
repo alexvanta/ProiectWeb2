@@ -147,3 +147,13 @@
 | 6. Corecții cu motiv & audit `before`/`after` + alerte retroactive fără forfait automat | [RULES.md §5.7](RULES.md) | `D-004`, `D-005` |
 | 7. Autentificare email+parolă, 5 roluri, RBAC pe server | — (operațional) | `D-002` |
 | 8. Public mobil/desktop, română, Light/Dark, formă, timeline, statistici | — (UX & design: `docs/design/DESIGN.md`) | `D-001` |
+
+---
+
+## Validare pe sezonul real (SuperLiga României 2025/2026)
+
+Cerințele de clasament și departajare din secțiunea 3 a acestui interviu (ROAF Art. 27 alin. 3 și alin. 5) au fost validate automat prin testul unitar [tests/domain/real-season-2025-2026.test.ts](tests/domain/real-season-2025-2026.test.ts) rulat peste toate cele **240 de meciuri** ale sezonului regular 2025/2026 ([prisma/seed-data/superliga-2025-2026.json](prisma/seed-data/superliga-2025-2026.json)) și comparat cu clasamentul oficial ([prisma/seed-data/official-standings-2025-2026.txt](prisma/seed-data/official-standings-2025-2026.txt)):
+
+- **Rezultat:** egalitate **100%** pe toate cele **16 poziții** (`Pos`, `Team`, `Pld`, `W`, `D`, `L`, `GF`, `GA`, `GD`, `Pts`), de la `#1 Universitatea Craiova` (`60` pct, `+26`) până la `#16 Metaloglobus București` (`12` pct, `−41`).
+- **Departajare reală validată (`32` pct):** `#12 Petrolul Ploiești` (`32` pct, golaveraj `−7`) este clasată corect înaintea `#13 Csíkszereda Miercurea Ciuc` (`32` pct, golaveraj `−28`), conform lanțului oficial de departajare ROAF Art. 27.
+- **Acoperire suplimentară la 3+ echipe:** 6 teste dedicate în [tests/domain/standings.test.ts](tests/domain/standings.test.ts) validează mini-clasamentele la 3+ echipe, circularitatea `A > B > C > A`, golurile în deplasare în meciurile directe și reluarea lanțului pe subgrupul rămas la egalitate.
