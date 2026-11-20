@@ -1,101 +1,100 @@
 # docs/design/registry.yaml — every screen and shared component, by DS- ID.
 # Plans, commits, mocks and board files use the ID (tickets don't). kind: foundation | component | screen
 # status: draft (mock drawn) | approved (confirmed on the board) | implemented | deprecated (never delete an entry)
-# Note: Design tokens approved in docs/design/DESIGN.md (Q-005); initial public screen mocks drafted in docs/design/mocks/.
 designs:
   - id: DS-p19-app-header
     kind: component
-    source: TBD (planned AppHeader, SeasonSelector, ThemeToggle)
+    source: src/components/AppHeader.tsx
     screenshots: []
     design_ref: docs/design/mocks/DS-p19-home-standings.html
-    status: draft
+    status: implemented
   - id: DS-p19-dense-table
     kind: component
-    source: TBD (planned StandingsTable, StatsTable, AuditTable)
+    source: src/components/StandingsPanel.tsx
     screenshots: []
     design_ref: docs/design/mocks/DS-p19-home-standings.html
-    status: draft
+    status: implemented
   - id: DS-p19-filter-bar
     kind: component
-    source: TBD (planned FilterBar + iCal export action)
+    source: src/components/FixturesClient.tsx
     screenshots: []
     design_ref: docs/design/mocks/DS-p19-fixtures.html
-    status: draft
+    status: implemented
   - id: DS-p19-match-card
     kind: component
-    source: TBD (planned MatchRow, MatchCard, MatchScoreboard)
+    source: src/app/meciuri/[id]/page.tsx
     screenshots: []
     design_ref: docs/design/mocks/DS-p19-fixtures.html
-    status: draft
+    status: implemented
   - id: DS-p19-status-badges
     kind: component
-    source: TBD (planned FormStrip W/D/L, CardCountBadge, StatusBadge)
+    source: src/components/FormStrip.tsx, src/components/StatusBadges.tsx
     screenshots: []
     design_ref: docs/design/mocks/DS-p19-home-standings.html
-    status: draft
+    status: implemented
   - id: DS-p19-alert-banner
     kind: component
-    source: TBD (planned AlertBanner for retroactive alerts & reschedule notifications)
+    source: src/components/AlertBanner.tsx
     screenshots: []
     design_ref: docs/design/mocks/DS-p19-match-detail.html
-    status: draft
+    status: implemented
   - id: DS-p19-home-standings
     kind: screen
-    source: TBD (planned route /)
+    source: src/app/page.tsx
     screenshots: []
     design_ref: docs/design/mocks/DS-p19-home-standings.html
-    status: draft
+    status: implemented
   - id: DS-p19-fixtures
     kind: screen
-    source: TBD (planned route /program)
+    source: src/app/program/page.tsx
     screenshots: []
     design_ref: docs/design/mocks/DS-p19-fixtures.html
-    status: draft
+    status: implemented
   - id: DS-p19-match-detail
     kind: screen
-    source: TBD (planned route /meciuri/[id])
+    source: src/app/meciuri/[id]/page.tsx
     screenshots: []
     design_ref: docs/design/mocks/DS-p19-match-detail.html
-    status: draft
+    status: implemented
   - id: DS-p19-stats-suspensions
     kind: screen
-    source: TBD (planned route /statistici)
+    source: src/app/statistici/page.tsx
     screenshots: []
     design_ref: none
-    status: draft
+    status: implemented
   - id: DS-p19-team-profile
     kind: screen
-    source: TBD (planned route /echipe/[id])
+    source: src/app/echipe/[id]/page.tsx
     screenshots: []
     design_ref: docs/design/mocks/DS-p19-team-profile.html
-    status: draft
+    status: implemented
   - id: DS-p19-player-profile
     kind: screen
-    source: TBD (planned route /jucatori/[id])
+    source: src/app/jucatori/[id]/page.tsx
     screenshots: []
     design_ref: none
-    status: draft
+    status: implemented
   - id: DS-p19-auth-notifications
     kind: screen
-    source: TBD (planned routes /login, /notificari)
+    source: src/app/login/page.tsx, src/app/notificari/page.tsx
     screenshots: []
     design_ref: none
-    status: draft
+    status: implemented
   - id: DS-p19-match-sheet
     kind: screen
-    source: TBD (planned route /capitan/foaie-meci/[matchId])
+    source: src/app/capitan/page.tsx, src/app/capitan/foaie-meci/[matchId]/page.tsx
     screenshots: []
     design_ref: none
-    status: draft
+    status: implemented
   - id: DS-p19-referee-panel
     kind: screen
-    source: TBD (planned route /arbitru)
+    source: src/app/arbitru/page.tsx
     screenshots: []
     design_ref: none
-    status: draft
+    status: implemented
   - id: DS-p19-admin-panel
     kind: screen
-    source: TBD (planned route /admin)
+    source: src/app/admin/page.tsx
     screenshots: []
     design_ref: none
-    status: draft
+    status: implemented
