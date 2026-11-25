@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" fill="none" preserveAspectRatio="xMidYMid slice">
+  <g stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Outer touchlines & goal lines -->
+    <rect x="64" y="48" width="1472" height="904" rx="2" />
+
+    <!-- Halfway line, center circle & center spot -->
+    <line x1="800" y1="48" x2="800" y2="952" />
+    <circle cx="800" cy="500" r="126" />
+    <circle cx="800" cy="500" r="5" fill="#ffffff" />
+
+    <!-- Left penalty area, 6-yard box, penalty spot & arc -->
+    <rect x="64" y="216" width="232" height="568" />
+    <rect x="64" y="368" width="84" height="264" />
+    <circle cx="218" cy="500" r="4.5" fill="#ffffff" />
+    <path d="M 296 398 A 126 126 0 0 1 296 602" />
+
+    <!-- Right penalty area, 6-yard box, penalty spot & arc -->
+    <rect x="1304" y="216" width="232" height="568" />
+    <rect x="1452" y="368" width="84" height="264" />
+    <circle cx="1382" cy="500" r="4.5" fill="#ffffff" />
+    <path d="M 1304 398 A 126 126 0 0 0 1304 602" />
+
+    <!-- Corner arcs -->
+    <path d="M 64 78 A 30 30 0 0 0 94 48" />
+    <path d="M 1506 48 A 30 30 0 0 0 1536 78" />
+    <path d="M 94 952 A 30 30 0 0 0 64 922" />
+    <path d="M 1536 922 A 30 30 0 0 0 1506 952" />
+  </g>
+</svg>

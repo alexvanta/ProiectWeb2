@@ -59,6 +59,11 @@ export default async function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body>
+        <div className="pitch-bg" aria-hidden="true">
+          <div className="pitch-bg-stripes" />
+          <div className="pitch-bg-lines" />
+          <div className="pitch-bg-vignette" />
+        </div>
         <Suspense fallback={null}>
           <AppHeader seasons={seasons} user={user} unreadCount={unreadCount} />
         </Suspense>
