@@ -127,6 +127,7 @@ export default async function StatisticsPage({
                           {team ? (
                             <Link href={`/echipe/${team.slug}`} className="team-cell">
                               <TeamCrest
+                                slug={team.slug}
                                 shortName={team.shortName}
                                 colorA={team.crestColorA}
                                 colorB={team.crestColorB}
@@ -211,7 +212,22 @@ export default async function StatisticsPage({
                               {sc.playerName}
                             </Link>
                           </td>
-                          <td style={{ color: "var(--text-secondary)" }}>{sc.teamName}</td>
+                          <td>
+                            <Link
+                              href={`/echipe/${sc.teamSlug}`}
+                              className="team-cell"
+                              style={{ color: "var(--text-secondary)", fontWeight: 500 }}
+                            >
+                              <TeamCrest
+                                slug={sc.teamSlug}
+                                shortName={sc.teamShortName}
+                                colorA={sc.crestColorA}
+                                colorB={sc.crestColorB}
+                                size="xs"
+                              />
+                              <span className="team-name">{sc.teamName}</span>
+                            </Link>
+                          </td>
                           <td className="col-goals tabular">{sc.goals}</td>
                         </tr>
                       );
@@ -255,7 +271,22 @@ export default async function StatisticsPage({
                             {sc.playerName}
                           </Link>
                         </td>
-                        <td>{sc.teamName}</td>
+                        <td>
+                          <Link
+                            href={`/echipe/${sc.teamSlug}`}
+                            className="team-cell"
+                            style={{ color: "var(--text-secondary)", fontWeight: 500 }}
+                          >
+                            <TeamCrest
+                              slug={sc.teamSlug}
+                              shortName={sc.teamShortName}
+                              colorA={sc.crestColorA}
+                              colorB={sc.crestColorB}
+                              size="xs"
+                            />
+                            <span className="team-name">{sc.teamName}</span>
+                          </Link>
+                        </td>
                         <td className="col-num">
                           <span style={{ display: "inline-flex", gap: "6px" }}>
                             {sc.yellowCards > 0 ? <CardCountBadge type="yellow" count={sc.yellowCards} /> : null}

@@ -837,6 +837,47 @@ a.match-item:hover .arrow-glide,
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 6px 14px rgba(0, 0, 0, 0.18);
 }
 
+.team-crest.team-crest-has-img {
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+  text-shadow: none;
+  overflow: visible;
+}
+
+.team-crest-xs.team-crest-has-img {
+  width: 20px;
+  height: 20px;
+}
+
+.team-crest-md.team-crest-has-img {
+  width: 26px;
+  height: 26px;
+}
+
+.team-crest-lg.team-crest-has-img {
+  width: 64px;
+  height: 64px;
+}
+
+.sb-crest.team-crest-has-img {
+  width: 58px;
+  height: 58px;
+}
+
+.team-crest-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 1px 2px rgba(15, 23, 42, 0.14));
+}
+
+[data-theme="dark"] .team-crest-img {
+  filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.34))
+    drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45));
+}
+
 /* ==========================================================================
    DS-p19-dense-table (Standings, Scorers, Data Tables)
    ========================================================================== */

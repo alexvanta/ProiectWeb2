@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/server/auth/rbac";
 import { MatchSheetClient } from "@/components/MatchSheetClient";
+import { TeamCrest } from "@/components/TeamCrest";
 
 export const dynamic = "force-dynamic";
 
@@ -83,12 +84,21 @@ export default async function MatchSheetPage({
       </nav>
 
       <div className="page-head animate-enter">
-        <div>
-          <h1 className="page-title">Foaie de meci · {team.name}</h1>
-          <p className="page-meta">
-            Etapa {fixture.roundNumber}: {fixture.homeTeam.name} – {fixture.awayTeam.name} ·{" "}
-            {fixture.season.name}
-          </p>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <TeamCrest
+            slug={team.slug}
+            shortName={team.shortName}
+            colorA={team.crestColorA}
+            colorB={team.crestColorB}
+            size="md"
+          />
+          <div>
+            <h1 className="page-title">Foaie de meci · {team.name}</h1>
+            <p className="page-meta">
+              Etapa {fixture.roundNumber}: {fixture.homeTeam.name} – {fixture.awayTeam.name} ·{" "}
+              {fixture.season.name}
+            </p>
+          </div>
         </div>
         <span className="demo-pill">Validare eligibilitate pe server (D-005)</span>
       </div>

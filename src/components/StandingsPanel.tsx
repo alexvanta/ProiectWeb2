@@ -380,6 +380,7 @@ export function StandingsPanel({
                               className="team-cell"
                             >
                               <TeamCrest
+                                slug={meta?.slug}
                                 shortName={row.shortName}
                                 colorA={meta?.crestColorA ?? "#156842"}
                                 colorB={meta?.crestColorB ?? "#0F5132"}
@@ -499,6 +500,7 @@ export function StandingsPanel({
                               style={{ color: "var(--text-secondary)", fontWeight: 500 }}
                             >
                               <TeamCrest
+                                slug={sc.teamSlug}
                                 shortName={sc.teamShortName}
                                 colorA={sc.crestColorA}
                                 colorB={sc.crestColorB}
@@ -588,6 +590,7 @@ export function StandingsPanel({
                       <div className="mini-grid-cell">
                         <span className="team-cell">
                           <TeamCrest
+                            slug={meta?.slug}
                             shortName={r.shortName}
                             colorA={meta?.crestColorA ?? "#156842"}
                             colorB={meta?.crestColorB ?? "#0F5132"}

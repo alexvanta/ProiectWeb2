@@ -113,6 +113,7 @@ export default async function PlayerProfilePage({
                         style={{ fontWeight: 600, color: "var(--text-primary)" }}
                       >
                         <TeamCrest
+                          slug={reg.team.slug}
                           shortName={reg.team.shortName}
                           colorA={reg.team.crestColorA}
                           colorB={reg.team.crestColorB}

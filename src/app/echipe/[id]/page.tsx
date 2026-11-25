@@ -51,8 +51,12 @@ export default async function TeamProfilePage({
         OR: [{ homeTeamId: team.id }, { awayTeamId: team.id }],
       },
       include: {
-        homeTeam: { select: { id: true, name: true, shortName: true } },
-        awayTeam: { select: { id: true, name: true, shortName: true } },
+        homeTeam: {
+          select: { id: true, name: true, shortName: true, slug: true, crestColorA: true, crestColorB: true },
+        },
+        awayTeam: {
+          select: { id: true, name: true, shortName: true, slug: true, crestColorA: true, crestColorB: true },
+        },
       },
       orderBy: [{ roundNumber: "asc" }, { scheduledAt: "asc" }],
     }),
@@ -99,6 +103,7 @@ export default async function TeamProfilePage({
       <section className="team-hero animate-enter" aria-labelledby="team-heading">
         <div className="team-hero-main">
           <TeamCrest
+            slug={team.slug}
             shortName={team.shortName}
             colorA={team.crestColorA}
             colorB={team.crestColorB}
@@ -241,9 +246,26 @@ export default async function TeamProfilePage({
                         <td>
                           <Link
                             href={`/meciuri/${fx.id}`}
-                            style={{ fontWeight: 600, color: "var(--text-primary)" }}
+                            className="team-cell"
+                            style={{ fontWeight: 600, color: "var(--text-primary)", flexWrap: "wrap" }}
                           >
-                            {fx.homeTeam.name} – {fx.awayTeam.name}
+                            <TeamCrest
+                              slug={fx.homeTeam.slug}
+                              shortName={fx.homeTeam.shortName}
+                              colorA={fx.homeTeam.crestColorA}
+                              colorB={fx.homeTeam.crestColorB}
+                              size="xs"
+                            />
+                            <span>{fx.homeTeam.name}</span>
+                            <span style={{ color: "var(--text-muted)", fontWeight: 400 }}>–</span>
+                            <TeamCrest
+                              slug={fx.awayTeam.slug}
+                              shortName={fx.awayTeam.shortName}
+                              colorA={fx.awayTeam.crestColorA}
+                              colorB={fx.awayTeam.crestColorB}
+                              size="xs"
+                            />
+                            <span>{fx.awayTeam.name}</span>
                           </Link>
                         </td>
                         <td className="col-center">
@@ -313,6 +335,7 @@ export default async function TeamProfilePage({
                   >
                     <span className="team-cell">
                       <TeamCrest
+                        slug={tm.slug}
                         shortName={tm.shortName}
                         colorA={tm.crestColorA}
                         colorB={tm.crestColorB}

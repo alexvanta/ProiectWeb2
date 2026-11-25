@@ -289,6 +289,7 @@ export function FixturesClient({
                         {homeWon ? <span className="win-dot" aria-hidden="true" /> : null}
                         <span className="team-text">{fx.homeTeam.name}</span>
                         <TeamCrest
+                          slug={fx.homeTeam.slug}
                           shortName={fx.homeTeam.shortName}
                           colorA={fx.homeTeam.crestColorA}
                           colorB={fx.homeTeam.crestColorB}
@@ -316,6 +317,7 @@ export function FixturesClient({
                         className={`team-side cell-away${awayWon ? " is-winner" : homeWon ? " is-loser" : ""}`}
                       >
                         <TeamCrest
+                          slug={fx.awayTeam.slug}
                           shortName={fx.awayTeam.shortName}
                           colorA={fx.awayTeam.crestColorA}
                           colorB={fx.awayTeam.crestColorB}

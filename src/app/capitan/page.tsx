@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/server/auth/rbac";
 import { FixtureStatusBadge } from "@/components/StatusBadges";
+import { TeamCrest } from "@/components/TeamCrest";
 
 export const dynamic = "force-dynamic";
 
@@ -32,8 +33,12 @@ export default async function CaptainIndexPage() {
             : {}),
         },
         include: {
-          homeTeam: { select: { name: true } },
-          awayTeam: { select: { name: true } },
+          homeTeam: {
+            select: { name: true, shortName: true, slug: true, crestColorA: true, crestColorB: true },
+          },
+          awayTeam: {
+            select: { name: true, shortName: true, slug: true, crestColorA: true, crestColorB: true },
+          },
         },
         orderBy: [{ roundNumber: "asc" }, { scheduledAt: "asc" }],
         take: 15,
@@ -70,10 +75,26 @@ export default async function CaptainIndexPage() {
                 className="team-dir-link"
                 style={{ padding: "12px var(--space-4)" }}
               >
-                <span style={{ display: "inline-flex", alignItems: "center", gap: "12px", flex: 1, minWidth: 0 }}>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: "12px", flex: 1, minWidth: 0, flexWrap: "wrap" }}>
                   <span className="demo-pill tabular">Etapa {fx.roundNumber}</span>
-                  <span className="team-name" style={{ fontWeight: 600 }}>
-                    {fx.homeTeam.name} – {fx.awayTeam.name}
+                  <span className="team-cell" style={{ fontWeight: 600 }}>
+                    <TeamCrest
+                      slug={fx.homeTeam.slug}
+                      shortName={fx.homeTeam.shortName}
+                      colorA={fx.homeTeam.crestColorA}
+                      colorB={fx.homeTeam.crestColorB}
+                      size="xs"
+                    />
+                    <span className="team-name">{fx.homeTeam.name}</span>
+                    <span style={{ color: "var(--text-muted)", fontWeight: 400 }}>–</span>
+                    <TeamCrest
+                      slug={fx.awayTeam.slug}
+                      shortName={fx.awayTeam.shortName}
+                      colorA={fx.awayTeam.crestColorA}
+                      colorB={fx.awayTeam.crestColorB}
+                      size="xs"
+                    />
+                    <span className="team-name">{fx.awayTeam.name}</span>
                   </span>
                 </span>
                 <span style={{ display: "inline-flex", alignItems: "center", gap: "12px", flexShrink: 0 }}>

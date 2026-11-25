@@ -131,6 +131,7 @@ export default async function HomePage({
                           {fx.homeTeam.name}
                         </span>
                         <TeamCrest
+                          slug={fx.homeTeam.slug}
                           shortName={fx.homeTeam.shortName}
                           colorA={fx.homeTeam.crestColorA}
                           colorB={fx.homeTeam.crestColorB}
@@ -148,6 +149,7 @@ export default async function HomePage({
 
                       <span className="match-side match-side-away">
                         <TeamCrest
+                          slug={fx.awayTeam.slug}
                           shortName={fx.awayTeam.shortName}
                           colorA={fx.awayTeam.crestColorA}
                           colorB={fx.awayTeam.crestColorB}

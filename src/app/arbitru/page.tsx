@@ -25,8 +25,12 @@ export default async function RefereePage() {
       ? prisma.fixture.findMany({
           where: { seasonId: activeSeason.id },
           include: {
-            homeTeam: { select: { id: true, name: true } },
-            awayTeam: { select: { id: true, name: true } },
+            homeTeam: {
+              select: { id: true, name: true, shortName: true, slug: true, crestColorA: true, crestColorB: true },
+            },
+            awayTeam: {
+              select: { id: true, name: true, shortName: true, slug: true, crestColorA: true, crestColorB: true },
+            },
           },
           orderBy: [{ roundNumber: "asc" }, { scheduledAt: "asc" }],
           take: 48,
@@ -85,8 +89,16 @@ export default async function RefereePage() {
           roundNumber: f.roundNumber,
           homeTeamId: f.homeTeamId,
           homeTeamName: f.homeTeam.name,
+          homeTeamShortName: f.homeTeam.shortName,
+          homeTeamSlug: f.homeTeam.slug,
+          homeTeamColorA: f.homeTeam.crestColorA,
+          homeTeamColorB: f.homeTeam.crestColorB,
           awayTeamId: f.awayTeamId,
           awayTeamName: f.awayTeam.name,
+          awayTeamShortName: f.awayTeam.shortName,
+          awayTeamSlug: f.awayTeam.slug,
+          awayTeamColorA: f.awayTeam.crestColorA,
+          awayTeamColorB: f.awayTeam.crestColorB,
           status: f.status,
           homeGoals: f.homeGoals,
           awayGoals: f.awayGoals,

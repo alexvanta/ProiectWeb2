@@ -4,14 +4,23 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { CheckCircle2, Plus, Save, Trash2 } from "lucide-react";
 import { AlertBanner } from "./AlertBanner";
+import { TeamCrest } from "./TeamCrest";
 
 export interface RefFixtureOption {
   id: string;
   roundNumber: number;
   homeTeamId: string;
   homeTeamName: string;
+  homeTeamShortName: string;
+  homeTeamSlug: string;
+  homeTeamColorA: string;
+  homeTeamColorB: string;
   awayTeamId: string;
   awayTeamName: string;
+  awayTeamShortName: string;
+  awayTeamSlug: string;
+  awayTeamColorA: string;
+  awayTeamColorB: string;
   status: "SCHEDULED" | "PLAYED" | "POSTPONED" | "INTERRUPTED_REPLAY";
   homeGoals: number | null;
   awayGoals: number | null;
@@ -326,7 +335,16 @@ export function RefereePanelClient({
               <>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
                   <div className="field">
-                    <label htmlFor="ref-home-goals">Goluri {currentFx.homeTeamName}</label>
+                    <label htmlFor="ref-home-goals" className="team-cell">
+                      <TeamCrest
+                        slug={currentFx.homeTeamSlug}
+                        shortName={currentFx.homeTeamShortName}
+                        colorA={currentFx.homeTeamColorA}
+                        colorB={currentFx.homeTeamColorB}
+                        size="xs"
+                      />
+                      <span>Goluri {currentFx.homeTeamName}</span>
+                    </label>
                     <input
                       id="ref-home-goals"
                       type="number"
@@ -338,7 +356,16 @@ export function RefereePanelClient({
                     />
                   </div>
                   <div className="field">
-                    <label htmlFor="ref-away-goals">Goluri {currentFx.awayTeamName}</label>
+                    <label htmlFor="ref-away-goals" className="team-cell">
+                      <TeamCrest
+                        slug={currentFx.awayTeamSlug}
+                        shortName={currentFx.awayTeamShortName}
+                        colorA={currentFx.awayTeamColorA}
+                        colorB={currentFx.awayTeamColorB}
+                        size="xs"
+                      />
+                      <span>Goluri {currentFx.awayTeamName}</span>
+                    </label>
                     <input
                       id="ref-away-goals"
                       type="number"

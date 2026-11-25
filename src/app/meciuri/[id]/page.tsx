@@ -158,6 +158,7 @@ export default async function MatchDetailPage({
             <Link href={`/echipe/${fixture.homeTeam.slug}`} className="sb-team-row">
               <span className="sb-team-name">{fixture.homeTeam.name}</span>
               <TeamCrest
+                slug={fixture.homeTeam.slug}
                 shortName={fixture.homeTeam.shortName}
                 colorA={fixture.homeTeam.crestColorA}
                 colorB={fixture.homeTeam.crestColorB}
@@ -181,6 +182,7 @@ export default async function MatchDetailPage({
           <div className="sb-team sb-team-away">
             <Link href={`/echipe/${fixture.awayTeam.slug}`} className="sb-team-row">
               <TeamCrest
+                slug={fixture.awayTeam.slug}
                 shortName={fixture.awayTeam.shortName}
                 colorA={fixture.awayTeam.crestColorA}
                 colorB={fixture.awayTeam.crestColorB}
@@ -268,6 +270,7 @@ export default async function MatchDetailPage({
                 <div className="sheet-team-head">
                   <span className="sheet-team-label">
                     <TeamCrest
+                      slug={team.slug}
                       shortName={team.shortName}
                       colorA={team.crestColorA}
                       colorB={team.crestColorB}
