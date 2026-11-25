@@ -583,6 +583,11 @@ async function main() {
     [playersByTeamSlug.get("cfr-cluj")![7]!.id, teamByName.get("FCSB")!.id], // CFR Cluj -> FCSB
   ]);
 
+  const season2SquadByTeamId = new Map<
+    string,
+    Array<{ id: string; fullName: string; shirtNumber: number }>
+  >();
+
   for (const meta of TEAM_METADATA) {
     const team = teamByName.get(meta.name)!;
     const squad = playersByTeamSlug.get(meta.slug)!;
@@ -599,6 +604,9 @@ async function main() {
           isCaptain: destTeamId === team.id && pIdx === 0,
         },
       });
+      const destList = season2SquadByTeamId.get(destTeamId) ?? [];
+      destList.push(p);
+      season2SquadByTeamId.set(destTeamId, destList);
     }
   }
 
@@ -657,7 +665,15 @@ async function main() {
   });
 
   // Seed Season 2 fixtures; mark rounds 1..3 as PLAYED with deterministic demo scores so Season 2 is visibly live
-  const season2Fixtures: Array<{ id: string; roundNumber: number; homeTeamId: string; awayTeamId: string; scheduledAt: Date }> = [];
+  const season2Fixtures: Array<{
+    id: string;
+    roundNumber: number;
+    homeTeamId: string;
+    awayTeamId: string;
+    scheduledAt: Date;
+    homeGoals: number | null;
+    awayGoals: number | null;
+  }> = [];
 
   for (let idx = 0; idx < generated.matches.length; idx++) {
     const gm = generated.matches[idx]!;
@@ -688,7 +704,62 @@ async function main() {
       homeTeamId: gm.homeTeamId,
       awayTeamId: gm.awayTeamId,
       scheduledAt,
+      homeGoals,
+      awayGoals,
     });
+  }
+
+  // Seed GOAL events for Season 2 played fixtures (rounds 1..3), matching exact scores
+  // and strictly excluding suspended players (transferredBannedPlayer, craiovaBannedPlayer)
+  const season2SuspendedIds = new Set<string>([
+    transferredBannedPlayer.id,
+    craiovaBannedPlayer.id,
+  ]);
+
+  for (const fx of season2Fixtures.filter((f) => f.roundNumber <= 3)) {
+    const homeEligible = (season2SquadByTeamId.get(fx.homeTeamId) ?? []).filter(
+      (p) => !season2SuspendedIds.has(p.id),
+    );
+    const awayEligible = (season2SquadByTeamId.get(fx.awayTeamId) ?? []).filter(
+      (p) => !season2SuspendedIds.has(p.id),
+    );
+
+    const homeAttackers = homeEligible.slice(-3);
+    const awayAttackers = awayEligible.slice(-3);
+
+    const eventsToCreate: Array<{
+      fixtureId: string;
+      teamId: string;
+      playerId: string;
+      type: MatchEventType;
+      minute: number;
+    }> = [];
+
+    for (let g = 0; g < (fx.homeGoals ?? 0); g++) {
+      const scorer = homeAttackers[(g + (fx.roundNumber % 2)) % homeAttackers.length]!;
+      eventsToCreate.push({
+        fixtureId: fx.id,
+        teamId: fx.homeTeamId,
+        playerId: scorer.id,
+        type: MatchEventType.GOAL,
+        minute: 12 + g * 23,
+      });
+    }
+
+    for (let g = 0; g < (fx.awayGoals ?? 0); g++) {
+      const scorer = awayAttackers[(g + (fx.roundNumber % 2)) % awayAttackers.length]!;
+      eventsToCreate.push({
+        fixtureId: fx.id,
+        teamId: fx.awayTeamId,
+        playerId: scorer.id,
+        type: MatchEventType.GOAL,
+        minute: 19 + g * 26,
+      });
+    }
+
+    if (eventsToCreate.length > 0) {
+      await prisma.matchEvent.createMany({ data: eventsToCreate });
+    }
   }
 
   // Add sample match sheet, audited correction, and reschedule notification in Season 2
