@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Download, RotateCcw } from "lucide-react";
+import { Calendar, CheckCircle2, MapPin, RotateCcw, X } from "lucide-react";
 import { TeamCrest } from "./TeamCrest";
 import { FixtureStatusBadge } from "./StatusBadges";
 
@@ -42,6 +42,34 @@ interface FixturesClientProps {
   initialRound?: string;
 }
 
+function formatDateTime(iso: string): string {
+  return new Date(iso).toLocaleString("ro-RO", {
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function formatTime(iso: string): string {
+  return new Date(iso).toLocaleTimeString("ro-RO", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function formatRoundDateSpan(items: FixtureListItem[]): string {
+  if (items.length === 0) return "";
+  const first = new Date(items[0]!.scheduledAt);
+  const last = new Date(items[items.length - 1]!.scheduledAt);
+  const fStr = first.toLocaleDateString("ro-RO", { day: "2-digit", month: "short" });
+  const lStr = last.toLocaleDateString("ro-RO", { day: "2-digit", month: "short", year: "numeric" });
+  return fStr === last.toLocaleDateString("ro-RO", { day: "2-digit", month: "short" })
+    ? lStr
+    : `${fStr} – ${lStr}`;
+}
+
 export function FixturesClient({
   seasonId,
   seasonName,
@@ -72,7 +100,6 @@ export function FixturesClient({
     });
   }, [fixtures, roundFilter, teamFilter, pitchFilter, statusFilter]);
 
-  // Group by ascending roundNumber
   const groupedByRound = useMemo(() => {
     const map = new Map<number, FixtureListItem[]>();
     for (const fx of filtered) {
@@ -84,6 +111,7 @@ export function FixturesClient({
   }, [filtered]);
 
   const exportTeamId = teamFilter || teams[0]?.id || "";
+  const exportTeamName = teams.find((t) => t.id === exportTeamId)?.name ?? "echipă";
 
   const handleReset = () => {
     setRoundFilter("");
@@ -94,28 +122,43 @@ export function FixturesClient({
 
   const handleIcalExport = () => {
     if (!exportTeamId) return;
-    const teamName = teams.find((t) => t.id === exportTeamId)?.name ?? "echipă";
     window.location.href = `/api/ical/${encodeURIComponent(seasonId)}/${encodeURIComponent(exportTeamId)}`;
-    setToast(`Fișierul iCal (.ics) pentru ${teamName} a fost generat.`);
-    setTimeout(() => setToast(null), 3500);
+    setToast(`Fișierul iCal (.ics) pentru ${exportTeamName} a fost generat.`);
+    setTimeout(() => setToast(null), 4000);
   };
 
   return (
-    <div style={{ display: "grid", gap: "var(--space-5)" }}>
-      {/* Filter Bar (DS-p19-filter-bar) */}
-      <section className="p19-panel" style={{ padding: "var(--space-4)" }}>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
-            gap: "var(--space-3)",
-            alignItems: "end",
-          }}
+    <>
+      <div className="page-head animate-enter">
+        <div>
+          <h1 className="page-title">Program &amp; rezultate · {seasonName}</h1>
+          <p className="page-meta">
+            Etape în ordine crescătoare, filtre după etapă, echipă, teren sau status și export iCal per echipă.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={handleIcalExport}
+          disabled={!exportTeamId}
+          className="btn btn-secondary"
         >
-          <label style={{ display: "grid", gap: "4px", fontSize: "12px", color: "var(--text-muted)" }}>
-            Etapă
+          <Calendar size={16} aria-hidden="true" />
+          <span>Export iCal (.ics)</span>
+        </button>
+      </div>
+
+      {/* DS-p19-filter-bar */}
+      <section
+        className="filter-bar animate-enter"
+        style={{ animationDelay: "40ms" }}
+        aria-label="Filtre program meciuri"
+      >
+        <div className="filter-grid">
+          <div className="field">
+            <label htmlFor="f-round">Etapă</label>
             <select
-              className="p19-select"
+              id="f-round"
+              className="select-control"
               value={roundFilter}
               onChange={(e) => setRoundFilter(e.target.value)}
             >
@@ -126,12 +169,13 @@ export function FixturesClient({
                 </option>
               ))}
             </select>
-          </label>
+          </div>
 
-          <label style={{ display: "grid", gap: "4px", fontSize: "12px", color: "var(--text-muted)" }}>
-            Echipă
+          <div className="field">
+            <label htmlFor="f-team">Echipă</label>
             <select
-              className="p19-select"
+              id="f-team"
+              className="select-control"
               value={teamFilter}
               onChange={(e) => setTeamFilter(e.target.value)}
             >
@@ -142,12 +186,13 @@ export function FixturesClient({
                 </option>
               ))}
             </select>
-          </label>
+          </div>
 
-          <label style={{ display: "grid", gap: "4px", fontSize: "12px", color: "var(--text-muted)" }}>
-            Teren
+          <div className="field">
+            <label htmlFor="f-pitch">Teren</label>
             <select
-              className="p19-select"
+              id="f-pitch"
+              className="select-control"
               value={pitchFilter}
               onChange={(e) => setPitchFilter(e.target.value)}
             >
@@ -158,12 +203,13 @@ export function FixturesClient({
                 </option>
               ))}
             </select>
-          </label>
+          </div>
 
-          <label style={{ display: "grid", gap: "4px", fontSize: "12px", color: "var(--text-muted)" }}>
-            Status
+          <div className="field">
+            <label htmlFor="f-status">Status</label>
             <select
-              className="p19-select"
+              id="f-status"
+              className="select-control"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
             >
@@ -172,174 +218,156 @@ export function FixturesClient({
               <option value="PLAYED">Jucat</option>
               <option value="POSTPONED">Amânat</option>
             </select>
-          </label>
-
-          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-            <button type="button" onClick={handleReset} className="p19-btn-secondary">
-              <RotateCcw size={14} aria-hidden="true" />
-              <span>Resetează</span>
-            </button>
-            <button
-              type="button"
-              onClick={handleIcalExport}
-              disabled={!exportTeamId}
-              className="p19-btn-primary"
-            >
-              <Download size={14} aria-hidden="true" />
-              <span>Export iCal (.ics)</span>
-            </button>
           </div>
+
+          <button type="button" onClick={handleReset} className="btn btn-ghost">
+            <RotateCcw size={14} aria-hidden="true" />
+            <span>Resetează</span>
+          </button>
         </div>
-        <div style={{ marginTop: "8px", fontSize: "12px", color: "var(--text-muted)" }}>
-          {seasonName} · {filtered.length} meciuri afișate
-          {teamFilter
-            ? ` · Exportul iCal va descărca calendarul echipei selectate.`
-            : ` · Selectează o echipă pentru export iCal dedicat (implicit: ${teams[0]?.name ?? "prima echipă"}).`}
+
+        <div className="filter-summary">
+          <span className="tabular">
+            Afișate <strong>{filtered.length}</strong> meciuri în{" "}
+            <strong>{groupedByRound.length}</strong>{" "}
+            {groupedByRound.length === 1 ? "etapă" : "etape"}
+          </span>
+          <span>
+            Export iCal activ pentru: <strong>{exportTeamName}</strong>
+          </span>
         </div>
       </section>
 
       {/* Rounds List (ascending order) */}
-      {groupedByRound.length === 0 ? (
-        <div className="p19-panel" style={{ padding: "var(--space-6)", textAlign: "center", color: "var(--text-muted)" }}>
-          Nu există meciuri care să corespundă filtrelor selectate.
-        </div>
-      ) : (
-        groupedByRound.map(([roundNum, items]) => (
-          <section key={roundNum} className="p19-panel" style={{ overflow: "hidden" }}>
-            <div
-              style={{
-                padding: "8px var(--space-4)",
-                background: "var(--bg-subtle)",
-                borderBottom: "1px solid var(--border-subtle)",
-                fontFamily: "var(--font-display)",
-                fontWeight: 600,
-                fontSize: "16px",
-              }}
-            >
-              Etapa {roundNum} {roundNum <= 15 ? "· Tur" : "· Retur"}
-            </div>
-            <div>
-              {items.map((fx) => {
-                const dateStr = new Date(fx.scheduledAt).toLocaleString("ro-RO", {
-                  day: "2-digit",
-                  month: "short",
-                  year: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                });
-                return (
-                  <Link
-                    key={fx.id}
-                    href={`/meciuri/${fx.id}`}
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "1fr auto 1fr auto",
-                      alignItems: "center",
-                      gap: "12px",
-                      padding: "10px var(--space-4)",
-                      borderBottom: "1px solid var(--border-subtle)",
-                      textDecoration: "none",
-                      color: "var(--text-primary)",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "flex-end",
-                        gap: "8px",
-                        fontWeight:
-                          fx.status === "PLAYED" && (fx.homeGoals ?? 0) > (fx.awayGoals ?? 0)
-                            ? 700
-                            : 500,
-                      }}
-                    >
-                      <span>{fx.homeTeam.name}</span>
-                      <TeamCrest
-                        shortName={fx.homeTeam.shortName}
-                        colorA={fx.homeTeam.crestColorA}
-                        colorB={fx.homeTeam.crestColorB}
-                      />
-                    </div>
+      <div className="rounds-stack">
+        {groupedByRound.length === 0 ? (
+          <div className="panel" style={{ padding: "var(--space-8) var(--space-4)", textAlign: "center" }}>
+            <h2 className="panel-title" style={{ justifyContent: "center", marginBottom: "var(--space-2)" }}>
+              Niciun meci găsit
+            </h2>
+            <p className="page-meta" style={{ marginBottom: "var(--space-4)" }}>
+              Nu există meciuri care să corespundă filtrelor selectate.
+            </p>
+            <button type="button" onClick={handleReset} className="btn btn-secondary">
+              Resetează filtrele
+            </button>
+          </div>
+        ) : (
+          groupedByRound.map(([roundNum, items]) => (
+            <section key={roundNum} className="round-panel animate-enter">
+              <div className="round-header">
+                <h2 className="round-title">
+                  <span>
+                    Etapa {roundNum} {roundNum <= 15 ? "· Tur" : "· Retur"}
+                  </span>
+                  <span className="round-tag">{items.length} meciuri</span>
+                </h2>
+                <span className="round-dates tabular">{formatRoundDateSpan(items)}</span>
+              </div>
 
-                    <div
-                      className="tabular-nums"
-                      style={{
-                        minWidth: "66px",
-                        textAlign: "center",
-                        padding: "4px 8px",
-                        borderRadius: "var(--radius-sm)",
-                        background: "var(--bg-subtle)",
-                        fontSize: "15px",
-                        fontWeight: 700,
-                      }}
-                    >
-                      {fx.status === "PLAYED" && fx.homeGoals !== null && fx.awayGoals !== null
-                        ? `${fx.homeGoals} – ${fx.awayGoals}`
-                        : "vs"}
-                    </div>
+              <div>
+                {items.map((fx) => {
+                  const isPlayed =
+                    fx.status === "PLAYED" &&
+                    fx.homeGoals !== null &&
+                    fx.awayGoals !== null;
+                  const homeWon = isPlayed && fx.homeGoals! > fx.awayGoals!;
+                  const awayWon = isPlayed && fx.awayGoals! > fx.homeGoals!;
 
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        fontWeight:
-                          fx.status === "PLAYED" && (fx.awayGoals ?? 0) > (fx.homeGoals ?? 0)
-                            ? 700
-                            : 500,
-                      }}
-                    >
-                      <TeamCrest
-                        shortName={fx.awayTeam.shortName}
-                        colorA={fx.awayTeam.crestColorA}
-                        colorB={fx.awayTeam.crestColorB}
-                      />
-                      <span>{fx.awayTeam.name}</span>
-                    </div>
+                  return (
+                    <div key={fx.id} className="match-row">
+                      <div className="cell-dt tabular">{formatDateTime(fx.scheduledAt)}</div>
 
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                        fontSize: "12px",
-                        color: "var(--text-muted)",
-                      }}
-                    >
-                      <span className="tabular-nums">{dateStr}</span>
-                      {fx.pitch ? <span>· {fx.pitch.name}</span> : null}
-                      <FixtureStatusBadge status={fx.status} />
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </section>
-        ))
-      )}
+                      <div className="cell-pitch">
+                        <MapPin size={13} aria-hidden="true" style={{ flexShrink: 0 }} />
+                        <span>{fx.pitch?.name ?? "Teren nealocat"}</span>
+                      </div>
 
-      {/* Transient bottom-right toast */}
+                      <div
+                        className={`team-side cell-home${homeWon ? " is-winner" : awayWon ? " is-loser" : ""}`}
+                      >
+                        {homeWon ? <span className="win-dot" aria-hidden="true" /> : null}
+                        <span className="team-text">{fx.homeTeam.name}</span>
+                        <TeamCrest
+                          shortName={fx.homeTeam.shortName}
+                          colorA={fx.homeTeam.crestColorA}
+                          colorB={fx.homeTeam.crestColorB}
+                          size="md"
+                        />
+                      </div>
+
+                      <div className={`score-box tabular${!isPlayed ? " upcoming" : ""}`}>
+                        {isPlayed ? (
+                          <>
+                            <span className={awayWon ? "score-num-lose" : undefined}>
+                              {fx.homeGoals}
+                            </span>
+                            <span className="score-sep">–</span>
+                            <span className={homeWon ? "score-num-lose" : undefined}>
+                              {fx.awayGoals}
+                            </span>
+                          </>
+                        ) : (
+                          formatTime(fx.scheduledAt)
+                        )}
+                      </div>
+
+                      <div
+                        className={`team-side cell-away${awayWon ? " is-winner" : homeWon ? " is-loser" : ""}`}
+                      >
+                        <TeamCrest
+                          shortName={fx.awayTeam.shortName}
+                          colorA={fx.awayTeam.crestColorA}
+                          colorB={fx.awayTeam.crestColorB}
+                          size="md"
+                        />
+                        <span className="team-text">{fx.awayTeam.name}</span>
+                        {awayWon ? <span className="win-dot" aria-hidden="true" /> : null}
+                      </div>
+
+                      <div className="cell-status">
+                        <FixtureStatusBadge status={fx.status} />
+                        <Link href={`/meciuri/${fx.id}`} className="detail-link">
+                          Detalii{" "}
+                          <span className="arrow-glide" aria-hidden="true">
+                            →
+                          </span>
+                        </Link>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          ))
+        )}
+      </div>
+
+      {/* Animated Floating Toast (never pushes layout) */}
       {toast ? (
-        <div
-          role="status"
-          style={{
-            position: "fixed",
-            right: "20px",
-            bottom: "20px",
-            zIndex: 70,
-            padding: "12px 16px",
-            borderRadius: "var(--radius-lg)",
-            background: "var(--tooltip-bg)",
-            color: "var(--tooltip-fg)",
-            boxShadow: "var(--shadow-md)",
-            fontSize: "13px",
-            fontWeight: 500,
-          }}
-        >
-          {toast}
+        <div className="toast-region" aria-live="polite">
+          <div className="toast" role="status">
+            <CheckCircle2
+              size={18}
+              aria-hidden="true"
+              style={{ color: "var(--accent-primary)", marginTop: "2px", flexShrink: 0 }}
+            />
+            <div>
+              <span className="toast-title">Export iCal pregătit</span>
+              <span>{toast}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setToast(null)}
+              aria-label="Închide notificarea"
+              className="btn btn-ghost"
+              style={{ minHeight: "28px", padding: "4px", marginLeft: "auto" }}
+            >
+              <X size={14} aria-hidden="true" />
+            </button>
+          </div>
         </div>
       ) : null}
-    </div>
+    </>
   );
 }

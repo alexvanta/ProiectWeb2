@@ -10,8 +10,8 @@ export default async function RefereePage() {
   if (!user) redirect("/login");
   if (user.role !== "REFEREE_ORGANIZER" && user.role !== "ADMIN") {
     return (
-      <main className="p19-container">
-        <div className="p19-panel" style={{ padding: "var(--space-6)" }}>
+      <main className="container">
+        <div className="panel" style={{ padding: "var(--space-6)" }}>
           Acces restricționat: această pagină este disponibilă doar pentru Arbitru / Organizator sau Admin.
         </div>
       </main>
@@ -68,14 +68,15 @@ export default async function RefereePage() {
   ]);
 
   return (
-    <main className="p19-container" style={{ display: "grid", gap: "var(--space-5)" }}>
-      <div>
-        <h1 className="font-display" style={{ margin: 0, fontSize: "28px" }}>
-          Panou Arbitru / Organizator
-        </h1>
-        <p style={{ margin: "4px 0 0", color: "var(--text-secondary)", fontSize: "13px" }}>
-          Introducere rezultate, corecții cu jurnal imutabil de audit, reprogramări cu notificări in-app și revizuire alerte retroactive.
-        </p>
+    <main className="container">
+      <div className="page-head animate-enter">
+        <div>
+          <h1 className="page-title">Panou Arbitru / Organizator</h1>
+          <p className="page-meta">
+            Introducere rezultate, corecții cu jurnal imutabil de audit, reprogramări cu notificări in-app și revizuire alerte retroactive.
+          </p>
+        </div>
+        {activeSeason ? <span className="demo-pill">{activeSeason.name}</span> : null}
       </div>
 
       <RefereePanelClient

@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import type { StandingsResult } from "@/domain/types";
 import type { TopScorerItem } from "@/server/queries/publicQueries";
 import { FormStrip } from "./FormStrip";
@@ -11,6 +12,8 @@ import { CardCountBadge } from "./StatusBadges";
 interface StandingsPanelProps {
   seasonName: string;
   seasonStatus: "DRAFT" | "ACTIVE" | "COMPLETED";
+  currentRound: number;
+  totalRounds: number;
   standings: StandingsResult;
   teamMeta: Record<string, { slug: string; crestColorA: string; crestColorB: string }>;
   topScorers: TopScorerItem[];
@@ -19,19 +22,28 @@ interface StandingsPanelProps {
 type ActiveTab = "CLASAMENT" | "FORMA" | "MARCATORI";
 
 const COLUMN_TIPS: Record<string, string> = {
-  MJ: "Meciuri jucate",
+  MJ: "Meciuri Jucate",
   V: "Victorii",
-  E: "Egaluri",
+  E: "Egal",
   Î: "Înfrângeri",
-  GM: "Goluri marcate",
-  GP: "Goluri primite",
-  DG: "Diferență de goluri",
-  Pct: "Puncte acumulate",
+  GM: "Goluri Marcate",
+  GP: "Goluri Primite",
+  DG: "Diferență Goluri",
+  Pct: "Puncte",
 };
+
+interface HeaderTooltipState {
+  label: string;
+  left: number;
+  top: number;
+  arrowX: number;
+}
 
 export function StandingsPanel({
   seasonName,
   seasonStatus,
+  currentRound,
+  totalRounds,
   standings,
   teamMeta,
   topScorers,
@@ -41,460 +53,586 @@ export function StandingsPanel({
     teamId: string | null;
     opponentId: string | null;
   }>({ teamId: null, opponentId: null });
-  const [hoveredTieGroup, setHoveredTieGroup] = useState<string | null>(null);
+  const [hoveredTie, setHoveredTie] = useState<{
+    groupId: string | null;
+    teamId: string | null;
+  }>({ groupId: null, teamId: null });
+  const [headerTip, setHeaderTip] = useState<HeaderTooltipState | null>(null);
+  const [mounted, setMounted] = useState(false);
 
-  const d3Groups = standings.tieBreakGroups.filter((g) => g.teamIds.length >= 2);
+  const tabListRef = useRef<HTMLDivElement | null>(null);
+  const tabBtnRefs = useRef<Record<ActiveTab, HTMLButtonElement | null>>({
+    CLASAMENT: null,
+    FORMA: null,
+    MARCATORI: null,
+  });
+  const [indicator, setIndicator] = useState<{
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+    ready: boolean;
+    animated: boolean;
+  }>({ left: 0, top: 0, width: 0, height: 0, ready: false, animated: false });
+  const d3PanelRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    const update = (animate: boolean) => {
+      const btn = tabBtnRefs.current[tab];
+      if (!btn) return;
+      setIndicator((prev) => ({
+        left: btn.offsetLeft,
+        top: btn.offsetTop,
+        width: btn.offsetWidth,
+        height: btn.offsetHeight,
+        ready: true,
+        animated: animate && prev.ready,
+      }));
+    };
+    update(true);
+    const onResize = () => update(false);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [tab]);
+
+  const d3Groups = useMemo(
+    () => standings.tieBreakGroups.filter((g) => g.teamIds.length >= 2),
+    [standings.tieBreakGroups],
+  );
+
+  // Last-5 form table sorted by recent points -> GD -> GF
+  const formRows = useMemo(() => {
+    return standings.rows
+      .map((row) => {
+        const entries = row.lastFiveForm;
+        let won = 0;
+        let drawn = 0;
+        let lost = 0;
+        let goalsFor = 0;
+        let goalsAgainst = 0;
+        for (const e of entries) {
+          if (e.result === "W") won += 1;
+          else if (e.result === "D") drawn += 1;
+          else lost += 1;
+          goalsFor += e.goalsFor;
+          goalsAgainst += e.goalsAgainst;
+        }
+        const points = won * 3 + drawn;
+        const goalDifference = goalsFor - goalsAgainst;
+        return {
+          ...row,
+          formPlayed: entries.length,
+          formWon: won,
+          formDrawn: drawn,
+          formLost: lost,
+          formGF: goalsFor,
+          formGA: goalsAgainst,
+          formGD: goalDifference,
+          formPoints: points,
+        };
+      })
+      .sort(
+        (a, b) =>
+          b.formPoints - a.formPoints ||
+          b.formGD - a.formGD ||
+          b.formGF - a.formGF ||
+          a.position - b.position,
+      );
+  }, [standings.rows]);
+
+  const showHeaderTip = (el: HTMLElement, key: string) => {
+    const label = COLUMN_TIPS[key];
+    if (!label) return;
+    const rect = el.getBoundingClientRect();
+    const approxWidth = Math.max(96, label.length * 7.2 + 24);
+    const pad = 10;
+    const centerX = rect.left + rect.width / 2;
+    const vw = typeof window !== "undefined" ? window.innerWidth : 1024;
+    const left = Math.max(pad, Math.min(centerX - approxWidth / 2, vw - approxWidth - pad));
+    const top = rect.bottom + 8;
+    const arrowX = Math.max(12, Math.min(approxWidth - 12, centerX - left));
+    setHeaderTip({ label, left, top, arrowX });
+  };
+
+  const hideHeaderTip = () => setHeaderTip(null);
+
+  const jumpToTieBreak = (groupId: string, teamId: string) => {
+    setHoveredTie({ groupId, teamId });
+    d3PanelRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
+
+  const panelTitle =
+    tab === "CLASAMENT"
+      ? seasonStatus === "COMPLETED"
+        ? "Clasament final"
+        : "Clasament live"
+      : tab === "FORMA"
+        ? "Forma"
+        : "Golgheteri";
+
+  const rowById = useMemo(() => {
+    const map = new Map(standings.rows.map((r) => [r.teamId, r]));
+    return map;
+  }, [standings.rows]);
+
+  const activeRows = tab === "FORMA" ? formRows : standings.rows;
 
   return (
-    <section className="p19-panel" style={{ overflow: "hidden" }}>
-      {/* Panel Header with Flashscore-style segmented tabs */}
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: "var(--space-3)",
-          padding: "var(--space-3) var(--space-4)",
-          borderBottom: "1px solid var(--border-subtle)",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          <span
-            className="p19-pulse-dot"
-            style={{
-              background:
-                seasonStatus === "ACTIVE"
-                  ? "var(--accent-primary)"
-                  : "var(--text-muted)",
-            }}
-            aria-hidden="true"
-          />
-          <h2
-            className="font-display"
-            style={{ margin: 0, fontSize: "20px", lineHeight: "26px", fontWeight: 600 }}
-          >
-            {seasonStatus === "COMPLETED" ? "Clasament final" : "Clasament live"} ·{" "}
-            {seasonName}
-          </h2>
-        </div>
+    <section aria-labelledby="standings-heading">
+      <div className="panel animate-enter" style={{ animationDelay: "40ms" }}>
+        {/* Panel Header with Flashscore-style sliding segmented tabs */}
+        <div className="panel-header">
+          <div className="panel-header-left">
+            <h2 id="standings-heading" className="panel-title">
+              {tab === "CLASAMENT" ? (
+                <span
+                  className={`pulse-dot${seasonStatus !== "ACTIVE" ? " pulse-dot-muted" : ""}`}
+                  aria-hidden="true"
+                />
+              ) : null}
+              <span>{panelTitle}</span>
+            </h2>
 
-        <div
-          role="tablist"
-          aria-label="Vizualizare clasament"
-          style={{
-            display: "inline-flex",
-            flexWrap: "wrap",
-            gap: "4px",
-            padding: "3px",
-            borderRadius: "var(--radius-md)",
-            background: "var(--bg-subtle)",
-          }}
-        >
-          {(["CLASAMENT", "FORMA", "MARCATORI"] as ActiveTab[]).map((t) => {
-            const active = tab === t;
-            return (
-              <button
-                key={t}
-                type="button"
-                role="tab"
-                aria-selected={active}
-                onClick={() => setTab(t)}
-                style={{
-                  padding: "6px 12px",
-                  borderRadius: "var(--radius-sm)",
-                  border: "none",
-                  cursor: "pointer",
-                  fontSize: "11.5px",
-                  fontWeight: 700,
-                  letterSpacing: "0.03em",
-                  background: active ? "var(--accent-primary)" : "transparent",
-                  color: active ? "var(--accent-primary-fg)" : "var(--text-secondary)",
-                  transition: "background-color var(--motion-fast), color var(--motion-fast)",
-                }}
-              >
-                {t}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Tab 1: CLASAMENT & Tab 2: FORMA */}
-      {tab !== "MARCATORI" ? (
-        <>
-          <div style={{ overflowX: "auto" }}>
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                fontSize: "13px",
-                lineHeight: "18px",
-              }}
+            <div
+              ref={tabListRef}
+              className={`panel-tabs${indicator.ready ? " has-indicator" : ""}${indicator.animated ? " is-animated" : ""}`}
+              role="tablist"
+              aria-label="Vizualizare clasament"
             >
-              <thead>
-                <tr
-                  style={{
-                    background: "var(--bg-subtle)",
-                    color: "var(--text-muted)",
-                    fontSize: "12px",
-                    fontWeight: 600,
-                    borderBottom: "1px solid var(--border-subtle)",
-                  }}
-                >
-                  <th style={{ padding: "8px 10px", textAlign: "center", width: "44px" }}>#</th>
-                  <th style={{ padding: "8px 10px", textAlign: "left" }}>Echipă</th>
-                  <th title={COLUMN_TIPS.MJ} style={{ padding: "8px 8px", textAlign: "right" }}>MJ</th>
-                  {tab === "CLASAMENT" ? (
-                    <>
-                      <th title={COLUMN_TIPS.V} style={{ padding: "8px 8px", textAlign: "right" }}>V</th>
-                      <th title={COLUMN_TIPS.E} style={{ padding: "8px 8px", textAlign: "right" }}>E</th>
-                      <th title={COLUMN_TIPS.Î} style={{ padding: "8px 8px", textAlign: "right" }}>Î</th>
-                      <th title={COLUMN_TIPS.GM} style={{ padding: "8px 8px", textAlign: "right" }}>GM</th>
-                      <th title={COLUMN_TIPS.GP} style={{ padding: "8px 8px", textAlign: "right" }}>GP</th>
-                    </>
-                  ) : null}
-                  <th title={COLUMN_TIPS.DG} style={{ padding: "8px 8px", textAlign: "right" }}>DG</th>
-                  <th title={COLUMN_TIPS.Pct} style={{ padding: "8px 10px", textAlign: "right", color: "var(--text-primary)" }}>
-                    Pct
-                  </th>
-                  <th style={{ padding: "8px 12px", textAlign: "right" }}>Formă (5)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {standings.rows.map((row) => {
-                  const meta = teamMeta[row.teamId];
-                  const isSelf = hoveredMatch.teamId === row.teamId;
-                  const isOpp = hoveredMatch.opponentId === row.teamId;
-                  const isTieHovered =
-                    !hoveredMatch.teamId &&
-                    hoveredTieGroup !== null &&
-                    row.tieBreakGroupId === hoveredTieGroup;
-
-                  const isLeader = row.position === 1;
-                  const hasTieBreak = row.tieBreakGroupId !== null;
-
-                  const rowClass = isSelf
-                    ? "p19-row-hl-self"
-                    : isOpp
-                      ? "p19-row-hl-opp"
-                      : "";
-
-                  return (
-                    <tr
-                      key={row.teamId}
-                      data-team={row.teamId}
-                      className={rowClass}
-                      style={{
-                        height: "var(--row-height-dense)",
-                        borderBottom: "1px solid var(--border-subtle)",
-                        background: isTieHovered ? "var(--alert-retro-bg)" : undefined,
-                        transition: "background-color var(--motion-fast)",
-                      }}
-                    >
-                      <td style={{ padding: "6px 10px", textAlign: "center" }}>
-                        <span
-                          className="tabular-nums"
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            width: "24px",
-                            height: "24px",
-                            borderRadius: "var(--radius-md)",
-                            fontSize: "12px",
-                            fontWeight: 700,
-                            background: isLeader
-                              ? "var(--accent-primary)"
-                              : hasTieBreak
-                                ? "var(--alert-retro-border)"
-                                : "transparent",
-                            color: isLeader
-                              ? "var(--accent-primary-fg)"
-                              : hasTieBreak
-                                ? "var(--alert-retro-btn-fg)"
-                                : "var(--text-muted)",
-                          }}
-                        >
-                          {row.position}
-                        </span>
-                      </td>
-
-                      <td style={{ padding: "6px 10px" }}>
-                        <Link
-                          href={`/echipe/${meta?.slug ?? row.teamId}`}
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "8px",
-                            textDecoration: "none",
-                            color: "var(--text-primary)",
-                            fontWeight: 600,
-                          }}
-                        >
-                          <TeamCrest
-                            shortName={row.shortName}
-                            colorA={meta?.crestColorA ?? "#156842"}
-                            colorB={meta?.crestColorB ?? "#0F5132"}
-                            size="sm"
-                          />
-                          <span>{row.teamName}</span>
-                        </Link>
-                      </td>
-
-                      <td className="tabular-nums" style={{ padding: "6px 8px", textAlign: "right", color: "var(--text-secondary)" }}>
-                        {row.played}
-                      </td>
-
-                      {tab === "CLASAMENT" ? (
-                        <>
-                          <td className="tabular-nums" style={{ padding: "6px 8px", textAlign: "right", color: "var(--text-secondary)" }}>
-                            {row.won}
-                          </td>
-                          <td className="tabular-nums" style={{ padding: "6px 8px", textAlign: "right", color: "var(--text-secondary)" }}>
-                            {row.drawn}
-                          </td>
-                          <td className="tabular-nums" style={{ padding: "6px 8px", textAlign: "right", color: "var(--text-secondary)" }}>
-                            {row.lost}
-                          </td>
-                          <td className="tabular-nums" style={{ padding: "6px 8px", textAlign: "right", color: "var(--text-secondary)" }}>
-                            {row.goalsFor}
-                          </td>
-                          <td className="tabular-nums" style={{ padding: "6px 8px", textAlign: "right", color: "var(--text-secondary)" }}>
-                            {row.goalsAgainst}
-                          </td>
-                        </>
-                      ) : null}
-
-                      <td className="tabular-nums" style={{ padding: "6px 8px", textAlign: "right", fontWeight: 500 }}>
-                        {row.goalDifference > 0 ? `+${row.goalDifference}` : row.goalDifference}
-                      </td>
-
-                      <td
-                        className="tabular-nums"
-                        style={{
-                          padding: "6px 10px",
-                          textAlign: "right",
-                          fontWeight: 700,
-                          color: "var(--text-primary)",
-                        }}
-                      >
-                        {row.points}
-                      </td>
-
-                      <td style={{ padding: "6px 12px", textAlign: "right" }}>
-                        <FormStrip
-                          teamId={row.teamId}
-                          entries={row.lastFiveForm}
-                          onHoverMatch={(tid, oid) =>
-                            setHoveredMatch({ teamId: tid, opponentId: oid })
-                          }
-                        />
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Footer legend + D3 tie-breaker callout */}
-          <div
-            style={{
-              padding: "var(--space-3) var(--space-4)",
-              background: "var(--bg-subtle)",
-              display: "flex",
-              flexWrap: "wrap",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: "var(--space-3)",
-              fontSize: "12px",
-              color: "var(--text-muted)",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: "14px", flexWrap: "wrap" }}>
-              <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                <span
-                  style={{
-                    width: "12px",
-                    height: "12px",
-                    borderRadius: "3px",
-                    background: "var(--accent-primary)",
-                  }}
-                />
-                Lider sezon regular
-              </span>
-              <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-                <span
-                  style={{
-                    width: "12px",
-                    height: "12px",
-                    borderRadius: "3px",
-                    background: "var(--alert-retro-border)",
-                  }}
-                />
-                Departajare ROAF Art. 27 ({standings.mode === "final" ? "meciuri directe" : "golaveraj general"})
-              </span>
-            </div>
-
-            {d3Groups.length > 0 ? (
-              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                {d3Groups.map((g) => (
+              <span
+                className="panel-tabs-indicator"
+                aria-hidden="true"
+                style={{
+                  width: `${indicator.width}px`,
+                  height: `${indicator.height}px`,
+                  transform: `translate3d(${indicator.left}px, ${indicator.top}px, 0)`,
+                }}
+              />
+              {(["CLASAMENT", "FORMA", "MARCATORI"] as ActiveTab[]).map((t) => {
+                const active = tab === t;
+                return (
                   <button
-                    key={g.groupId}
+                    key={t}
+                    ref={(el) => {
+                      tabBtnRefs.current[t] = el;
+                    }}
                     type="button"
-                    onMouseEnter={() => setHoveredTieGroup(g.groupId)}
-                    onMouseLeave={() => setHoveredTieGroup(null)}
-                    onFocus={() => setHoveredTieGroup(g.groupId)}
-                    onBlur={() => setHoveredTieGroup(null)}
-                    style={{
-                      padding: "3px 8px",
-                      borderRadius: "var(--radius-sm)",
-                      border: "1px solid var(--alert-retro-border)",
-                      background: "var(--alert-retro-bg)",
-                      color: "var(--alert-retro-fg)",
-                      fontSize: "11px",
-                      fontWeight: 600,
-                      cursor: "pointer",
+                    role="tab"
+                    className="panel-tab"
+                    aria-selected={active}
+                    tabIndex={active ? 0 : -1}
+                    onClick={() => {
+                      setTab(t);
+                      setHoveredMatch({ teamId: null, opponentId: null });
+                      setHoveredTie({ groupId: null, teamId: null });
                     }}
                   >
-                    Egalitate la {g.points} pct ({g.teamIds.length} echipe · criteriu {g.resolvedBy})
+                    {t}
                   </button>
-                ))}
-              </div>
-            ) : null}
+                );
+              })}
+            </div>
           </div>
-        </>
-      ) : (
-        /* Tab 3: MARCATORI */
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
-            <thead>
-              <tr
-                style={{
-                  background: "var(--bg-subtle)",
-                  color: "var(--text-muted)",
-                  fontSize: "12px",
-                  fontWeight: 600,
-                  borderBottom: "1px solid var(--border-subtle)",
-                }}
-              >
-                <th style={{ padding: "8px 10px", textAlign: "center", width: "44px" }}>#</th>
-                <th style={{ padding: "8px 10px", textAlign: "left" }}>Jucător</th>
-                <th style={{ padding: "8px 10px", textAlign: "left" }}>Echipă</th>
-                <th style={{ padding: "8px 10px", textAlign: "right" }}>Cartonașe</th>
-                <th style={{ padding: "8px 12px", textAlign: "right", color: "var(--text-primary)" }}>
-                  Goluri
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {topScorers.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={5}
-                    style={{ padding: "24px", textAlign: "center", color: "var(--text-muted)" }}
-                  >
-                    Nu există marcatori înregistrați în acest sezon.
-                  </td>
-                </tr>
-              ) : (
-                topScorers.map((sc, idx) => {
-                  const rank = idx + 1;
-                  const rankBg =
-                    rank === 1
-                      ? "var(--scorer-rank-1)"
-                      : rank === 2
-                        ? "var(--scorer-rank-2)"
-                        : rank === 3
-                          ? "var(--scorer-rank-3)"
-                          : "transparent";
-                  const rankFg = rank <= 3 ? "var(--scorer-rank-fg)" : "var(--text-muted)";
 
-                  return (
-                    <tr
-                      key={sc.playerId}
-                      style={{
-                        height: "var(--row-height-dense)",
-                        borderBottom: "1px solid var(--border-subtle)",
-                      }}
+          <span className="demo-pill tabular">
+            Etapa {currentRound} / {totalRounds}
+          </span>
+        </div>
+
+        {/* Tab 1: CLASAMENT & Tab 2: FORMA */}
+        {tab !== "MARCATORI" ? (
+          <>
+            <div className="table-wrap">
+              <table className="standings">
+                <thead>
+                  <tr>
+                    <th scope="col" className="col-pos">#</th>
+                    <th scope="col" className="col-team">Echipă</th>
+                    {(["MJ", "V", "E", "Î"] as const).map((col) => (
+                      <th
+                        key={col}
+                        scope="col"
+                        tabIndex={0}
+                        data-col-tooltip={COLUMN_TIPS[col]}
+                        aria-label={`${col} — ${COLUMN_TIPS[col]}`}
+                        onMouseEnter={(e) => showHeaderTip(e.currentTarget, col)}
+                        onMouseLeave={hideHeaderTip}
+                        onFocus={(e) => showHeaderTip(e.currentTarget, col)}
+                        onBlur={hideHeaderTip}
+                      >
+                        {col}
+                      </th>
+                    ))}
+                    <th
+                      scope="col"
+                      className="col-gf"
+                      tabIndex={0}
+                      data-col-tooltip={COLUMN_TIPS.GM}
+                      aria-label={`GM — ${COLUMN_TIPS.GM}`}
+                      onMouseEnter={(e) => showHeaderTip(e.currentTarget, "GM")}
+                      onMouseLeave={hideHeaderTip}
+                      onFocus={(e) => showHeaderTip(e.currentTarget, "GM")}
+                      onBlur={hideHeaderTip}
                     >
-                      <td style={{ padding: "6px 10px", textAlign: "center" }}>
-                        <span
-                          className="tabular-nums"
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            width: "24px",
-                            height: "24px",
-                            borderRadius: "var(--radius-md)",
-                            fontSize: "12px",
-                            fontWeight: 700,
-                            background: rankBg,
-                            color: rankFg,
-                            textShadow: rank === 3 ? "0 1px 2px rgba(0,0,0,0.45)" : undefined,
-                          }}
-                        >
-                          {rank}
-                        </span>
-                      </td>
-                      <td style={{ padding: "6px 10px" }}>
-                        <Link
-                          href={`/jucatori/${sc.playerSlug}`}
-                          style={{
-                            color: "var(--text-primary)",
-                            fontWeight: 600,
-                            textDecoration: "none",
-                          }}
-                        >
-                          {sc.playerName}
-                        </Link>
-                      </td>
-                      <td style={{ padding: "6px 10px" }}>
-                        <Link
-                          href={`/echipe/${sc.teamSlug}`}
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "8px",
-                            color: "var(--text-secondary)",
-                            textDecoration: "none",
-                          }}
-                        >
-                          <TeamCrest
-                            shortName={sc.teamShortName}
-                            colorA={sc.crestColorA}
-                            colorB={sc.crestColorB}
-                          />
-                          <span>{sc.teamName}</span>
-                        </Link>
-                      </td>
-                      <td style={{ padding: "6px 10px", textAlign: "right" }}>
-                        <span style={{ display: "inline-flex", gap: "6px" }}>
-                          {sc.yellowCards > 0 ? <CardCountBadge type="yellow" count={sc.yellowCards} /> : null}
-                          {sc.redCards > 0 ? <CardCountBadge type="red" count={sc.redCards} /> : null}
-                        </span>
-                      </td>
-                      <td
-                        className="tabular-nums"
-                        style={{
-                          padding: "6px 12px",
-                          textAlign: "right",
-                          fontWeight: 700,
-                          color: "var(--text-primary)",
+                      GM
+                    </th>
+                    <th
+                      scope="col"
+                      className="col-ga"
+                      tabIndex={0}
+                      data-col-tooltip={COLUMN_TIPS.GP}
+                      aria-label={`GP — ${COLUMN_TIPS.GP}`}
+                      onMouseEnter={(e) => showHeaderTip(e.currentTarget, "GP")}
+                      onMouseLeave={hideHeaderTip}
+                      onFocus={(e) => showHeaderTip(e.currentTarget, "GP")}
+                      onBlur={hideHeaderTip}
+                    >
+                      GP
+                    </th>
+                    <th
+                      scope="col"
+                      tabIndex={0}
+                      data-col-tooltip={COLUMN_TIPS.DG}
+                      aria-label={`DG — ${COLUMN_TIPS.DG}`}
+                      onMouseEnter={(e) => showHeaderTip(e.currentTarget, "DG")}
+                      onMouseLeave={hideHeaderTip}
+                      onFocus={(e) => showHeaderTip(e.currentTarget, "DG")}
+                      onBlur={hideHeaderTip}
+                    >
+                      DG
+                    </th>
+                    <th
+                      scope="col"
+                      className="col-pts"
+                      tabIndex={0}
+                      data-col-tooltip={COLUMN_TIPS.Pct}
+                      aria-label={`Pct — ${COLUMN_TIPS.Pct}`}
+                      onMouseEnter={(e) => showHeaderTip(e.currentTarget, "Pct")}
+                      onMouseLeave={hideHeaderTip}
+                      onFocus={(e) => showHeaderTip(e.currentTarget, "Pct")}
+                      onBlur={hideHeaderTip}
+                    >
+                      Pct
+                    </th>
+                    <th scope="col" className="col-form">Formă (5)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {activeRows.map((row, idx) => {
+                    const meta = teamMeta[row.teamId];
+                    const displayPos = tab === "FORMA" ? idx + 1 : row.position;
+                    const isLeader = displayPos === 1;
+                    const hasTieBreak = tab === "CLASAMENT" && row.tieBreakGroupId !== null;
+
+                    const isSelf = hoveredMatch.teamId === row.teamId;
+                    const isOpp = hoveredMatch.opponentId === row.teamId;
+                    const showTie = !hoveredMatch.teamId && hoveredTie.groupId !== null;
+                    const isTieActive = showTie && hoveredTie.teamId === row.teamId;
+                    const isTieGroupHover =
+                      showTie &&
+                      !isTieActive &&
+                      row.tieBreakGroupId === hoveredTie.groupId;
+
+                    const classes = [
+                      isLeader ? "rank-leader" : hasTieBreak ? "rank-tied" : "",
+                      isSelf ? "form-pair-self" : isOpp ? "form-pair-opp" : "",
+                      isTieActive ? "d3-team-active" : isTieGroupHover ? "d3-group-hover" : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ");
+
+                    const played = tab === "FORMA" ? (row as typeof formRows[number]).formPlayed : row.played;
+                    const won = tab === "FORMA" ? (row as typeof formRows[number]).formWon : row.won;
+                    const drawn = tab === "FORMA" ? (row as typeof formRows[number]).formDrawn : row.drawn;
+                    const lost = tab === "FORMA" ? (row as typeof formRows[number]).formLost : row.lost;
+                    const gf = tab === "FORMA" ? (row as typeof formRows[number]).formGF : row.goalsFor;
+                    const ga = tab === "FORMA" ? (row as typeof formRows[number]).formGA : row.goalsAgainst;
+                    const gd = tab === "FORMA" ? (row as typeof formRows[number]).formGD : row.goalDifference;
+                    const pts = tab === "FORMA" ? (row as typeof formRows[number]).formPoints : row.points;
+
+                    return (
+                      <tr
+                        key={row.teamId}
+                        data-team={row.teamId}
+                        className={classes || undefined}
+                        onMouseEnter={() => {
+                          if (hasTieBreak && row.tieBreakGroupId) {
+                            setHoveredTie({ groupId: row.tieBreakGroupId, teamId: row.teamId });
+                          }
+                        }}
+                        onMouseLeave={() => {
+                          if (hasTieBreak) {
+                            setHoveredTie({ groupId: null, teamId: null });
+                          }
                         }}
                       >
-                        {sc.goals}
+                        <td className="col-pos">
+                          <span className="pos-badge">{displayPos}</span>
+                        </td>
+                        <td className="col-team">
+                          <div className="team-cell">
+                            <Link
+                              href={`/echipe/${meta?.slug ?? row.teamId}`}
+                              className="team-cell"
+                            >
+                              <TeamCrest
+                                shortName={row.shortName}
+                                colorA={meta?.crestColorA ?? "#156842"}
+                                colorB={meta?.crestColorB ?? "#0F5132"}
+                                size="sm"
+                              />
+                              <span className="team-name">{row.teamName}</span>
+                            </Link>
+                            {hasTieBreak && row.tieBreakGroupId ? (
+                              <button
+                                type="button"
+                                className="tie-tag"
+                                onClick={() => jumpToTieBreak(row.tieBreakGroupId!, row.teamId)}
+                                aria-label={`Vezi departajarea ROAF pentru ${row.teamName}`}
+                              >
+                                D3
+                              </button>
+                            ) : null}
+                          </div>
+                        </td>
+                        <td className="tabular">{played}</td>
+                        <td className="tabular">{won}</td>
+                        <td className="tabular">{drawn}</td>
+                        <td className="tabular">{lost}</td>
+                        <td className="col-gf tabular">{gf}</td>
+                        <td className="col-ga tabular">{ga}</td>
+                        <td className="tabular">{gd > 0 ? `+${gd}` : gd}</td>
+                        <td className="col-pts tabular">{pts}</td>
+                        <td className="col-form">
+                          <FormStrip
+                            teamId={row.teamId}
+                            teamName={row.teamName}
+                            entries={row.lastFiveForm}
+                            onHoverMatch={(tid, oid) =>
+                              setHoveredMatch({ teamId: tid, opponentId: oid })
+                            }
+                          />
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="table-footer">
+              <div className="legend-group">
+                <span className="legend-item">
+                  <span className="legend-pos legend-pos-leader" aria-hidden="true">
+                    1
+                  </span>
+                  {tab === "FORMA" ? "Cea mai bună formă (5 etape)" : "Locul 1 · Lider"}
+                </span>
+                {tab === "CLASAMENT" ? (
+                  <span className="legend-item">
+                    <span className="legend-pos legend-pos-tied" aria-hidden="true">
+                      2
+                    </span>
+                    Departajare ROAF Art. 27 ({standings.mode === "final" ? "meciuri directe" : "golaveraj general"})
+                  </span>
+                ) : null}
+              </div>
+              <span>Formă: W = Victorie · D = Egal · L = Înfrângere</span>
+            </div>
+          </>
+        ) : (
+          /* Tab 3: MARCATORI (Top Scorers) */
+          <>
+            <div className="table-wrap">
+              <table className="scorers">
+                <thead>
+                  <tr>
+                    <th scope="col" className="col-pos">#</th>
+                    <th scope="col" className="col-player">Jucător</th>
+                    <th scope="col" style={{ textAlign: "left" }}>Echipă</th>
+                    <th scope="col" style={{ textAlign: "right" }}>Cartonașe</th>
+                    <th scope="col" className="col-goals">Goluri</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {topScorers.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={5}
+                        style={{ padding: "24px", textAlign: "center", color: "var(--text-muted)" }}
+                      >
+                        Nu există marcatori înregistrați în acest sezon.
                       </td>
                     </tr>
+                  ) : (
+                    topScorers.map((sc, idx) => {
+                      const rank = idx + 1;
+                      const rankCls =
+                        rank === 1
+                          ? "scorer-rank-1"
+                          : rank === 2
+                            ? "scorer-rank-2"
+                            : rank === 3
+                              ? "scorer-rank-3"
+                              : "";
+                      return (
+                        <tr key={sc.playerId} className={rankCls || undefined}>
+                          <td className="col-pos">
+                            <span className="pos-badge">{rank}</span>
+                          </td>
+                          <td>
+                            <Link
+                              href={`/jucatori/${sc.playerSlug}`}
+                              style={{ fontWeight: 600, color: "var(--text-primary)" }}
+                            >
+                              {sc.playerName}
+                            </Link>
+                          </td>
+                          <td>
+                            <Link
+                              href={`/echipe/${sc.teamSlug}`}
+                              className="team-cell"
+                              style={{ color: "var(--text-secondary)", fontWeight: 500 }}
+                            >
+                              <TeamCrest
+                                shortName={sc.teamShortName}
+                                colorA={sc.crestColorA}
+                                colorB={sc.crestColorB}
+                                size="xs"
+                              />
+                              <span className="team-name">{sc.teamName}</span>
+                            </Link>
+                          </td>
+                          <td style={{ textAlign: "right" }}>
+                            <span style={{ display: "inline-flex", gap: "6px" }}>
+                              {sc.yellowCards > 0 ? <CardCountBadge type="yellow" count={sc.yellowCards} /> : null}
+                              {sc.redCards > 0 ? <CardCountBadge type="red" count={sc.redCards} /> : null}
+                            </span>
+                          </td>
+                          <td className="col-goals tabular">{sc.goals}</td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+            <div className="table-footer">
+              <div className="legend-group">
+                <span className="legend-item">
+                  <span className="legend-pos legend-pos-s1" aria-hidden="true">1</span>
+                  Locul 1
+                </span>
+                <span className="legend-item">
+                  <span className="legend-pos legend-pos-s2" aria-hidden="true">2</span>
+                  Locul 2
+                </span>
+                <span className="legend-item">
+                  <span className="legend-pos legend-pos-s3" aria-hidden="true">3</span>
+                  Locul 3
+                </span>
+              </div>
+              <span>{seasonName} · Goluri oficiale</span>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* D3 Tie-Breaker Callout Panel (below standings, using div grid to preserve single <table> on /) */}
+      {tab === "CLASAMENT" && d3Groups.length > 0 ? (
+        <div
+          ref={d3PanelRef}
+          className={`tiebreak-panel animate-enter${hoveredTie.groupId ? " d3-panel-active" : ""}`}
+          style={{ animationDelay: "120ms" }}
+        >
+          <div className="tiebreak-head">
+            <h3 className="tiebreak-title">
+              Departajare activă · ROAF Art. 27 ({d3Groups.length}{" "}
+              {d3Groups.length === 1 ? "grup" : "grupuri"} la egalitate)
+            </h3>
+            <span className="demo-pill">
+              {standings.mode === "final" ? "Clasament final (H2H)" : "Clasament intermediar"}
+            </span>
+          </div>
+          <p className="tiebreak-desc">
+            Treci cu mouse-ul pe un rând pentru a evidenția echipele implicate în clasamentul general.
+          </p>
+
+          <div style={{ display: "grid", gap: "var(--space-3)" }}>
+            {d3Groups.map((g) => (
+              <div key={g.groupId} className="mini-grid">
+                <div className="mini-grid-row mini-grid-head">
+                  <div className="mini-grid-cell">
+                    Egalitate la {g.points} pct · Criteriu: {g.resolvedBy}
+                  </div>
+                  <div className="mini-grid-cell">MJ</div>
+                  <div className="mini-grid-cell">DG</div>
+                  <div className="mini-grid-cell">Pct</div>
+                </div>
+                {g.teamIds.map((tid) => {
+                  const r = rowById.get(tid);
+                  if (!r) return null;
+                  const meta = teamMeta[tid];
+                  const isActive = hoveredTie.teamId === tid;
+                  return (
+                    <div
+                      key={tid}
+                      className={`mini-grid-row mini-grid-body${isActive ? " d3-team-active" : ""}`}
+                      onMouseEnter={() => setHoveredTie({ groupId: g.groupId, teamId: tid })}
+                      onMouseLeave={() => setHoveredTie({ groupId: null, teamId: null })}
+                    >
+                      <div className="mini-grid-cell">
+                        <span className="team-cell">
+                          <TeamCrest
+                            shortName={r.shortName}
+                            colorA={meta?.crestColorA ?? "#156842"}
+                            colorB={meta?.crestColorB ?? "#0F5132"}
+                            size="xs"
+                          />
+                          <span>
+                            {r.position}. {r.teamName}
+                          </span>
+                        </span>
+                      </div>
+                      <div className="mini-grid-cell tabular">{r.played}</div>
+                      <div className="mini-grid-cell tabular">
+                        {r.goalDifference > 0 ? `+${r.goalDifference}` : r.goalDifference}
+                      </div>
+                      <div className="mini-grid-cell tabular">
+                        <strong>{r.points}</strong>
+                      </div>
+                    </div>
                   );
-                })
-              )}
-            </tbody>
-          </table>
+                })}
+              </div>
+            ))}
+          </div>
         </div>
-      )}
+      ) : null}
+
+      {/* Column Header Portal Tooltip */}
+      {mounted && headerTip
+        ? createPortal(
+            <div
+              role="tooltip"
+              className="form-tooltip"
+              style={
+                {
+                  left: `${headerTip.left}px`,
+                  top: `${headerTip.top}px`,
+                  "--arrow-x": `${headerTip.arrowX}px`,
+                } as React.CSSProperties
+              }
+            >
+              <span className="form-tooltip-result">{headerTip.label}</span>
+            </div>,
+            document.body,
+          )
+        : null}
     </section>
   );
 }

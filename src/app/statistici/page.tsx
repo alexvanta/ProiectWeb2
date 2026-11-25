@@ -26,8 +26,8 @@ export default async function StatisticsPage({
 
   if (!current) {
     return (
-      <main className="p19-container">
-        <div className="p19-panel" style={{ padding: "var(--space-6)" }}>
+      <main className="container">
+        <div className="panel" style={{ padding: "var(--space-6)" }}>
           Nu există sezoane disponibile.
         </div>
       </main>
@@ -71,210 +71,80 @@ export default async function StatisticsPage({
     .slice(0, 20);
 
   return (
-    <main className="p19-container" style={{ display: "grid", gap: "var(--space-6)" }}>
-      <div>
-        <h1 className="font-display" style={{ margin: 0, fontSize: "28px", lineHeight: "32px" }}>
-          Statistici & Suspendări active · {current.name}
-        </h1>
-        <p style={{ margin: "4px 0 0", color: "var(--text-secondary)", fontSize: "13px" }}>
-          Top marcatori, situația cartonașelor și jucătorii suspendați activ (inclusiv suspendări reportate între sezoane).
-        </p>
+    <main className="container">
+      <div className="page-head animate-enter">
+        <div>
+          <h1 className="page-title">Statistici &amp; Suspendări active · {current.name}</h1>
+          <p className="page-meta">
+            Top marcatori, situația cartonașelor și jucătorii suspendați activ (inclusiv suspendări reportate între sezoane).
+          </p>
+        </div>
+        <span className="demo-pill tabular">
+          {activeSuspensions.length} suspendări active
+        </span>
       </div>
 
-      {/* Active Suspensions */}
-      <section className="p19-panel" style={{ overflow: "hidden" }}>
-        <div
-          style={{
-            padding: "var(--space-3) var(--space-4)",
-            borderBottom: "1px solid var(--border-subtle)",
-          }}
-        >
-          <h2 className="font-display" style={{ margin: 0, fontSize: "20px" }}>
-            Suspendări active ({activeSuspensions.length})
-          </h2>
-        </div>
-
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
-            <thead>
-              <tr
-                style={{
-                  background: "var(--bg-subtle)",
-                  color: "var(--text-muted)",
-                  fontSize: "12px",
-                  borderBottom: "1px solid var(--border-subtle)",
-                }}
-              >
-                <th style={{ padding: "8px 12px", textAlign: "left" }}>Jucător</th>
-                <th style={{ padding: "8px 12px", textAlign: "left" }}>Echipă curentă</th>
-                <th style={{ padding: "8px 12px", textAlign: "left" }}>Motiv</th>
-                <th style={{ padding: "8px 12px", textAlign: "left" }}>Origine</th>
-                <th style={{ padding: "8px 12px", textAlign: "right" }}>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {activeSuspensions.length === 0 ? (
-                <tr>
-                  <td colSpan={5} style={{ padding: "20px", textAlign: "center", color: "var(--text-muted)" }}>
-                    Nu există jucători suspendați activ în acest moment.
-                  </td>
-                </tr>
-              ) : (
-                activeSuspensions.map((s) => {
-                  const team = s.player.registrations[0]?.team;
-                  return (
-                    <tr
-                      key={s.id}
-                      style={{
-                        height: "var(--row-height-dense)",
-                        borderBottom: "1px solid var(--border-subtle)",
-                      }}
-                    >
-                      <td style={{ padding: "6px 12px" }}>
-                        <Link
-                          href={`/jucatori/${s.player.slug}`}
-                          style={{ fontWeight: 600, color: "var(--text-primary)", textDecoration: "none" }}
-                        >
-                          {s.player.fullName}
-                        </Link>
-                      </td>
-                      <td style={{ padding: "6px 12px" }}>
-                        {team ? (
-                          <Link
-                            href={`/echipe/${team.slug}`}
-                            style={{
-                              display: "inline-flex",
-                              alignItems: "center",
-                              gap: "8px",
-                              color: "var(--text-secondary)",
-                              textDecoration: "none",
-                            }}
-                          >
-                            <TeamCrest
-                              shortName={team.shortName}
-                              colorA={team.crestColorA}
-                              colorB={team.crestColorB}
-                            />
-                            <span>{team.name}</span>
-                          </Link>
-                        ) : (
-                          "—"
-                        )}
-                      </td>
-                      <td style={{ padding: "6px 12px", color: "var(--text-secondary)" }}>
-                        {REASON_LABELS[s.reason] ?? s.reason}
-                      </td>
-                      <td style={{ padding: "6px 12px", color: "var(--text-muted)", fontSize: "12px" }}>
-                        {s.originSeason.name}
-                        {s.originSeasonId !== current.id ? " (Reportată)" : ""}
-                      </td>
-                      <td style={{ padding: "6px 12px", textAlign: "right" }}>
-                        <EligibilityBadge suspendedRounds={s.remainingRounds} />
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {/* Top Scorers + Cards Grid */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-          gap: "var(--space-5)",
-        }}
-      >
-        {/* Top Scorers */}
-        <section className="p19-panel" style={{ overflow: "hidden" }}>
-          <div
-            style={{
-              padding: "var(--space-3) var(--space-4)",
-              borderBottom: "1px solid var(--border-subtle)",
-            }}
-          >
-            <h2 className="font-display" style={{ margin: 0, fontSize: "20px" }}>
-              Top marcatori
-            </h2>
+      <div style={{ display: "grid", gap: "var(--space-6)" }}>
+        {/* Active Suspensions */}
+        <section className="panel animate-enter" style={{ animationDelay: "40ms" }}>
+          <div className="panel-header">
+            <h2 className="panel-title">Suspendări active</h2>
+            <span className="demo-pill tabular">{activeSuspensions.length} jucători</span>
           </div>
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+
+          <div className="table-wrap">
+            <table className="data-table">
               <thead>
-                <tr
-                  style={{
-                    background: "var(--bg-subtle)",
-                    color: "var(--text-muted)",
-                    fontSize: "12px",
-                    borderBottom: "1px solid var(--border-subtle)",
-                  }}
-                >
-                  <th style={{ padding: "8px 10px", textAlign: "center", width: "40px" }}>#</th>
-                  <th style={{ padding: "8px 10px", textAlign: "left" }}>Jucător</th>
-                  <th style={{ padding: "8px 10px", textAlign: "left" }}>Echipă</th>
-                  <th style={{ padding: "8px 10px", textAlign: "right" }}>Goluri</th>
+                <tr>
+                  <th scope="col">Jucător</th>
+                  <th scope="col">Echipă curentă</th>
+                  <th scope="col">Motiv</th>
+                  <th scope="col" className="col-hide-sm">Origine</th>
+                  <th scope="col" className="col-num">Status</th>
                 </tr>
               </thead>
               <tbody>
-                {topScorers.length === 0 ? (
+                {activeSuspensions.length === 0 ? (
                   <tr>
-                    <td colSpan={4} style={{ padding: "18px", textAlign: "center", color: "var(--text-muted)" }}>
-                      Niciun gol înregistrat încă.
+                    <td colSpan={5} style={{ padding: "20px", textAlign: "center", color: "var(--text-muted)" }}>
+                      Nu există jucători suspendați activ în acest moment.
                     </td>
                   </tr>
                 ) : (
-                  topScorers.map((sc, i) => {
-                    const rank = i + 1;
-                    const bg =
-                      rank === 1
-                        ? "var(--scorer-rank-1)"
-                        : rank === 2
-                          ? "var(--scorer-rank-2)"
-                          : rank === 3
-                            ? "var(--scorer-rank-3)"
-                            : "transparent";
+                  activeSuspensions.map((s) => {
+                    const team = s.player.registrations[0]?.team;
                     return (
-                      <tr
-                        key={sc.playerId}
-                        style={{
-                          height: "var(--row-height-dense)",
-                          borderBottom: "1px solid var(--border-subtle)",
-                        }}
-                      >
-                        <td style={{ padding: "6px 10px", textAlign: "center" }}>
-                          <span
-                            className="tabular-nums"
-                            style={{
-                              display: "inline-flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              width: "24px",
-                              height: "24px",
-                              borderRadius: "var(--radius-md)",
-                              fontSize: "12px",
-                              fontWeight: 700,
-                              background: bg,
-                              color: rank <= 3 ? "var(--scorer-rank-fg)" : "var(--text-muted)",
-                            }}
-                          >
-                            {rank}
-                          </span>
-                        </td>
-                        <td style={{ padding: "6px 10px" }}>
+                      <tr key={s.id}>
+                        <td>
                           <Link
-                            href={`/jucatori/${sc.playerSlug}`}
-                            style={{ fontWeight: 600, color: "var(--text-primary)", textDecoration: "none" }}
+                            href={`/jucatori/${s.player.slug}`}
+                            style={{ fontWeight: 600, color: "var(--text-primary)" }}
                           >
-                            {sc.playerName}
+                            {s.player.fullName}
                           </Link>
                         </td>
-                        <td style={{ padding: "6px 10px", color: "var(--text-secondary)" }}>
-                          {sc.teamName}
+                        <td>
+                          {team ? (
+                            <Link href={`/echipe/${team.slug}`} className="team-cell">
+                              <TeamCrest
+                                shortName={team.shortName}
+                                colorA={team.crestColorA}
+                                colorB={team.crestColorB}
+                                size="xs"
+                              />
+                              <span className="team-name">{team.name}</span>
+                            </Link>
+                          ) : (
+                            "—"
+                          )}
                         </td>
-                        <td className="tabular-nums" style={{ padding: "6px 10px", textAlign: "right", fontWeight: 700 }}>
-                          {sc.goals}
+                        <td>{REASON_LABELS[s.reason] ?? s.reason}</td>
+                        <td className="col-hide-sm" style={{ color: "var(--text-muted)", fontSize: "12px" }}>
+                          {s.originSeason.name}
+                          {s.originSeasonId !== current.id ? " (Reportată)" : ""}
+                        </td>
+                        <td className="col-num">
+                          <EligibilityBadge suspendedRounds={s.remainingRounds} />
                         </td>
                       </tr>
                     );
@@ -285,74 +155,121 @@ export default async function StatisticsPage({
           </div>
         </section>
 
-        {/* Cards Leaderboard */}
-        <section className="p19-panel" style={{ overflow: "hidden" }}>
-          <div
-            style={{
-              padding: "var(--space-3) var(--space-4)",
-              borderBottom: "1px solid var(--border-subtle)",
-            }}
-          >
-            <h2 className="font-display" style={{ margin: 0, fontSize: "20px" }}>
-              Disciplină & cartonașe
-            </h2>
-          </div>
-          <div style={{ overflowX: "auto" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
-              <thead>
-                <tr
-                  style={{
-                    background: "var(--bg-subtle)",
-                    color: "var(--text-muted)",
-                    fontSize: "12px",
-                    borderBottom: "1px solid var(--border-subtle)",
-                  }}
-                >
-                  <th style={{ padding: "8px 10px", textAlign: "left" }}>Jucător</th>
-                  <th style={{ padding: "8px 10px", textAlign: "left" }}>Echipă</th>
-                  <th style={{ padding: "8px 10px", textAlign: "right" }}>Cartonașe</th>
-                </tr>
-              </thead>
-              <tbody>
-                {topCards.length === 0 ? (
+        {/* Top Scorers + Cards Grid */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+            gap: "var(--space-5)",
+            alignItems: "start",
+          }}
+        >
+          {/* Top Scorers */}
+          <section className="panel animate-enter" style={{ animationDelay: "80ms" }}>
+            <div className="panel-header">
+              <h2 className="panel-title">Top marcatori</h2>
+              <span className="demo-pill tabular">Top {topScorers.length}</span>
+            </div>
+            <div className="table-wrap">
+              <table className="scorers">
+                <thead>
                   <tr>
-                    <td colSpan={3} style={{ padding: "18px", textAlign: "center", color: "var(--text-muted)" }}>
-                      Niciun cartonaș înregistrat în acest sezon.
-                    </td>
+                    <th scope="col" className="col-pos">#</th>
+                    <th scope="col" className="col-player">Jucător</th>
+                    <th scope="col" style={{ textAlign: "left" }}>Echipă</th>
+                    <th scope="col" className="col-goals">Goluri</th>
                   </tr>
-                ) : (
-                  topCards.map((sc) => (
-                    <tr
-                      key={sc.playerId}
-                      style={{
-                        height: "var(--row-height-dense)",
-                        borderBottom: "1px solid var(--border-subtle)",
-                      }}
-                    >
-                      <td style={{ padding: "6px 10px" }}>
-                        <Link
-                          href={`/jucatori/${sc.playerSlug}`}
-                          style={{ fontWeight: 600, color: "var(--text-primary)", textDecoration: "none" }}
-                        >
-                          {sc.playerName}
-                        </Link>
-                      </td>
-                      <td style={{ padding: "6px 10px", color: "var(--text-secondary)" }}>
-                        {sc.teamName}
-                      </td>
-                      <td style={{ padding: "6px 10px", textAlign: "right" }}>
-                        <span style={{ display: "inline-flex", gap: "6px" }}>
-                          {sc.yellowCards > 0 ? <CardCountBadge type="yellow" count={sc.yellowCards} /> : null}
-                          {sc.redCards > 0 ? <CardCountBadge type="red" count={sc.redCards} /> : null}
-                        </span>
+                </thead>
+                <tbody>
+                  {topScorers.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} style={{ padding: "18px", textAlign: "center", color: "var(--text-muted)" }}>
+                        Niciun gol înregistrat încă.
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </section>
+                  ) : (
+                    topScorers.map((sc, i) => {
+                      const rank = i + 1;
+                      const rankCls =
+                        rank === 1
+                          ? "scorer-rank-1"
+                          : rank === 2
+                            ? "scorer-rank-2"
+                            : rank === 3
+                              ? "scorer-rank-3"
+                              : "";
+                      return (
+                        <tr key={sc.playerId} className={rankCls || undefined}>
+                          <td className="col-pos">
+                            <span className="pos-badge">{rank}</span>
+                          </td>
+                          <td>
+                            <Link
+                              href={`/jucatori/${sc.playerSlug}`}
+                              style={{ fontWeight: 600, color: "var(--text-primary)" }}
+                            >
+                              {sc.playerName}
+                            </Link>
+                          </td>
+                          <td style={{ color: "var(--text-secondary)" }}>{sc.teamName}</td>
+                          <td className="col-goals tabular">{sc.goals}</td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          {/* Cards Leaderboard */}
+          <section className="panel animate-enter" style={{ animationDelay: "120ms" }}>
+            <div className="panel-header">
+              <h2 className="panel-title">Disciplină &amp; cartonașe</h2>
+              <span className="demo-pill tabular">{topCards.length} jucători</span>
+            </div>
+            <div className="table-wrap">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Jucător</th>
+                    <th scope="col">Echipă</th>
+                    <th scope="col" className="col-num">Cartonașe</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {topCards.length === 0 ? (
+                    <tr>
+                      <td colSpan={3} style={{ padding: "18px", textAlign: "center", color: "var(--text-muted)" }}>
+                        Niciun cartonaș înregistrat în acest sezon.
+                      </td>
+                    </tr>
+                  ) : (
+                    topCards.map((sc) => (
+                      <tr key={sc.playerId}>
+                        <td>
+                          <Link
+                            href={`/jucatori/${sc.playerSlug}`}
+                            style={{ fontWeight: 600, color: "var(--text-primary)" }}
+                          >
+                            {sc.playerName}
+                          </Link>
+                        </td>
+                        <td>{sc.teamName}</td>
+                        <td className="col-num">
+                          <span style={{ display: "inline-flex", gap: "6px" }}>
+                            {sc.yellowCards > 0 ? <CardCountBadge type="yellow" count={sc.yellowCards} /> : null}
+                            {sc.redCards > 0 ? <CardCountBadge type="red" count={sc.redCards} /> : null}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
       </div>
     </main>
   );

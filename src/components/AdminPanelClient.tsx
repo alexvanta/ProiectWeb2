@@ -83,19 +83,8 @@ export function AdminPanelClient({
 
   return (
     <div style={{ display: "grid", gap: "var(--space-5)" }}>
-      {/* Tabs */}
-      <div
-        role="tablist"
-        style={{
-          display: "inline-flex",
-          flexWrap: "wrap",
-          gap: "6px",
-          padding: "4px",
-          borderRadius: "var(--radius-md)",
-          background: "var(--bg-subtle)",
-          width: "fit-content",
-        }}
-      >
+      {/* Segmented Tabs matching mockup */}
+      <div className="panel-tabs" role="tablist" style={{ width: "fit-content" }}>
         {(
           [
             { id: "SCHEDULE", label: "Generator program" },
@@ -108,18 +97,9 @@ export function AdminPanelClient({
             key={t.id}
             type="button"
             role="tab"
+            className="panel-tab"
             aria-selected={tab === t.id}
             onClick={() => setTab(t.id)}
-            style={{
-              padding: "7px 12px",
-              borderRadius: "var(--radius-sm)",
-              border: "none",
-              cursor: "pointer",
-              fontSize: "12.5px",
-              fontWeight: 700,
-              background: tab === t.id ? "var(--accent-primary)" : "transparent",
-              color: tab === t.id ? "var(--accent-primary-fg)" : "var(--text-secondary)",
-            }}
           >
             {t.label}
           </button>
@@ -127,88 +107,120 @@ export function AdminPanelClient({
       </div>
 
       {error ? (
-        <div role="alert" style={{ padding: "10px 14px", borderRadius: "var(--radius-md)", background: "var(--card-red-bg)", color: "var(--card-red-fg)", fontSize: "13px", fontWeight: 600 }}>
-          {error}
+        <div
+          role="alert"
+          className="alert-retro"
+          style={{
+            background: "var(--card-red-bg)",
+            color: "var(--card-red-fg)",
+            borderColor: "var(--card-red-fill)",
+          }}
+        >
+          <strong>{error}</strong>
         </div>
       ) : null}
+
       {success ? (
-        <div role="status" style={{ padding: "10px 14px", borderRadius: "var(--radius-md)", background: "var(--status-win-bg)", color: "var(--status-win-fg)", fontSize: "13px", fontWeight: 600 }}>
-          {success}
+        <div
+          role="status"
+          className="alert-banner"
+          style={{
+            background: "var(--status-win-bg)",
+            color: "var(--status-win-fg)",
+            borderLeft: "4px solid var(--accent-primary)",
+          }}
+        >
+          <strong>{success}</strong>
         </div>
       ) : null}
 
       {tab === "SCHEDULE" ? (
-        <section className="p19-panel" style={{ padding: "var(--space-5)", display: "grid", gap: "var(--space-4)" }}>
-          <h2 className="font-display" style={{ margin: 0, fontSize: "20px" }}>
-            Generator program tur–retur (preview + confirmare)
-          </h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "12px" }}>
-            <label style={{ display: "grid", gap: "4px", fontSize: "12px", color: "var(--text-muted)" }}>
-              Sezon
-              <select className="p19-select" value={schedSeasonId} onChange={(e) => setSchedSeasonId(e.target.value)}>
-                {seasons.map((s) => (
-                  <option key={s.id} value={s.id}>{s.name} ({s.status})</option>
-                ))}
-              </select>
-            </label>
-            <label style={{ display: "grid", gap: "4px", fontSize: "12px", color: "var(--text-muted)" }}>
-              Dată start Etapa 1
-              <input type="date" className="p19-input" value={schedStartDate} onChange={(e) => setSchedStartDate(e.target.value)} />
-            </label>
+        <section className="panel animate-enter">
+          <div className="panel-header panel-header-subtle">
+            <h2 className="panel-title">Generator program tur–retur (preview + confirmare)</h2>
           </div>
 
-          <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-            <button
-              type="button"
-              disabled={busy}
-              className="p19-btn-secondary"
-              onClick={async () => {
-                const data = await runApi(
-                  "/api/admin/schedule",
-                  { seasonId: schedSeasonId, startDate: schedStartDate, confirm: false },
-                  "Preview generat cu succes.",
-                );
-                if (data?.schedule) {
-                  setPreviewSummary({
-                    totalRounds: data.schedule.totalRounds,
-                    matchesCount: data.schedule.matches.length,
-                    byesCount: data.schedule.byes.length,
-                  });
-                }
-              }}
-            >
-              Generează preview
-            </button>
-            <button
-              type="button"
-              disabled={busy}
-              className="p19-btn-primary"
-              onClick={() =>
-                runApi(
-                  "/api/admin/schedule",
-                  { seasonId: schedSeasonId, startDate: schedStartDate, confirm: true },
-                  "Programul a fost confirmat și salvat în baza de date.",
-                )
-              }
-            >
-              Confirmă & salvează programul
-            </button>
-          </div>
-
-          {previewSummary ? (
-            <div style={{ padding: "12px", borderRadius: "var(--radius-md)", background: "var(--bg-subtle)", fontSize: "13px" }}>
-              Preview: <strong>{previewSummary.totalRounds}</strong> etape ·{" "}
-              <strong>{previewSummary.matchesCount}</strong> meciuri ·{" "}
-              <strong>{previewSummary.byesCount}</strong> etape libere (bye).
+          <div style={{ padding: "var(--space-5)", display: "grid", gap: "var(--space-4)" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "12px" }}>
+              <div className="field">
+                <label htmlFor="adm-sched-season">Sezon</label>
+                <select
+                  id="adm-sched-season"
+                  className="p19-select"
+                  value={schedSeasonId}
+                  onChange={(e) => setSchedSeasonId(e.target.value)}
+                >
+                  {seasons.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name} ({s.status})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="field">
+                <label htmlFor="adm-sched-start">Dată start Etapa 1</label>
+                <input
+                  id="adm-sched-start"
+                  type="date"
+                  className="p19-input"
+                  value={schedStartDate}
+                  onChange={(e) => setSchedStartDate(e.target.value)}
+                />
+              </div>
             </div>
-          ) : null}
+
+            <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+              <button
+                type="button"
+                disabled={busy}
+                className="btn btn-secondary"
+                onClick={async () => {
+                  const data = await runApi(
+                    "/api/admin/schedule",
+                    { seasonId: schedSeasonId, startDate: schedStartDate, confirm: false },
+                    "Preview generat cu succes.",
+                  );
+                  if (data?.schedule) {
+                    setPreviewSummary({
+                      totalRounds: data.schedule.totalRounds,
+                      matchesCount: data.schedule.matches.length,
+                      byesCount: data.schedule.byes.length,
+                    });
+                  }
+                }}
+              >
+                Generează preview
+              </button>
+              <button
+                type="button"
+                disabled={busy}
+                className="btn btn-primary"
+                onClick={() =>
+                  runApi(
+                    "/api/admin/schedule",
+                    { seasonId: schedSeasonId, startDate: schedStartDate, confirm: true },
+                    "Programul a fost confirmat și salvat în baza de date.",
+                  )
+                }
+              >
+                Confirmă &amp; salvează programul
+              </button>
+            </div>
+
+            {previewSummary ? (
+              <div className="audit-reason tabular" style={{ margin: 0 }}>
+                Preview: <strong>{previewSummary.totalRounds}</strong> etape ·{" "}
+                <strong>{previewSummary.matchesCount}</strong> meciuri ·{" "}
+                <strong>{previewSummary.byesCount}</strong> etape libere (bye).
+              </div>
+            ) : null}
+          </div>
         </section>
       ) : null}
 
       {tab === "TRANSFERS" ? (
         <form
-          className="p19-panel"
-          style={{ padding: "var(--space-5)", display: "grid", gap: "var(--space-4)" }}
+          className="panel animate-enter"
           onSubmit={(e) => {
             e.preventDefault();
             runApi(
@@ -218,46 +230,48 @@ export function AdminPanelClient({
             );
           }}
         >
-          <h2 className="font-display" style={{ margin: 0, fontSize: "20px" }}>
-            Înregistrare transfer jucător
-          </h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "12px" }}>
-            <label style={{ display: "grid", gap: "4px", fontSize: "12px", color: "var(--text-muted)" }}>
-              Jucător
-              <select className="p19-select" value={trPlayerId} onChange={(e) => setTrPlayerId(e.target.value)}>
-                {players.map((p) => (
-                  <option key={p.id} value={p.id}>{p.fullName}</option>
-                ))}
-              </select>
-            </label>
-            <label style={{ display: "grid", gap: "4px", fontSize: "12px", color: "var(--text-muted)" }}>
-              Sezon
-              <select className="p19-select" value={trSeasonId} onChange={(e) => setTrSeasonId(e.target.value)}>
-                {seasons.map((s) => (
-                  <option key={s.id} value={s.id}>{s.name}</option>
-                ))}
-              </select>
-            </label>
-            <label style={{ display: "grid", gap: "4px", fontSize: "12px", color: "var(--text-muted)" }}>
-              Echipă destinație
-              <select className="p19-select" value={trTeamId} onChange={(e) => setTrTeamId(e.target.value)}>
-                {teams.map((t) => (
-                  <option key={t.id} value={t.id}>{t.name}</option>
-                ))}
-              </select>
-            </label>
+          <div className="panel-header panel-header-subtle">
+            <h2 className="panel-title">Înregistrare transfer jucător</h2>
           </div>
-          <button type="submit" disabled={busy} className="p19-btn-primary" style={{ width: "fit-content" }}>
-            Salvează transferul
-          </button>
+
+          <div style={{ padding: "var(--space-5)", display: "grid", gap: "var(--space-4)" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "12px" }}>
+              <div className="field">
+                <label htmlFor="adm-tr-player">Jucător</label>
+                <select id="adm-tr-player" className="p19-select" value={trPlayerId} onChange={(e) => setTrPlayerId(e.target.value)}>
+                  {players.map((p) => (
+                    <option key={p.id} value={p.id}>{p.fullName}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="field">
+                <label htmlFor="adm-tr-season">Sezon</label>
+                <select id="adm-tr-season" className="p19-select" value={trSeasonId} onChange={(e) => setTrSeasonId(e.target.value)}>
+                  {seasons.map((s) => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="field">
+                <label htmlFor="adm-tr-team">Echipă destinație</label>
+                <select id="adm-tr-team" className="p19-select" value={trTeamId} onChange={(e) => setTrTeamId(e.target.value)}>
+                  {teams.map((t) => (
+                    <option key={t.id} value={t.id}>{t.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <button type="submit" disabled={busy} className="btn btn-primary" style={{ width: "fit-content" }}>
+              Salvează transferul
+            </button>
+          </div>
         </form>
       ) : null}
 
       {tab === "TEAMS_PITCHES" ? (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "var(--space-5)" }}>
           <form
-            className="p19-panel"
-            style={{ padding: "var(--space-5)", display: "grid", gap: "12px" }}
+            className="panel animate-enter"
             onSubmit={async (e) => {
               e.preventDefault();
               const slug = teamName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -272,17 +286,19 @@ export function AdminPanelClient({
               }
             }}
           >
-            <h2 className="font-display" style={{ margin: 0, fontSize: "20px" }}>
-              Adaugă echipă ({teams.length} existente)
-            </h2>
-            <input required className="p19-input" placeholder="Nume echipă" value={teamName} onChange={(e) => setTeamName(e.target.value)} />
-            <input required maxLength={4} className="p19-input" placeholder="Cod scurt (ex: UCV)" value={teamShort} onChange={(e) => setTeamShort(e.target.value)} />
-            <button type="submit" disabled={busy} className="p19-btn-primary">Adaugă echipă</button>
+            <div className="panel-header panel-header-subtle">
+              <h2 className="panel-title">Adaugă echipă ({teams.length})</h2>
+            </div>
+            <div style={{ padding: "var(--space-5)", display: "grid", gap: "12px" }}>
+              <input required className="p19-input" placeholder="Nume echipă" value={teamName} onChange={(e) => setTeamName(e.target.value)} />
+              <input required maxLength={4} className="p19-input" placeholder="Cod scurt (ex: UCV)" value={teamShort} onChange={(e) => setTeamShort(e.target.value)} />
+              <button type="submit" disabled={busy} className="btn btn-primary">Adaugă echipă</button>
+            </div>
           </form>
 
           <form
-            className="p19-panel"
-            style={{ padding: "var(--space-5)", display: "grid", gap: "12px" }}
+            className="panel animate-enter"
+            style={{ animationDelay: "60ms" }}
             onSubmit={async (e) => {
               e.preventDefault();
               const ok = await runApi(
@@ -303,12 +319,14 @@ export function AdminPanelClient({
               }
             }}
           >
-            <h2 className="font-display" style={{ margin: 0, fontSize: "20px" }}>
-              Adaugă teren ({pitches.length} existente)
-            </h2>
-            <input required className="p19-input" placeholder="Nume stadion / teren" value={pitchName} onChange={(e) => setPitchName(e.target.value)} />
-            <input required className="p19-input" placeholder="Oraș" value={pitchCity} onChange={(e) => setPitchCity(e.target.value)} />
-            <button type="submit" disabled={busy} className="p19-btn-primary">Adaugă teren</button>
+            <div className="panel-header panel-header-subtle">
+              <h2 className="panel-title">Adaugă teren ({pitches.length})</h2>
+            </div>
+            <div style={{ padding: "var(--space-5)", display: "grid", gap: "12px" }}>
+              <input required className="p19-input" placeholder="Nume stadion / teren" value={pitchName} onChange={(e) => setPitchName(e.target.value)} />
+              <input required className="p19-input" placeholder="Oraș" value={pitchCity} onChange={(e) => setPitchCity(e.target.value)} />
+              <button type="submit" disabled={busy} className="btn btn-primary">Adaugă teren</button>
+            </div>
           </form>
         </div>
       ) : null}
@@ -316,8 +334,7 @@ export function AdminPanelClient({
       {tab === "USERS" ? (
         <div style={{ display: "grid", gap: "var(--space-5)" }}>
           <form
-            className="p19-panel"
-            style={{ padding: "var(--space-5)", display: "grid", gap: "12px" }}
+            className="panel animate-enter"
             onSubmit={async (e) => {
               e.preventDefault();
               const ok = await runApi(
@@ -338,47 +355,61 @@ export function AdminPanelClient({
               }
             }}
           >
-            <h2 className="font-display" style={{ margin: 0, fontSize: "20px" }}>
-              Creează cont utilizator (exclusiv Admin, D-002)
-            </h2>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "10px" }}>
-              <input required type="email" className="p19-input" placeholder="Email" value={userEmail} onChange={(e) => setUserEmail(e.target.value)} />
-              <input required className="p19-input" placeholder="Nume complet" value={userName} onChange={(e) => setUserName(e.target.value)} />
-              <input required type="password" minLength={6} className="p19-input" placeholder="Parolă (min 6)" value={userPass} onChange={(e) => setUserPass(e.target.value)} />
-              <select className="p19-select" value={userRole} onChange={(e) => setUserRole(e.target.value as typeof userRole)}>
-                <option value="PLAYER">Jucător</option>
-                <option value="CAPTAIN">Căpitan</option>
-                <option value="REFEREE_ORGANIZER">Arbitru / Organizator</option>
-                <option value="ADMIN">Admin</option>
-              </select>
-              {userRole === "CAPTAIN" || userRole === "PLAYER" ? (
-                <select className="p19-select" value={userTeamId} onChange={(e) => setUserTeamId(e.target.value)}>
-                  {teams.map((t) => (
-                    <option key={t.id} value={t.id}>{t.name}</option>
-                  ))}
-                </select>
-              ) : null}
+            <div className="panel-header panel-header-subtle">
+              <h2 className="panel-title">Creează cont utilizator (exclusiv Admin, D-002)</h2>
             </div>
-            <button type="submit" disabled={busy} className="p19-btn-primary" style={{ width: "fit-content" }}>
-              Creează cont
-            </button>
+            <div style={{ padding: "var(--space-5)", display: "grid", gap: "12px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "10px" }}>
+                <input required type="email" className="p19-input" placeholder="Email" value={userEmail} onChange={(e) => setUserEmail(e.target.value)} />
+                <input required className="p19-input" placeholder="Nume complet" value={userName} onChange={(e) => setUserName(e.target.value)} />
+                <input required type="password" minLength={6} className="p19-input" placeholder="Parolă (min 6)" value={userPass} onChange={(e) => setUserPass(e.target.value)} />
+                <select className="p19-select" value={userRole} onChange={(e) => setUserRole(e.target.value as typeof userRole)}>
+                  <option value="PLAYER">Jucător</option>
+                  <option value="CAPTAIN">Căpitan</option>
+                  <option value="REFEREE_ORGANIZER">Arbitru / Organizator</option>
+                  <option value="ADMIN">Admin</option>
+                </select>
+                {userRole === "CAPTAIN" || userRole === "PLAYER" ? (
+                  <select className="p19-select" value={userTeamId} onChange={(e) => setUserTeamId(e.target.value)}>
+                    {teams.map((t) => (
+                      <option key={t.id} value={t.id}>{t.name}</option>
+                    ))}
+                  </select>
+                ) : null}
+              </div>
+              <button type="submit" disabled={busy} className="btn btn-primary" style={{ width: "fit-content" }}>
+                Creează cont
+              </button>
+            </div>
           </form>
 
-          <section className="p19-panel" style={{ overflow: "hidden" }}>
-            <div style={{ padding: "var(--space-3) var(--space-4)", borderBottom: "1px solid var(--border-subtle)" }}>
-              <h3 style={{ margin: 0, fontSize: "16px" }}>Conturi existente ({users.length})</h3>
+          <section className="panel animate-enter" style={{ animationDelay: "60ms" }}>
+            <div className="panel-header">
+              <h3 className="panel-title">Conturi existente</h3>
+              <span className="demo-pill tabular">{users.length}</span>
             </div>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
-              <tbody>
-                {users.map((u) => (
-                  <tr key={u.id} style={{ height: "var(--row-height-dense)", borderBottom: "1px solid var(--border-subtle)" }}>
-                    <td style={{ padding: "6px 12px", fontWeight: 600 }}>{u.name}</td>
-                    <td className="font-mono-audit" style={{ padding: "6px 12px", color: "var(--text-secondary)" }}>{u.email}</td>
-                    <td style={{ padding: "6px 12px", textAlign: "right", fontWeight: 600 }}>{u.role}</td>
+            <div className="table-wrap">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Nume</th>
+                    <th scope="col">Email</th>
+                    <th scope="col" className="col-num">Rol</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {users.map((u) => (
+                    <tr key={u.id}>
+                      <td style={{ fontWeight: 600, color: "var(--text-primary)" }}>{u.name}</td>
+                      <td className="mono">{u.email}</td>
+                      <td className="col-num">
+                        <span className="status-badge status-neutral">{u.role}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </section>
         </div>
       ) : null}

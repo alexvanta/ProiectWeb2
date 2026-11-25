@@ -1,9 +1,10 @@
-import { AlertTriangle, CalendarClock } from "lucide-react";
+import { AlertTriangle, Info } from "lucide-react";
 
 interface AlertBannerProps {
   variant: "retroactive" | "reschedule";
   title: string;
   description: string;
+  roleChip?: string;
   action?: React.ReactNode;
 }
 
@@ -11,48 +12,47 @@ export function AlertBanner({
   variant,
   title,
   description,
+  roleChip,
   action,
 }: AlertBannerProps) {
   const isRetro = variant === "retroactive";
 
-  return (
-    <div
-      role={isRetro ? "alert" : "status"}
-      style={{
-        display: "flex",
-        flexWrap: "wrap",
-        alignItems: "flex-start",
-        justifyContent: "space-between",
-        gap: "var(--space-3)",
-        padding: "var(--space-3) var(--space-4)",
-        borderRadius: "var(--radius-lg)",
-        background: isRetro ? "var(--alert-retro-bg)" : "var(--info-bg)",
-        color: isRetro ? "var(--alert-retro-fg)" : "var(--info-fg)",
-        borderLeft: `4px solid ${isRetro ? "var(--alert-retro-border)" : "var(--info-fg)"}`,
-      }}
-    >
-      <div style={{ display: "flex", gap: "var(--space-3)", flex: "1 1 260px" }}>
-        <span style={{ marginTop: "2px", flexShrink: 0 }}>
-          {isRetro ? (
-            <AlertTriangle size={18} aria-hidden="true" />
-          ) : (
-            <CalendarClock size={18} aria-hidden="true" />
-          )}
-        </span>
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: 700, fontSize: "13px" }}>
-            {isRetro && (
-              <span
-                className="p19-pulse-dot"
-                style={{ background: "var(--alert-retro-border)" }}
-                aria-hidden="true"
-              />
-            )}
-            <span>{title}</span>
+  if (isRetro) {
+    return (
+      <section className="alert-retro animate-enter" role="alert">
+        <div className="alert-retro-content">
+          <AlertTriangle
+            size={20}
+            aria-hidden="true"
+            style={{ marginTop: "2px", flexShrink: 0 }}
+          />
+          <div>
+            <div className="alert-retro-title">
+              <span className="pulse-alert-dot" aria-hidden="true" />
+              <span>{title}</span>
+              {roleChip ? <span className="role-chip">{roleChip}</span> : null}
+            </div>
+            <p style={{ margin: 0, fontSize: "13px", lineHeight: "19px" }}>
+              {description}
+            </p>
           </div>
-          <p style={{ margin: "4px 0 0", fontSize: "13px", lineHeight: "18px" }}>
-            {description}
-          </p>
+        </div>
+        {action ? <div style={{ flexShrink: 0 }}>{action}</div> : null}
+      </section>
+    );
+  }
+
+  return (
+    <div className="alert-banner alert-info animate-enter" role="status">
+      <div className="alert-body">
+        <Info
+          size={18}
+          aria-hidden="true"
+          style={{ marginTop: "2px", flexShrink: 0 }}
+        />
+        <div>
+          <span className="alert-title">{title}</span>
+          <span>{description}</span>
         </div>
       </div>
       {action ? <div style={{ flexShrink: 0 }}>{action}</div> : null}

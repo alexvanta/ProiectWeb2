@@ -48,72 +48,72 @@ export function LoginForm() {
 
   return (
     <div style={{ display: "grid", gap: "var(--space-5)", maxWidth: "560px", margin: "0 auto" }}>
-      <form
-        onSubmit={handleSubmit}
-        className="p19-panel"
-        style={{ padding: "var(--space-6)", display: "grid", gap: "var(--space-4)" }}
-      >
-        <div>
-          <h1 className="font-display" style={{ margin: 0, fontSize: "26px" }}>
-            Autentificare platformă P19
-          </h1>
-          <p style={{ margin: "4px 0 0", fontSize: "13px", color: "var(--text-secondary)" }}>
-            Conturile sunt create exclusiv de Administrator (fără auto-înregistrare publică).
-          </p>
+      <form onSubmit={handleSubmit} className="panel animate-enter">
+        <div
+          className="panel-header"
+          style={{ backgroundImage: "var(--hero-glow)", padding: "var(--space-5)" }}
+        >
+          <div>
+            <h1 className="page-title" style={{ fontSize: "26px", lineHeight: "30px" }}>
+              Autentificare platformă P19
+            </h1>
+            <p className="page-meta">
+              Conturile sunt create exclusiv de Administrator (fără auto-înregistrare publică).
+            </p>
+          </div>
         </div>
 
-        {error ? (
-          <div
-            role="alert"
-            style={{
-              padding: "10px 12px",
-              borderRadius: "var(--radius-md)",
-              background: "var(--card-red-bg)",
-              color: "var(--card-red-fg)",
-              fontSize: "13px",
-              fontWeight: 600,
-            }}
-          >
-            {error}
+        <div style={{ padding: "var(--space-5)", display: "grid", gap: "var(--space-4)" }}>
+          {error ? (
+            <div
+              role="alert"
+              className="status-badge status-suspended"
+              style={{ padding: "10px 12px", whiteSpace: "normal", borderRadius: "var(--radius-md)" }}
+            >
+              {error}
+            </div>
+          ) : null}
+
+          <div className="field">
+            <label htmlFor="login-email">Email</label>
+            <input
+              id="login-email"
+              type="email"
+              required
+              className="p19-input"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="ex: arbitru@superliga.ro"
+            />
           </div>
-        ) : null}
 
-        <label style={{ display: "grid", gap: "6px", fontSize: "13px", fontWeight: 600 }}>
-          Email
-          <input
-            type="email"
-            required
-            className="p19-input"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="ex: arbitru@superliga.ro"
-          />
-        </label>
+          <div className="field">
+            <label htmlFor="login-password">Parolă</label>
+            <input
+              id="login-password"
+              type="password"
+              required
+              className="p19-input"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+            />
+          </div>
 
-        <label style={{ display: "grid", gap: "6px", fontSize: "13px", fontWeight: 600 }}>
-          Parolă
-          <input
-            type="password"
-            required
-            className="p19-input"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-          />
-        </label>
-
-        <button type="submit" disabled={loading} className="p19-btn-primary">
-          <LogIn size={15} aria-hidden="true" />
-          <span>{loading ? "Se autentifică..." : "Intră în cont"}</span>
-        </button>
+          <button type="submit" disabled={loading} className="btn btn-primary">
+            <LogIn size={15} aria-hidden="true" />
+            <span>{loading ? "Se autentifică..." : "Intră în cont"}</span>
+          </button>
+        </div>
       </form>
 
       {/* Demo roles quick-fill panel */}
-      <section className="p19-panel" style={{ padding: "var(--space-4)" }}>
-        <h2 className="font-display" style={{ margin: "0 0 var(--space-3)", fontSize: "18px" }}>
-          Conturi demo pre-încărcate (click pentru completare rapidă)
-        </h2>
-        <div style={{ display: "grid", gap: "8px" }}>
+      <section className="panel animate-enter" style={{ animationDelay: "60ms" }}>
+        <div className="panel-header">
+          <h2 className="panel-title">Conturi demo pre-încărcate</h2>
+          <span className="demo-pill">Click pentru completare</span>
+        </div>
+        <div className="team-directory">
           {DEMO_ACCOUNTS.map((acc) => (
             <button
               key={acc.email}
@@ -122,26 +122,22 @@ export function LoginForm() {
                 setEmail(acc.email);
                 setPassword(acc.pass);
               }}
+              className="team-dir-link"
               style={{
-                display: "flex",
-                flexWrap: "wrap",
-                justifyContent: "space-between",
-                alignItems: "center",
-                gap: "8px",
-                padding: "8px 12px",
-                borderRadius: "var(--radius-md)",
-                border: "1px solid var(--border-subtle)",
-                background: "var(--bg-subtle)",
-                color: "var(--text-primary)",
+                width: "100%",
+                border: "none",
+                borderBottom: "1px solid var(--border-subtle)",
+                background: "transparent",
                 cursor: "pointer",
                 textAlign: "left",
+                fontFamily: "var(--font-sans)",
               }}
             >
               <div>
-                <div style={{ fontWeight: 700, fontSize: "13px" }}>{acc.role}</div>
-                <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>{acc.desc}</div>
+                <span className="summary-name">{acc.role}</span>
+                <span className="summary-sub">{acc.desc}</span>
               </div>
-              <span className="font-mono-audit" style={{ fontSize: "11.5px", color: "var(--accent-primary)" }}>
+              <span className="mono" style={{ color: "var(--accent-primary)", fontWeight: 600 }}>
                 {acc.email}
               </span>
             </button>

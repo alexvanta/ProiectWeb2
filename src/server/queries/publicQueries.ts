@@ -121,11 +121,20 @@ export async function getHomePageData(seasonSlug?: string) {
       teamMeta: {} as Record<string, { slug: string; crestColorA: string; crestColorB: string }>,
       topScorers: [] as TopScorerItem[],
       currentRound: 1,
+      totalRounds: 30,
       roundFixtures: [],
+      activeSuspensions: [] as Array<{
+        id: string;
+        playerName: string;
+        playerSlug: string;
+        teamName: string | null;
+        reason: string;
+        remainingRounds: number;
+      }>,
     };
   }
 
-  const [standings, seasonTeams, topScorers, fixtures] = await Promise.all([
+  const [standings, seasonTeams, topScorers, fixtures, activeSuspensionsRaw] = await Promise.all([
     getSeasonStandings(current.id),
     prisma.seasonTeam.findMany({
       where: { seasonId: current.id },
@@ -149,6 +158,22 @@ export async function getHomePageData(seasonSlug?: string) {
       },
       orderBy: [{ roundNumber: "asc" }, { scheduledAt: "asc" }],
     }),
+    prisma.suspension.findMany({
+      where: { remainingRounds: { gt: 0 } },
+      include: {
+        player: {
+          include: {
+            registrations: {
+              where: { seasonId: current.id, leftAt: null },
+              include: { team: { select: { name: true } } },
+              take: 1,
+            },
+          },
+        },
+      },
+      orderBy: [{ remainingRounds: "desc" }, { createdAt: "desc" }],
+      take: 6,
+    }),
   ]);
 
   const teamMeta: Record<string, { slug: string; crestColorA: string; crestColorB: string }> = {};
@@ -164,7 +189,17 @@ export async function getHomePageData(seasonSlug?: string) {
   const firstScheduled = fixtures.find((f) => f.status === "SCHEDULED");
   const lastPlayed = [...fixtures].reverse().find((f) => f.status === "PLAYED");
   const currentRound = firstScheduled?.roundNumber ?? lastPlayed?.roundNumber ?? 1;
+  const totalRounds = fixtures.reduce((max, f) => Math.max(max, f.roundNumber), 30);
   const roundFixtures = fixtures.filter((f) => f.roundNumber === currentRound);
+
+  const activeSuspensions = activeSuspensionsRaw.map((s) => ({
+    id: s.id,
+    playerName: s.player.fullName,
+    playerSlug: s.player.slug,
+    teamName: s.player.registrations[0]?.team.name ?? null,
+    reason: s.reason,
+    remainingRounds: s.remainingRounds,
+  }));
 
   return {
     seasons,
@@ -173,7 +208,9 @@ export async function getHomePageData(seasonSlug?: string) {
     teamMeta,
     topScorers: topScorers.slice(0, 20),
     currentRound,
+    totalRounds,
     roundFixtures,
+    activeSuspensions,
   };
 }
 

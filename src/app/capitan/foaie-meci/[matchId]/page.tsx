@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/server/auth/rbac";
@@ -14,8 +15,8 @@ export default async function MatchSheetPage({
   if (!user) redirect("/login");
   if (user.role !== "CAPTAIN" && user.role !== "ADMIN") {
     return (
-      <main className="p19-container">
-        <div className="p19-panel" style={{ padding: "var(--space-6)" }}>
+      <main className="container">
+        <div className="panel" style={{ padding: "var(--space-6)" }}>
           Acces restricționat: doar Căpitanul echipei sau Adminul poate depune foaia de meci.
         </div>
       </main>
@@ -46,8 +47,8 @@ export default async function MatchSheetPage({
 
   if (!team) {
     return (
-      <main className="p19-container">
-        <div className="p19-panel" style={{ padding: "var(--space-6)" }}>
+      <main className="container">
+        <div className="panel" style={{ padding: "var(--space-6)" }}>
           Nu poți depune foaia de meci pentru o echipă din care nu faci parte.
         </div>
       </main>
@@ -72,15 +73,24 @@ export default async function MatchSheetPage({
   );
 
   return (
-    <main className="p19-container" style={{ display: "grid", gap: "var(--space-5)" }}>
-      <div>
-        <h1 className="font-display" style={{ margin: 0, fontSize: "28px" }}>
-          Foaie de meci · {team.name}
-        </h1>
-        <p style={{ margin: "4px 0 0", color: "var(--text-secondary)", fontSize: "13px" }}>
-          Etapa {fixture.roundNumber}: {fixture.homeTeam.name} – {fixture.awayTeam.name} ·{" "}
-          {fixture.season.name}
-        </p>
+    <main className="container">
+      <nav className="breadcrumb animate-enter" aria-label="Cale de navigare">
+        <Link href="/capitan">Panou Căpitan</Link>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">
+          Etapa {fixture.roundNumber} · {team.name}
+        </span>
+      </nav>
+
+      <div className="page-head animate-enter">
+        <div>
+          <h1 className="page-title">Foaie de meci · {team.name}</h1>
+          <p className="page-meta">
+            Etapa {fixture.roundNumber}: {fixture.homeTeam.name} – {fixture.awayTeam.name} ·{" "}
+            {fixture.season.name}
+          </p>
+        </div>
+        <span className="demo-pill">Validare eligibilitate pe server (D-005)</span>
       </div>
 
       <MatchSheetClient

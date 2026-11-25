@@ -10,8 +10,8 @@ export default async function AdminPage() {
   if (!user) redirect("/login");
   if (user.role !== "ADMIN") {
     return (
-      <main className="p19-container">
-        <div className="p19-panel" style={{ padding: "var(--space-6)" }}>
+      <main className="container">
+        <div className="panel" style={{ padding: "var(--space-6)" }}>
           Acces restricționat: Panoul Admin este disponibil exclusiv rolului ADMIN.
         </div>
       </main>
@@ -43,14 +43,17 @@ export default async function AdminPage() {
   ]);
 
   return (
-    <main className="p19-container" style={{ display: "grid", gap: "var(--space-5)" }}>
-      <div>
-        <h1 className="font-display" style={{ margin: 0, fontSize: "28px" }}>
-          Panou Admin · SuperLiga României
-        </h1>
-        <p style={{ margin: "4px 0 0", color: "var(--text-secondary)", fontSize: "13px" }}>
-          Administrare sezoane & reguli, echipe, transferuri între sezoane, terenuri, generator program round-robin și conturi.
-        </p>
+    <main className="container">
+      <div className="page-head animate-enter">
+        <div>
+          <h1 className="page-title">Panou Admin · SuperLiga României</h1>
+          <p className="page-meta">
+            Administrare sezoane &amp; reguli, echipe, transferuri între sezoane, terenuri, generator program round-robin și conturi.
+          </p>
+        </div>
+        <span className="demo-pill tabular">
+          {teams.length} echipe · {pitches.length} terenuri · {users.length} conturi
+        </span>
       </div>
 
       <AdminPanelClient

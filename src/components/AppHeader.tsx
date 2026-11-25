@@ -3,15 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import {
-  Bell,
-  LogIn,
-  LogOut,
-  Moon,
-  Shield,
-  Sun,
-  Trophy,
-} from "lucide-react";
+import { Bell, LogOut, Moon, Shield, Sun } from "lucide-react";
 import type { SeasonOption } from "@/server/queries/publicQueries";
 import type { SessionUser } from "@/server/auth/session";
 
@@ -33,6 +25,7 @@ export function AppHeader({ seasons, user, unreadCount }: AppHeaderProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [iconRotation, setIconRotation] = useState(0);
   const [loggingOut, setLoggingOut] = useState(false);
 
   const selectedSeason =
@@ -49,6 +42,7 @@ export function AppHeader({ seasons, user, unreadCount }: AppHeaderProps) {
   const toggleTheme = () => {
     const next = theme === "dark" ? "light" : "dark";
     setTheme(next);
+    setIconRotation((r) => r + 180);
     document.documentElement.dataset.theme = next;
     try {
       localStorage.setItem("p19_theme", next);
@@ -117,144 +111,87 @@ export function AppHeader({ seasons, user, unreadCount }: AppHeaderProps) {
   }
 
   return (
-    <header
-      className="p19-header-glass"
-      style={{
-        position: "sticky",
-        top: 0,
-        zIndex: 40,
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "var(--container-max)",
-          margin: "0 auto",
-          padding: "10px var(--space-4)",
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: "var(--space-3)",
-        }}
-      >
-        {/* Brand + Navigation */}
-        <div style={{ display: "flex", alignItems: "center", gap: "var(--space-5)", flexWrap: "wrap" }}>
-          <Link
-            href={`/${seasonQuery}`}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "8px",
-              textDecoration: "none",
-              color: "var(--text-primary)",
-              fontFamily: "var(--font-display)",
-              fontWeight: 700,
-              fontSize: "20px",
-              letterSpacing: "-0.01em",
-            }}
-          >
-            <span
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "28px",
-                height: "28px",
-                borderRadius: "var(--radius-md)",
-                background: "var(--accent-primary)",
-                color: "var(--accent-primary-fg)",
-              }}
+    <header className="app-header">
+      <div className="header-inner">
+        <Link
+          href={`/${seasonQuery}`}
+          className="brand-group"
+          aria-label="SuperLiga României P19 — Acasă"
+        >
+          <span className="brand-mark" aria-hidden="true">
+            P19
+          </span>
+          <span>
+            <span className="brand-title">SuperLiga României</span>
+            <span className="brand-sub">Sezon regular · ROAF FRF</span>
+          </span>
+        </Link>
+
+        <nav className="main-nav" aria-label="Navigație principală">
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`nav-link${item.active ? " active" : ""}`}
+              aria-current={item.active ? "page" : undefined}
             >
-              <Trophy size={16} aria-hidden="true" />
-            </span>
-            <span>SuperLiga P19</span>
-          </Link>
+              {item.label}
+            </Link>
+          ))}
+        </nav>
 
-          <nav
-            aria-label="Navigare principală"
-            style={{ display: "flex", alignItems: "center", gap: "4px", flexWrap: "wrap" }}
-          >
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                style={{
-                  padding: "6px 10px",
-                  borderRadius: "var(--radius-md)",
-                  fontSize: "13px",
-                  fontWeight: item.active ? 700 : 500,
-                  textDecoration: "none",
-                  color: item.active ? "var(--accent-primary)" : "var(--text-secondary)",
-                  background: item.active ? "var(--bg-subtle)" : "transparent",
-                  borderBottom: item.active
-                    ? "2px solid var(--accent-primary)"
-                    : "2px solid transparent",
-                  transition: "background-color var(--motion-fast), color var(--motion-fast)",
-                }}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-        </div>
-
-        {/* Controls: Season selector, Theme toggle, Notifications, Auth */}
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+        <div className="header-actions">
           {seasons.length > 0 ? (
-            <label style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
-              <span className="sr-only">Selectează sezon</span>
-              <select
-                aria-label="Selectează sezon"
-                className="p19-select"
-                value={selectedSeason}
-                onChange={(e) => handleSeasonChange(e.target.value)}
-                style={{ width: "auto", minWidth: "160px", padding: "6px 10px" }}
-              >
-                {seasons.map((s) => (
-                  <option key={s.id} value={s.slug}>
-                    {s.name} ({s.status === "COMPLETED" ? "Încheiat" : s.status === "ACTIVE" ? "Activ" : "Draft"})
-                  </option>
-                ))}
-              </select>
-            </label>
+            <select
+              aria-label="Selectează sezon"
+              className="select-control"
+              value={selectedSeason}
+              onChange={(e) => handleSeasonChange(e.target.value)}
+            >
+              {seasons.map((s) => (
+                <option key={s.id} value={s.slug}>
+                  {s.name} ({s.status === "COMPLETED" ? "Încheiat" : s.status === "ACTIVE" ? "Activ" : "Draft"})
+                </option>
+              ))}
+            </select>
           ) : null}
 
           <button
             type="button"
             onClick={toggleTheme}
-            className="p19-btn-secondary"
+            className="btn btn-secondary"
+            aria-pressed={theme === "dark"}
             aria-label={theme === "dark" ? "Comută pe tema deschisă" : "Comută pe tema întunecată"}
-            style={{ width: "36px", height: "36px", padding: 0 }}
           >
-            {theme === "dark" ? (
-              <Sun size={16} aria-hidden="true" />
-            ) : (
-              <Moon size={16} aria-hidden="true" />
-            )}
+            <span
+              className="theme-icon"
+              style={{
+                display: "inline-flex",
+                transform: `rotate(${iconRotation}deg)`,
+              }}
+              aria-hidden="true"
+            >
+              {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+            </span>
+            <span>{theme === "dark" ? "Light" : "Dark"}</span>
           </button>
 
           {user ? (
             <>
               <Link
                 href="/notificari"
-                className="p19-btn-secondary"
+                className="btn btn-secondary"
                 aria-label={`Notificări reprogramare (${unreadCount} necitite)`}
-                style={{
-                  position: "relative",
-                  width: "36px",
-                  height: "36px",
-                  padding: 0,
-                  textDecoration: "none",
-                }}
+                style={{ position: "relative", padding: "0 10px" }}
               >
                 <Bell size={16} aria-hidden="true" />
                 {unreadCount > 0 ? (
                   <span
-                    className="tabular-nums"
+                    className="tabular"
                     style={{
                       position: "absolute",
-                      top: "-4px",
-                      right: "-4px",
+                      top: "-5px",
+                      right: "-5px",
                       minWidth: "18px",
                       height: "18px",
                       padding: "0 4px",
@@ -273,18 +210,7 @@ export function AppHeader({ seasons, user, unreadCount }: AppHeaderProps) {
                 ) : null}
               </Link>
 
-              <span
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  padding: "4px 10px",
-                  borderRadius: "var(--radius-md)",
-                  background: "var(--bg-subtle)",
-                  fontSize: "12px",
-                  color: "var(--text-secondary)",
-                }}
-              >
+              <span className="demo-pill">
                 <Shield size={13} aria-hidden="true" />
                 <strong style={{ color: "var(--text-primary)" }}>{user.name}</strong>
                 <span>· {ROLE_LABELS[user.role] ?? user.role}</span>
@@ -294,7 +220,7 @@ export function AppHeader({ seasons, user, unreadCount }: AppHeaderProps) {
                 type="button"
                 onClick={handleLogout}
                 disabled={loggingOut}
-                className="p19-btn-secondary"
+                className="btn btn-secondary"
                 aria-label="Deconectare"
               >
                 <LogOut size={14} aria-hidden="true" />
@@ -302,13 +228,8 @@ export function AppHeader({ seasons, user, unreadCount }: AppHeaderProps) {
               </button>
             </>
           ) : (
-            <Link
-              href="/login"
-              className="p19-btn-primary"
-              style={{ textDecoration: "none" }}
-            >
-              <LogIn size={14} aria-hidden="true" />
-              <span>Autentificare</span>
+            <Link href="/login" className="btn btn-primary">
+              Autentificare
             </Link>
           )}
         </div>

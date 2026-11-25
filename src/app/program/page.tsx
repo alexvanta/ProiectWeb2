@@ -14,8 +14,8 @@ export default async function ProgramPage({
 
   if (!current) {
     return (
-      <main className="p19-container">
-        <div className="p19-panel" style={{ padding: "var(--space-6)" }}>
+      <main className="container">
+        <div className="panel" style={{ padding: "var(--space-6)" }}>
           Nu există sezoane disponibile.
         </div>
       </main>
@@ -62,16 +62,7 @@ export default async function ProgramPage({
   ]);
 
   return (
-    <main className="p19-container" style={{ display: "grid", gap: "var(--space-5)" }}>
-      <div>
-        <h1 className="font-display" style={{ margin: 0, fontSize: "28px", lineHeight: "32px" }}>
-          Program & rezultate · {current.name}
-        </h1>
-        <p style={{ margin: "4px 0 0", color: "var(--text-secondary)", fontSize: "13px" }}>
-          Filtrează meciurile după etapă, echipă, teren sau status și exportă calendarul iCal (.ics) per echipă.
-        </p>
-      </div>
-
+    <main className="container">
       <FixturesClient
         seasonId={current.id}
         seasonName={current.name}

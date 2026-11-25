@@ -220,42 +220,38 @@ export function RefereePanelClient({
       {error ? (
         <div
           role="alert"
+          className="alert-retro"
           style={{
-            padding: "12px 14px",
-            borderRadius: "var(--radius-md)",
             background: "var(--card-red-bg)",
             color: "var(--card-red-fg)",
-            fontSize: "13px",
-            fontWeight: 600,
+            borderColor: "var(--card-red-fill)",
           }}
         >
-          {error}
+          <strong>{error}</strong>
         </div>
       ) : null}
 
       {success ? (
         <div
           role="status"
+          className="alert-banner"
           style={{
-            padding: "12px 14px",
-            borderRadius: "var(--radius-md)",
             background: "var(--status-win-bg)",
             color: "var(--status-win-fg)",
-            fontSize: "13px",
-            fontWeight: 600,
+            borderLeft: "4px solid var(--accent-primary)",
           }}
         >
-          {success}
+          <strong>{success}</strong>
         </div>
       ) : null}
 
       {/* Retroactive Suspension Alerts (D-005) */}
       <section style={{ display: "grid", gap: "var(--space-3)" }}>
-        <h2 className="font-display" style={{ margin: 0, fontSize: "20px" }}>
+        <h2 className="panel-title">
           Alerte suspendare retroactivă ({alerts.filter((a) => a.status === "OPEN").length} deschise)
         </h2>
         {alerts.length === 0 ? (
-          <div className="p19-panel" style={{ padding: "var(--space-4)", color: "var(--text-muted)", fontSize: "13px" }}>
+          <div className="panel" style={{ padding: "var(--space-4)", color: "var(--text-muted)", fontSize: "13px" }}>
             Nu există alerte retroactive în așteptare.
           </div>
         ) : (
@@ -282,7 +278,7 @@ export function RefereePanelClient({
                       type="button"
                       disabled={busy}
                       onClick={() => handleResolveAlert(alert.id, "REVIEWED")}
-                      className="p19-btn-primary"
+                      className="btn btn-alert"
                     >
                       <CheckCircle2 size={14} aria-hidden="true" />
                       <span>Marchează revizuită</span>
@@ -295,271 +291,272 @@ export function RefereePanelClient({
         )}
       </section>
 
-      {/* Result Entry & Audited Correction Form */}
+      {/* Result Entry & Reschedule Forms */}
       <div
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
           gap: "var(--space-5)",
+          alignItems: "start",
         }}
       >
-        <form
-          onSubmit={handleSaveResult}
-          className="p19-panel"
-          style={{ padding: "var(--space-5)", display: "grid", gap: "var(--space-4)" }}
-        >
-          <h2 className="font-display" style={{ margin: 0, fontSize: "20px" }}>
-            Introducere / Corecție rezultat & evenimente
-          </h2>
+        <form onSubmit={handleSaveResult} className="panel animate-enter">
+          <div className="panel-header panel-header-subtle">
+            <h2 className="panel-title">Introducere / Corecție rezultat</h2>
+          </div>
 
-          <label style={{ display: "grid", gap: "4px", fontSize: "12px", color: "var(--text-muted)" }}>
-            Selectează meciul
-            <select
-              className="p19-select"
-              value={selectedFixtureId}
-              onChange={(e) => handleSelectFixture(e.target.value)}
-            >
-              {fixtures.map((f) => (
-                <option key={f.id} value={f.id}>
-                  Et. {f.roundNumber}: {f.homeTeamName} – {f.awayTeamName} ({f.status})
-                </option>
-              ))}
-            </select>
-          </label>
+          <div style={{ padding: "var(--space-5)", display: "grid", gap: "var(--space-4)" }}>
+            <div className="field">
+              <label htmlFor="ref-fixture">Selectează meciul</label>
+              <select
+                id="ref-fixture"
+                className="p19-select"
+                value={selectedFixtureId}
+                onChange={(e) => handleSelectFixture(e.target.value)}
+              >
+                {fixtures.map((f) => (
+                  <option key={f.id} value={f.id}>
+                    Et. {f.roundNumber}: {f.homeTeamName} – {f.awayTeamName} ({f.status})
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          {currentFx ? (
-            <>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-                <label style={{ display: "grid", gap: "4px", fontSize: "12px", color: "var(--text-muted)" }}>
-                  Goluri {currentFx.homeTeamName}
-                  <input
-                    type="number"
-                    min={0}
-                    max={50}
-                    className="p19-input tabular-nums"
-                    value={homeGoals}
-                    onChange={(e) => setHomeGoals(Number(e.target.value))}
-                  />
-                </label>
-                <label style={{ display: "grid", gap: "4px", fontSize: "12px", color: "var(--text-muted)" }}>
-                  Goluri {currentFx.awayTeamName}
-                  <input
-                    type="number"
-                    min={0}
-                    max={50}
-                    className="p19-input tabular-nums"
-                    value={awayGoals}
-                    onChange={(e) => setAwayGoals(Number(e.target.value))}
-                  />
-                </label>
-              </div>
-
-              {currentFx.status === "PLAYED" ? (
-                <label style={{ display: "grid", gap: "4px", fontSize: "12px", color: "var(--alert-retro-fg)", fontWeight: 600 }}>
-                  Motiv corecție (obligatoriu pentru audit D-005)
-                  <textarea
-                    required
-                    rows={2}
-                    className="p19-textarea"
-                    value={reason}
-                    onChange={(e) => setReason(e.target.value)}
-                    placeholder="Ex: Corecție cartonaș galben conform raportului de arbitraj..."
-                  />
-                </label>
-              ) : null}
-
-              {/* Events builder */}
-              <div style={{ display: "grid", gap: "8px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontSize: "12px", fontWeight: 600, color: "var(--text-secondary)" }}>
-                    Evenimente meci ({events.length})
-                  </span>
-                  <button type="button" onClick={addDraftEvent} className="p19-btn-secondary">
-                    <Plus size={13} aria-hidden="true" />
-                    <span>Adaugă eveniment</span>
-                  </button>
+            {currentFx ? (
+              <>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                  <div className="field">
+                    <label htmlFor="ref-home-goals">Goluri {currentFx.homeTeamName}</label>
+                    <input
+                      id="ref-home-goals"
+                      type="number"
+                      min={0}
+                      max={50}
+                      className="p19-input tabular"
+                      value={homeGoals}
+                      onChange={(e) => setHomeGoals(Number(e.target.value))}
+                    />
+                  </div>
+                  <div className="field">
+                    <label htmlFor="ref-away-goals">Goluri {currentFx.awayTeamName}</label>
+                    <input
+                      id="ref-away-goals"
+                      type="number"
+                      min={0}
+                      max={50}
+                      className="p19-input tabular"
+                      value={awayGoals}
+                      onChange={(e) => setAwayGoals(Number(e.target.value))}
+                    />
+                  </div>
                 </div>
 
-                {events.map((ev, idx) => (
-                  <div
-                    key={idx}
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "1fr 1fr 64px auto",
-                      gap: "6px",
-                      alignItems: "center",
-                    }}
-                  >
-                    <select
-                      className="p19-select"
-                      value={ev.playerId}
-                      onChange={(e) => {
-                        const p = fixturePlayers.find((x) => x.id === e.target.value);
-                        if (!p) return;
-                        setEvents((prev) =>
-                          prev.map((item, i) =>
-                            i === idx ? { ...item, playerId: p.id, teamId: p.teamId } : item,
-                          ),
-                        );
-                      }}
-                    >
-                      {fixturePlayers.map((p) => (
-                        <option key={p.id} value={p.id}>
-                          {p.fullName}
-                        </option>
-                      ))}
-                    </select>
-
-                    <select
-                      className="p19-select"
-                      value={ev.type}
-                      onChange={(e) =>
-                        setEvents((prev) =>
-                          prev.map((item, i) =>
-                            i === idx
-                              ? { ...item, type: e.target.value as DraftEvent["type"] }
-                              : item,
-                          ),
-                        )
-                      }
-                    >
-                      <option value="GOAL">Gol</option>
-                      <option value="OWN_GOAL">Autogol</option>
-                      <option value="YELLOW_CARD">Galben</option>
-                      <option value="SECOND_YELLOW_RED">2 Galbene (Roșu indirect)</option>
-                      <option value="DIRECT_RED">Roșu direct</option>
-                    </select>
-
-                    <input
-                      type="number"
-                      min={1}
-                      max={120}
-                      className="p19-input tabular-nums"
-                      value={ev.minute}
-                      onChange={(e) =>
-                        setEvents((prev) =>
-                          prev.map((item, i) =>
-                            i === idx ? { ...item, minute: Number(e.target.value) } : item,
-                          ),
-                        )
-                      }
+                {currentFx.status === "PLAYED" ? (
+                  <div className="field">
+                    <label htmlFor="ref-reason" style={{ color: "var(--alert-retro-fg)" }}>
+                      Motiv corecție (obligatoriu pentru audit D-005)
+                    </label>
+                    <textarea
+                      id="ref-reason"
+                      required
+                      rows={2}
+                      className="p19-textarea"
+                      value={reason}
+                      onChange={(e) => setReason(e.target.value)}
+                      placeholder="Ex: Corecție cartonaș galben conform raportului de arbitraj..."
                     />
+                  </div>
+                ) : null}
 
-                    <button
-                      type="button"
-                      aria-label="Șterge eveniment"
-                      onClick={() => setEvents((prev) => prev.filter((_, i) => i !== idx))}
-                      className="p19-btn-secondary"
-                      style={{ padding: "6px" }}
-                    >
-                      <Trash2 size={14} aria-hidden="true" />
+                {/* Events builder */}
+                <div style={{ display: "grid", gap: "8px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{ fontSize: "12px", fontWeight: 600, color: "var(--text-secondary)" }}>
+                      Evenimente meci ({events.length})
+                    </span>
+                    <button type="button" onClick={addDraftEvent} className="btn btn-secondary">
+                      <Plus size={13} aria-hidden="true" />
+                      <span>Adaugă eveniment</span>
                     </button>
                   </div>
-                ))}
-              </div>
 
-              <button type="submit" disabled={busy} className="p19-btn-primary">
-                <Save size={14} aria-hidden="true" />
-                <span>
-                  {busy
-                    ? "Se salvează..."
-                    : currentFx.status === "PLAYED"
-                      ? "Salvează corecția (cu audit)"
-                      : "Salvează rezultatul"}
-                </span>
-              </button>
-            </>
-          ) : null}
+                  {events.map((ev, idx) => (
+                    <div
+                      key={idx}
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "1fr 1fr 64px auto",
+                        gap: "6px",
+                        alignItems: "center",
+                      }}
+                    >
+                      <select
+                        className="p19-select"
+                        value={ev.playerId}
+                        onChange={(e) => {
+                          const p = fixturePlayers.find((x) => x.id === e.target.value);
+                          if (!p) return;
+                          setEvents((prev) =>
+                            prev.map((item, i) =>
+                              i === idx ? { ...item, playerId: p.id, teamId: p.teamId } : item,
+                            ),
+                          );
+                        }}
+                      >
+                        {fixturePlayers.map((p) => (
+                          <option key={p.id} value={p.id}>
+                            {p.fullName}
+                          </option>
+                        ))}
+                      </select>
+
+                      <select
+                        className="p19-select"
+                        value={ev.type}
+                        onChange={(e) =>
+                          setEvents((prev) =>
+                            prev.map((item, i) =>
+                              i === idx
+                                ? { ...item, type: e.target.value as DraftEvent["type"] }
+                                : item,
+                            ),
+                          )
+                        }
+                      >
+                        <option value="GOAL">Gol</option>
+                        <option value="OWN_GOAL">Autogol</option>
+                        <option value="YELLOW_CARD">Galben</option>
+                        <option value="SECOND_YELLOW_RED">2 Galbene (Roșu indirect)</option>
+                        <option value="DIRECT_RED">Roșu direct</option>
+                      </select>
+
+                      <input
+                        type="number"
+                        min={1}
+                        max={120}
+                        className="p19-input tabular"
+                        value={ev.minute}
+                        onChange={(e) =>
+                          setEvents((prev) =>
+                            prev.map((item, i) =>
+                              i === idx ? { ...item, minute: Number(e.target.value) } : item,
+                            ),
+                          )
+                        }
+                      />
+
+                      <button
+                        type="button"
+                        aria-label="Șterge eveniment"
+                        onClick={() => setEvents((prev) => prev.filter((_, i) => i !== idx))}
+                        className="btn btn-secondary"
+                        style={{ padding: "0 8px" }}
+                      >
+                        <Trash2 size={14} aria-hidden="true" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                <button type="submit" disabled={busy} className="btn btn-primary">
+                  <Save size={14} aria-hidden="true" />
+                  <span>
+                    {busy
+                      ? "Se salvează..."
+                      : currentFx.status === "PLAYED"
+                        ? "Salvează corecția (cu audit)"
+                        : "Salvează rezultatul"}
+                  </span>
+                </button>
+              </>
+            ) : null}
+          </div>
         </form>
 
         {/* Reschedule Form */}
-        <form
-          onSubmit={handleReschedule}
-          className="p19-panel"
-          style={{ padding: "var(--space-5)", display: "grid", gap: "var(--space-4)", alignContent: "start" }}
-        >
-          <h2 className="font-display" style={{ margin: 0, fontSize: "20px" }}>
-            Reprogramare meci (notificări in-app)
-          </h2>
+        <form onSubmit={handleReschedule} className="panel animate-enter" style={{ animationDelay: "60ms" }}>
+          <div className="panel-header panel-header-subtle">
+            <h2 className="panel-title">Reprogramare meci (notificări in-app)</h2>
+          </div>
 
-          <label style={{ display: "grid", gap: "4px", fontSize: "12px", color: "var(--text-muted)" }}>
-            Dată & oră nouă
-            <input
-              type="datetime-local"
-              required
-              className="p19-input"
-              value={rescheduleDate}
-              onChange={(e) => setRescheduleDate(e.target.value)}
-            />
-          </label>
+          <div style={{ padding: "var(--space-5)", display: "grid", gap: "var(--space-4)" }}>
+            <div className="field">
+              <label htmlFor="ref-reschedule-dt">Dată &amp; oră nouă</label>
+              <input
+                id="ref-reschedule-dt"
+                type="datetime-local"
+                required
+                className="p19-input"
+                value={rescheduleDate}
+                onChange={(e) => setRescheduleDate(e.target.value)}
+              />
+            </div>
 
-          <label style={{ display: "grid", gap: "4px", fontSize: "12px", color: "var(--text-muted)" }}>
-            Teren
-            <select
-              className="p19-select"
-              value={reschedulePitchId}
-              onChange={(e) => setReschedulePitchId(e.target.value)}
-            >
-              <option value="">Păstrează terenul actual</option>
-              {pitches.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-          </label>
+            <div className="field">
+              <label htmlFor="ref-reschedule-pitch">Teren</label>
+              <select
+                id="ref-reschedule-pitch"
+                className="p19-select"
+                value={reschedulePitchId}
+                onChange={(e) => setReschedulePitchId(e.target.value)}
+              >
+                <option value="">Păstrează terenul actual</option>
+                {pitches.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-          <label style={{ display: "grid", gap: "4px", fontSize: "12px", color: "var(--text-muted)" }}>
-            Mesaj notificare (opțional)
-            <input
-              type="text"
-              className="p19-input"
-              value={rescheduleMsg}
-              onChange={(e) => setRescheduleMsg(e.target.value)}
-              placeholder="Ex: Reprogramat din cauza condițiilor meteo"
-            />
-          </label>
+            <div className="field">
+              <label htmlFor="ref-reschedule-msg">Mesaj notificare (opțional)</label>
+              <input
+                id="ref-reschedule-msg"
+                type="text"
+                className="p19-input"
+                value={rescheduleMsg}
+                onChange={(e) => setRescheduleMsg(e.target.value)}
+                placeholder="Ex: Reprogramat din cauza condițiilor meteo"
+              />
+            </div>
 
-          <button type="submit" disabled={busy || !currentFx} className="p19-btn-secondary">
-            Reprogramează & trimite notificări
-          </button>
+            <button type="submit" disabled={busy || !currentFx} className="btn btn-secondary">
+              Reprogramează &amp; trimite notificări
+            </button>
+          </div>
         </form>
       </div>
 
       {/* Audit History */}
-      <section className="p19-panel" style={{ padding: "var(--space-5)" }}>
-        <h2 className="font-display" style={{ margin: "0 0 var(--space-3)", fontSize: "20px" }}>
-          Jurnal imutabil corecții recente ({audits.length})
-        </h2>
+      <section className="panel animate-enter" style={{ animationDelay: "100ms" }}>
+        <div className="panel-header panel-header-subtle">
+          <h2 className="panel-title">Jurnal imutabil corecții recente</h2>
+          <span className="status-badge status-corrected tabular">{audits.length} înregistrări</span>
+        </div>
+
         {audits.length === 0 ? (
-          <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "13px" }}>
+          <div style={{ padding: "var(--space-4)", color: "var(--text-muted)", fontSize: "13px" }}>
             Nu există corecții înregistrate.
-          </p>
+          </div>
         ) : (
-          <div style={{ display: "grid", gap: "var(--space-3)" }}>
+          <div className="audit-body" style={{ display: "grid", gap: "var(--space-4)" }}>
             {audits.map((a) => (
-              <div
-                key={a.id}
-                style={{
-                  padding: "var(--space-3)",
-                  borderRadius: "var(--radius-md)",
-                  background: "var(--bg-subtle)",
-                }}
-              >
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "var(--text-muted)" }}>
+              <div key={a.id}>
+                <div className="audit-meta">
                   <span>
-                    <strong style={{ color: "var(--text-primary)" }}>{a.fixtureLabel}</strong> · {a.actorName}
+                    <strong>{a.fixtureLabel}</strong> · Autor: <strong>{a.actorName}</strong>
                   </span>
-                  <span className="font-mono-audit">{a.createdAt.slice(0, 19).replace("T", " ")}</span>
+                  <span className="mono">{a.createdAt.slice(0, 19).replace("T", " ")} UTC</span>
                 </div>
-                <p style={{ margin: "4px 0 8px", fontSize: "13px", fontWeight: 600 }}>
-                  Motiv: {a.reason}
+                <p className="audit-reason">
+                  <strong>Motiv:</strong> {a.reason}
                 </p>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
-                  <pre className="font-mono-audit" style={{ margin: 0, padding: "8px", background: "var(--bg-surface)", borderRadius: "4px", fontSize: "11px", overflowX: "auto" }}>
+                <div className="diff-grid">
+                  <pre className="mono diff-box diff-before">
                     {`BEFORE: ${JSON.stringify(a.beforeSnapshot)}`}
                   </pre>
-                  <pre className="font-mono-audit" style={{ margin: 0, padding: "8px", background: "var(--bg-surface)", borderRadius: "4px", fontSize: "11px", overflowX: "auto" }}>
+                  <pre className="mono diff-box diff-after">
                     {`AFTER: ${JSON.stringify(a.afterSnapshot)}`}
                   </pre>
                 </div>

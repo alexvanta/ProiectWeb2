@@ -1,18 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import type { FormEntry } from "@/domain/types";
 
 interface FormStripProps {
   teamId: string;
+  teamName?: string;
   entries: FormEntry[];
   onHoverMatch?: (teamId: string | null, opponentId: string | null) => void;
 }
 
 interface TooltipState {
-  entry: FormEntry;
-  x: number;
-  y: number;
+  resultLine: string;
+  metaLine: string;
+  left: number;
+  top: number;
+  arrowX: number;
 }
 
 const RESULT_LABEL_RO: Record<"W" | "D" | "L", string> = {
@@ -27,13 +31,42 @@ function formatShortDate(iso: string | null): string {
   if (Number.isNaN(d.getTime())) return "";
   return d.toLocaleDateString("ro-RO", {
     day: "2-digit",
-    month: "short",
+    month: "2-digit",
     year: "numeric",
   });
 }
 
-export function FormStrip({ teamId, entries, onHoverMatch }: FormStripProps) {
+export function FormStrip({
+  teamId,
+  teamName,
+  entries,
+  onHoverMatch,
+}: FormStripProps) {
   const [tooltip, setTooltip] = useState<TooltipState | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!tooltip) return;
+    const dismiss = () => {
+      setTooltip(null);
+      onHoverMatch?.(null, null);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") dismiss();
+    };
+    window.addEventListener("scroll", dismiss, { passive: true });
+    window.addEventListener("resize", dismiss, { passive: true });
+    document.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("scroll", dismiss);
+      window.removeEventListener("resize", dismiss);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [tooltip, onHoverMatch]);
 
   if (entries.length === 0) {
     return (
@@ -43,37 +76,46 @@ export function FormStrip({ teamId, entries, onHoverMatch }: FormStripProps) {
 
   return (
     <div
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "4px",
-        position: "relative",
-      }}
+      className="form-strip"
+      aria-label={`Ultimele ${entries.length} meciuri: ${entries
+        .map((e) => RESULT_LABEL_RO[e.result])
+        .join(", ")}`}
     >
       {entries.map((entry) => {
-        const bg =
+        const tileCls =
           entry.result === "W"
-            ? "var(--status-win-solid)"
+            ? "form-tile form-w"
             : entry.result === "D"
-              ? "var(--status-draw-solid)"
-              : "var(--status-loss-solid)";
-        const fg =
-          entry.result === "W"
-            ? "var(--status-win-solid-fg)"
-            : entry.result === "D"
-              ? "var(--status-draw-solid-fg)"
-              : "var(--status-loss-solid-fg)";
+              ? "form-tile form-d"
+              : "form-tile form-l";
 
-        const scoreLabel = `${entry.goalsFor}–${entry.goalsAgainst}`;
-        const ariaLabel = `${RESULT_LABEL_RO[entry.result]} ${scoreLabel} ${entry.isHome ? "acasă cu" : "în deplasare la"} ${entry.opponentName}, Etapa ${entry.roundNumber}`;
+        const homeScore = entry.isHome ? entry.goalsFor : entry.goalsAgainst;
+        const awayScore = entry.isHome ? entry.goalsAgainst : entry.goalsFor;
+        const selfLabel = teamName ?? "Echipa";
+        const matchLabel = entry.isHome
+          ? `${homeScore}-${awayScore} (${selfLabel} - ${entry.opponentName})`
+          : `${homeScore}-${awayScore} (${entry.opponentName} - ${selfLabel})`;
+        const dateStr = formatShortDate(entry.date);
+        const metaLine = `Etapa ${entry.roundNumber}${dateStr ? ` · ${dateStr}` : ""}`;
+        const ariaLabel = `${RESULT_LABEL_RO[entry.result]}: ${matchLabel}, ${metaLine}`;
 
         const show = (el: HTMLElement) => {
           const rect = el.getBoundingClientRect();
-          const clampedX = Math.min(
-            Math.max(rect.left + rect.width / 2, 110),
-            typeof window !== "undefined" ? window.innerWidth - 110 : 800,
-          );
-          setTooltip({ entry, x: clampedX, y: rect.top - 8 });
+          const approxWidth = Math.max(180, matchLabel.length * 6.8 + 24);
+          const pad = 10;
+          const centerX = rect.left + rect.width / 2;
+          const vw = typeof window !== "undefined" ? window.innerWidth : 1024;
+          const left = Math.max(pad, Math.min(centerX - approxWidth / 2, vw - approxWidth - pad));
+          const top = rect.bottom + 8;
+          const arrowX = Math.max(12, Math.min(approxWidth - 12, centerX - left));
+
+          setTooltip({
+            resultLine: matchLabel,
+            metaLine,
+            left,
+            top,
+            arrowX,
+          });
           onHoverMatch?.(teamId, entry.opponentId);
         };
 
@@ -86,9 +128,8 @@ export function FormStrip({ teamId, entries, onHoverMatch }: FormStripProps) {
           <button
             key={entry.fixtureId}
             type="button"
-            className="p19-form-tile"
+            className={tileCls}
             aria-label={ariaLabel}
-            style={{ background: bg, color: fg }}
             onMouseEnter={(e) => show(e.currentTarget)}
             onFocus={(e) => show(e.currentTarget)}
             onMouseLeave={hide}
@@ -99,36 +140,25 @@ export function FormStrip({ teamId, entries, onHoverMatch }: FormStripProps) {
         );
       })}
 
-      {tooltip ? (
-        <div
-          role="tooltip"
-          style={{
-            position: "fixed",
-            left: `${tooltip.x}px`,
-            top: `${tooltip.y}px`,
-            transform: "translate(-50%, -100%)",
-            zIndex: 60,
-            pointerEvents: "none",
-            background: "var(--tooltip-bg)",
-            color: "var(--tooltip-fg)",
-            border: "1px solid var(--tooltip-border)",
-            borderRadius: "var(--radius-md)",
-            padding: "6px 10px",
-            boxShadow: "var(--shadow-md)",
-            whiteSpace: "nowrap",
-            textAlign: "left",
-          }}
-        >
-          <div className="tabular-nums" style={{ fontSize: "12px", fontWeight: 600 }}>
-            {tooltip.entry.isHome ? "vs" : "@"} {tooltip.entry.opponentName} ·{" "}
-            {tooltip.entry.goalsFor}–{tooltip.entry.goalsAgainst}
-          </div>
-          <div style={{ fontSize: "10.5px", color: "var(--tooltip-muted)" }}>
-            Etapa {tooltip.entry.roundNumber}
-            {tooltip.entry.date ? ` · ${formatShortDate(tooltip.entry.date)}` : ""}
-          </div>
-        </div>
-      ) : null}
+      {mounted && tooltip
+        ? createPortal(
+            <div
+              role="tooltip"
+              className="form-tooltip"
+              style={
+                {
+                  left: `${tooltip.left}px`,
+                  top: `${tooltip.top}px`,
+                  "--arrow-x": `${tooltip.arrowX}px`,
+                } as React.CSSProperties
+              }
+            >
+              <span className="form-tooltip-result">{tooltip.resultLine}</span>
+              <span className="form-tooltip-meta">{tooltip.metaLine}</span>
+            </div>,
+            document.body,
+          )
+        : null}
     </div>
   );
 }

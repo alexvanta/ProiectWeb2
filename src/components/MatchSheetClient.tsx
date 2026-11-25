@@ -96,48 +96,34 @@ export function MatchSheetClient({
       {error ? (
         <div
           role="alert"
+          className="alert-retro"
           style={{
-            padding: "12px 14px",
-            borderRadius: "var(--radius-md)",
             background: "var(--card-red-bg)",
             color: "var(--card-red-fg)",
-            fontSize: "13px",
-            fontWeight: 600,
+            borderColor: "var(--card-red-fill)",
           }}
         >
-          {error}
+          <strong>{error}</strong>
         </div>
       ) : null}
 
       {success ? (
         <div
           role="status"
+          className="alert-banner"
           style={{
-            padding: "12px 14px",
-            borderRadius: "var(--radius-md)",
             background: "var(--status-win-bg)",
             color: "var(--status-win-fg)",
-            fontSize: "13px",
-            fontWeight: 600,
+            borderLeft: "4px solid var(--accent-primary)",
           }}
         >
-          {success}
+          <strong>{success}</strong>
         </div>
       ) : null}
 
-      <section className="p19-panel" style={{ overflow: "hidden" }}>
-        <div
-          style={{
-            padding: "var(--space-3) var(--space-4)",
-            borderBottom: "1px solid var(--border-subtle)",
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: "12px",
-          }}
-        >
-          <div className="tabular-nums" style={{ fontSize: "13px", fontWeight: 600 }}>
+      <section className="panel animate-enter">
+        <div className="panel-header">
+          <div className="tabular" style={{ fontSize: "13px", fontWeight: 600 }}>
             Selecție curentă: <strong>{startersCount}</strong> / {maxStarters} titulari ·{" "}
             <strong>{subsCount}</strong> rezerve · Total <strong>{chosenEntries.length}</strong> (minim {minPlayers})
           </div>
@@ -165,7 +151,7 @@ export function MatchSheetClient({
                     },
                   ]);
                 }}
-                className="p19-btn-secondary"
+                className="btn btn-secondary"
               >
                 <Lock size={14} aria-hidden="true" />
                 <span>Testează respingere server (cu suspendat)</span>
@@ -176,7 +162,7 @@ export function MatchSheetClient({
               type="button"
               disabled={submitting}
               onClick={() => submitEntries(chosenEntries)}
-              className="p19-btn-primary"
+              className="btn btn-primary"
             >
               <Send size={14} aria-hidden="true" />
               <span>{submitting ? "Se validează..." : "Depune foaia de meci"}</span>
@@ -184,22 +170,15 @@ export function MatchSheetClient({
           </div>
         </div>
 
-        <div style={{ overflowX: "auto" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+        <div className="table-wrap">
+          <table className="data-table">
             <thead>
-              <tr
-                style={{
-                  background: "var(--bg-subtle)",
-                  color: "var(--text-muted)",
-                  fontSize: "12px",
-                  borderBottom: "1px solid var(--border-subtle)",
-                }}
-              >
-                <th style={{ padding: "8px 10px", textAlign: "center", width: "44px" }}>Nr.</th>
-                <th style={{ padding: "8px 10px", textAlign: "left" }}>Jucător</th>
-                <th style={{ padding: "8px 10px", textAlign: "left" }}>Post</th>
-                <th style={{ padding: "8px 10px", textAlign: "left" }}>Eligibilitate</th>
-                <th style={{ padding: "8px 12px", textAlign: "right" }}>Rol pe foaie</th>
+              <tr>
+                <th scope="col" className="col-center" style={{ width: "48px" }}>Nr.</th>
+                <th scope="col">Jucător</th>
+                <th scope="col" className="col-hide-sm">Post</th>
+                <th scope="col">Eligibilitate</th>
+                <th scope="col" className="col-num">Rol pe foaie</th>
               </tr>
             </thead>
             <tbody>
@@ -210,52 +189,48 @@ export function MatchSheetClient({
                   <tr
                     key={p.playerId}
                     style={{
-                      height: "var(--row-height-dense)",
-                      borderBottom: "1px solid var(--border-subtle)",
                       background: isSuspended ? "var(--card-red-bg)" : undefined,
-                      opacity: isSuspended ? 0.85 : 1,
+                      opacity: isSuspended ? 0.88 : 1,
                     }}
                   >
-                    <td className="tabular-nums" style={{ padding: "6px 10px", textAlign: "center" }}>
-                      {p.shirtNumber ?? "—"}
+                    <td className="col-center">
+                      <span className="jersey-num tabular">{p.shirtNumber ?? "—"}</span>
                     </td>
-                    <td style={{ padding: "6px 10px", fontWeight: 600 }}>{p.fullName}</td>
-                    <td style={{ padding: "6px 10px", color: "var(--text-secondary)" }}>
-                      {p.position}
-                    </td>
-                    <td style={{ padding: "6px 10px" }}>
+                    <td style={{ fontWeight: 600, color: "var(--text-primary)" }}>{p.fullName}</td>
+                    <td className="col-hide-sm">{p.position}</td>
+                    <td>
                       <EligibilityBadge suspendedRounds={p.suspendedRounds} />
                     </td>
-                    <td style={{ padding: "6px 12px", textAlign: "right" }}>
-                      <div style={{ display: "inline-flex", gap: "4px" }}>
-                        {(["NONE", "STARTER", "SUB"] as const).map((opt) => (
-                          <button
-                            key={opt}
-                            type="button"
-                            disabled={isSuspended}
-                            onClick={() =>
-                              setSelected((prev) => ({ ...prev, [p.playerId]: opt }))
-                            }
-                            style={{
-                              padding: "4px 8px",
-                              borderRadius: "var(--radius-sm)",
-                              border: "1px solid var(--border-strong)",
-                              fontSize: "11.5px",
-                              fontWeight: 600,
-                              cursor: isSuspended ? "not-allowed" : "pointer",
-                              background:
-                                mode === opt && !isSuspended
-                                  ? "var(--accent-primary)"
-                                  : "var(--bg-surface)",
-                              color:
-                                mode === opt && !isSuspended
+                    <td className="col-num">
+                      <div className="panel-tabs" style={{ padding: "2px" }}>
+                        {(["NONE", "STARTER", "SUB"] as const).map((opt) => {
+                          const isSelected = mode === opt && !isSuspended;
+                          return (
+                            <button
+                              key={opt}
+                              type="button"
+                              disabled={isSuspended}
+                              onClick={() =>
+                                setSelected((prev) => ({ ...prev, [p.playerId]: opt }))
+                              }
+                              className="panel-tab"
+                              aria-pressed={isSelected}
+                              style={{
+                                minHeight: "24px",
+                                padding: "3px 8px",
+                                fontSize: "11px",
+                                background: isSelected ? "var(--accent-primary)" : "transparent",
+                                color: isSelected
                                   ? "var(--accent-primary-fg)"
                                   : "var(--text-secondary)",
-                            }}
-                          >
-                            {opt === "NONE" ? "Absent" : opt === "STARTER" ? "Titular" : "Rezervă"}
-                          </button>
-                        ))}
+                                opacity: isSuspended ? 0.5 : 1,
+                                cursor: isSuspended ? "not-allowed" : "pointer",
+                              }}
+                            >
+                              {opt === "NONE" ? "Absent" : opt === "STARTER" ? "Titular" : "Rezervă"}
+                            </button>
+                          );
+                        })}
                       </div>
                     </td>
                   </tr>

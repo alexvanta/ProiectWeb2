@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { ArrowRight, Calendar } from "lucide-react";
 import { getHomePageData } from "@/server/queries/publicQueries";
 import { StandingsPanel } from "@/components/StandingsPanel";
 import { TeamCrest } from "@/components/TeamCrest";
@@ -7,10 +6,25 @@ import { FixtureStatusBadge } from "@/components/StatusBadges";
 
 export const dynamic = "force-dynamic";
 
+const REASON_LABELS: Record<string, string> = {
+  YELLOW_ACCUMULATION: "Cumul cartonașe galbene",
+  INDIRECT_RED: "Al doilea galben (roșu indirect)",
+  DIRECT_RED: "Cartonaș roșu direct",
+  COMMITTEE_DECISION: "Decizie Comisie de Disciplină",
+};
+
 function formatMatchDate(d: Date): string {
   return d.toLocaleString("ro-RO", {
+    weekday: "short",
     day: "2-digit",
     month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function formatTime(d: Date): string {
+  return d.toLocaleTimeString("ro-RO", {
     hour: "2-digit",
     minute: "2-digit",
   });
@@ -26,12 +40,10 @@ export default async function HomePage({
 
   if (!data.current || !data.standings) {
     return (
-      <main className="p19-container">
-        <div className="p19-panel" style={{ padding: "var(--space-6)" }}>
-          <h1 className="font-display" style={{ margin: 0, fontSize: "28px" }}>
-            SuperLiga României — Sezon regular
-          </h1>
-          <p style={{ color: "var(--text-secondary)", marginTop: "var(--space-2)" }}>
+      <main className="container">
+        <div className="panel" style={{ padding: "var(--space-6)" }}>
+          <h1 className="page-title">SuperLiga României — Sezon regular</h1>
+          <p className="page-meta" style={{ marginTop: "var(--space-2)" }}>
             Nu există sezoane configurate încă. Rulează migrările și seed-ul (`npm run db:seed`) pentru a încărca datele SuperLigii.
           </p>
         </div>
@@ -40,174 +52,175 @@ export default async function HomePage({
   }
 
   return (
-    <main className="p19-container" style={{ display: "grid", gap: "var(--space-6)" }}>
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: "flex-end",
-          justifyContent: "space-between",
-          gap: "var(--space-3)",
-        }}
-      >
+    <main className="container">
+      <div className="page-head animate-enter">
         <div>
-          <h1
-            className="font-display"
-            style={{ margin: 0, fontSize: "28px", lineHeight: "32px", fontWeight: 700 }}
-          >
+          <h1 className="page-title">
             SuperLiga României · {data.current.name}
           </h1>
-          <p style={{ margin: "4px 0 0", color: "var(--text-secondary)", fontSize: "13px" }}>
-            Sezon regular (16 echipe, 30 etape tur–retur) · Regulament ROAF FRF & RD FRF
+          <p className="page-meta">
+            Format tur–retur (16 echipe, {data.totalRounds} etape) · Regulament ROAF FRF &amp; RD FRF · Etapa curentă: {data.currentRound}
           </p>
         </div>
-
-        <Link
-          href={`/program?season=${encodeURIComponent(data.current.slug)}`}
-          className="p19-btn-secondary"
-          style={{ textDecoration: "none" }}
-        >
-          <Calendar size={14} aria-hidden="true" />
-          <span>Vezi tot programul</span>
-          <ArrowRight size={14} aria-hidden="true" />
-        </Link>
+        <span className="demo-pill">
+          {data.current.status === "COMPLETED"
+            ? "Sezon încheiat · Clasament oficial"
+            : "Sezon activ · Clasament live"}
+        </span>
       </div>
 
-      {/* Main Standings / Form / Top Scorers panel */}
-      <StandingsPanel
-        seasonName={data.current.name}
-        seasonStatus={data.current.status}
-        standings={data.standings}
-        teamMeta={data.teamMeta}
-        topScorers={data.topScorers}
-      />
+      <div className="main-grid">
+        {/* Coloana stângă: Clasament + Tab-uri + Departajare D3 */}
+        <StandingsPanel
+          seasonName={data.current.name}
+          seasonStatus={data.current.status}
+          currentRound={data.currentRound}
+          totalRounds={data.totalRounds}
+          standings={data.standings}
+          teamMeta={data.teamMeta}
+          topScorers={data.topScorers}
+        />
 
-      {/* Current Round Fixtures */}
-      <section className="p19-panel" style={{ overflow: "hidden" }}>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "var(--space-3) var(--space-4)",
-            borderBottom: "1px solid var(--border-subtle)",
-          }}
-        >
-          <h2
-            className="font-display"
-            style={{ margin: 0, fontSize: "20px", lineHeight: "26px", fontWeight: 600 }}
+        {/* Coloana dreaptă: Etapa curentă + Suspendări active */}
+        <aside className="side-stack" aria-label="Etapa curentă și rezumat disciplină">
+          <section
+            className="panel animate-enter"
+            style={{ animationDelay: "80ms" }}
+            aria-labelledby="round-heading"
           >
-            Etapa {data.currentRound} · Meciuri
-          </h2>
-          <Link
-            href={`/program?season=${encodeURIComponent(data.current.slug)}&round=${data.currentRound}`}
-            style={{
-              fontSize: "13px",
-              fontWeight: 600,
-              color: "var(--accent-primary)",
-              textDecoration: "none",
-            }}
-          >
-            Filtrează etapa →
-          </Link>
-        </div>
-
-        <div style={{ display: "grid" }}>
-          {data.roundFixtures.map((fx) => {
-            const homeWon =
-              fx.status === "PLAYED" &&
-              fx.homeGoals !== null &&
-              fx.awayGoals !== null &&
-              fx.homeGoals > fx.awayGoals;
-            const awayWon =
-              fx.status === "PLAYED" &&
-              fx.homeGoals !== null &&
-              fx.awayGoals !== null &&
-              fx.awayGoals > fx.homeGoals;
-
-            return (
+            <div className="panel-header">
+              <h2 id="round-heading" className="panel-title">
+                Etapa {data.currentRound}
+              </h2>
               <Link
-                key={fx.id}
-                href={`/meciuri/${fx.id}`}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr auto 1fr auto",
-                  alignItems: "center",
-                  gap: "12px",
-                  padding: "10px var(--space-4)",
-                  borderBottom: "1px solid var(--border-subtle)",
-                  textDecoration: "none",
-                  color: "var(--text-primary)",
-                }}
+                className="panel-link"
+                href={`/program?season=${encodeURIComponent(data.current.slug)}&round=${data.currentRound}`}
               >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "flex-end",
-                    gap: "8px",
-                    textAlign: "right",
-                    fontWeight: homeWon ? 700 : 500,
-                  }}
-                >
-                  <span>{fx.homeTeam.name}</span>
-                  <TeamCrest
-                    shortName={fx.homeTeam.shortName}
-                    colorA={fx.homeTeam.crestColorA}
-                    colorB={fx.homeTeam.crestColorB}
-                  />
-                </div>
-
-                <div
-                  className="tabular-nums"
-                  style={{
-                    minWidth: "68px",
-                    textAlign: "center",
-                    padding: "4px 8px",
-                    borderRadius: "var(--radius-sm)",
-                    background: "var(--bg-subtle)",
-                    fontSize: "15px",
-                    fontWeight: 700,
-                  }}
-                >
-                  {fx.status === "PLAYED" && fx.homeGoals !== null && fx.awayGoals !== null
-                    ? `${fx.homeGoals} – ${fx.awayGoals}`
-                    : "vs"}
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    fontWeight: awayWon ? 700 : 500,
-                  }}
-                >
-                  <TeamCrest
-                    shortName={fx.awayTeam.shortName}
-                    colorA={fx.awayTeam.crestColorA}
-                    colorB={fx.awayTeam.crestColorB}
-                  />
-                  <span>{fx.awayTeam.name}</span>
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    fontSize: "12px",
-                    color: "var(--text-muted)",
-                  }}
-                >
-                  <span className="tabular-nums">{formatMatchDate(fx.scheduledAt)}</span>
-                  <FixtureStatusBadge status={fx.status} />
-                </div>
+                Tot programul{" "}
+                <span className="arrow-glide" aria-hidden="true">
+                  →
+                </span>
               </Link>
-            );
-          })}
-        </div>
-      </section>
+            </div>
+
+            <div className="match-list">
+              {data.roundFixtures.map((fx) => {
+                const isPlayed =
+                  fx.status === "PLAYED" &&
+                  fx.homeGoals !== null &&
+                  fx.awayGoals !== null;
+                const homeLost = isPlayed && fx.homeGoals! < fx.awayGoals!;
+                const awayLost = isPlayed && fx.awayGoals! < fx.homeGoals!;
+
+                return (
+                  <Link
+                    key={fx.id}
+                    href={`/meciuri/${fx.id}`}
+                    className="match-item"
+                  >
+                    <div className="match-meta">
+                      <span className="tabular">{formatMatchDate(fx.scheduledAt)}</span>
+                      <FixtureStatusBadge status={fx.status} />
+                    </div>
+
+                    <div className="match-teams">
+                      <span className="match-side match-side-home">
+                        <span
+                          className={`match-team-label${homeLost ? " muted-loser" : ""}`}
+                        >
+                          {fx.homeTeam.name}
+                        </span>
+                        <TeamCrest
+                          shortName={fx.homeTeam.shortName}
+                          colorA={fx.homeTeam.crestColorA}
+                          colorB={fx.homeTeam.crestColorB}
+                          size="xs"
+                        />
+                      </span>
+
+                      <span
+                        className={`score-pill tabular${!isPlayed ? " upcoming" : ""}`}
+                      >
+                        {isPlayed
+                          ? `${fx.homeGoals} – ${fx.awayGoals}`
+                          : formatTime(fx.scheduledAt)}
+                      </span>
+
+                      <span className="match-side match-side-away">
+                        <TeamCrest
+                          shortName={fx.awayTeam.shortName}
+                          colorA={fx.awayTeam.crestColorA}
+                          colorB={fx.awayTeam.crestColorB}
+                          size="xs"
+                        />
+                        <span
+                          className={`match-team-label${awayLost ? " muted-loser" : ""}`}
+                        >
+                          {fx.awayTeam.name}
+                        </span>
+                      </span>
+                    </div>
+
+                    <div className="match-foot">
+                      <span>{fx.pitch?.name ?? "Teren nealocat"}</span>
+                      <span className="match-cta">
+                        Detalii{" "}
+                        <span className="arrow-glide" aria-hidden="true">
+                          →
+                        </span>
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+
+          <section
+            className="panel animate-enter"
+            style={{ animationDelay: "160ms" }}
+            aria-labelledby="suspensions-heading"
+          >
+            <div className="panel-header">
+              <h2 id="suspensions-heading" className="panel-title">
+                Suspendări active
+              </h2>
+              <span className="demo-pill tabular">
+                {data.activeSuspensions.length}{" "}
+                {data.activeSuspensions.length === 1 ? "jucător" : "jucători"}
+              </span>
+            </div>
+
+            {data.activeSuspensions.length === 0 ? (
+              <div className="summary-list">
+                <span style={{ fontSize: "13px", color: "var(--text-muted)" }}>
+                  Niciun jucător suspendat activ în acest moment.
+                </span>
+              </div>
+            ) : (
+              <div className="summary-list">
+                {data.activeSuspensions.map((s) => (
+                  <div key={s.id} className="summary-row">
+                    <div>
+                      <Link href={`/jucatori/${s.playerSlug}`} className="summary-name">
+                        {s.playerName}
+                      </Link>
+                      <span className="summary-sub">
+                        {s.teamName ? `${s.teamName} · ` : ""}
+                        {REASON_LABELS[s.reason] ?? s.reason}
+                      </span>
+                    </div>
+                    <span className="status-badge status-suspended tabular">
+                      {s.remainingRounds}{" "}
+                      {s.remainingRounds === 1 ? "etapă" : "etape"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        </aside>
+      </div>
     </main>
   );
 }

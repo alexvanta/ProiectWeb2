@@ -11,8 +11,8 @@ export default async function CaptainIndexPage() {
   if (!user) redirect("/login");
   if (user.role !== "CAPTAIN" && user.role !== "ADMIN") {
     return (
-      <main className="p19-container">
-        <div className="p19-panel" style={{ padding: "var(--space-6)" }}>
+      <main className="container">
+        <div className="panel" style={{ padding: "var(--space-6)" }}>
           Acces restricționat: această pagină este disponibilă doar pentru rolul Căpitan sau Admin.
         </div>
       </main>
@@ -41,51 +41,48 @@ export default async function CaptainIndexPage() {
     : [];
 
   return (
-    <main className="p19-container" style={{ display: "grid", gap: "var(--space-5)" }}>
-      <div>
-        <h1 className="font-display" style={{ margin: 0, fontSize: "28px" }}>
-          Panou Căpitan · Foi de meci
-        </h1>
-        <p style={{ margin: "4px 0 0", color: "var(--text-secondary)", fontSize: "13px" }}>
-          Selectează un meci pentru a completa și depune foaia de meci (minim 7 jucători, maxim 11 titulari; jucătorii suspendați sunt blocați pe server).
-        </p>
+    <main className="container">
+      <div className="page-head animate-enter">
+        <div>
+          <h1 className="page-title">Panou Căpitan · Foi de meci</h1>
+          <p className="page-meta">
+            Selectează un meci pentru a completa și depune foaia de meci (minim 7 jucători, maxim 11 titulari; jucătorii suspendați sunt blocați pe server).
+          </p>
+        </div>
+        <span className="demo-pill tabular">{fixtures.length} meciuri</span>
       </div>
 
-      <section className="p19-panel" style={{ overflow: "hidden" }}>
+      <section className="panel animate-enter" style={{ animationDelay: "40ms" }}>
+        <div className="panel-header">
+          <h2 className="panel-title">Meciuri eligibile pentru foaie de meci</h2>
+          {activeSeason ? <span className="demo-pill">{activeSeason.name}</span> : null}
+        </div>
         {fixtures.length === 0 ? (
           <div style={{ padding: "var(--space-5)", color: "var(--text-muted)" }}>
             Nu există meciuri programate în sezonul activ.
           </div>
         ) : (
-          fixtures.map((fx) => (
-            <Link
-              key={fx.id}
-              href={`/capitan/foaie-meci/${fx.id}`}
-              style={{
-                display: "flex",
-                flexWrap: "wrap",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: "12px",
-                padding: "12px var(--space-4)",
-                borderBottom: "1px solid var(--border-subtle)",
-                textDecoration: "none",
-                color: "var(--text-primary)",
-                fontSize: "13px",
-              }}
-            >
-              <span className="tabular-nums" style={{ color: "var(--text-muted)" }}>
-                Etapa {fx.roundNumber}
-              </span>
-              <span style={{ fontWeight: 600, flex: 1 }}>
-                {fx.homeTeam.name} – {fx.awayTeam.name}
-              </span>
-              <FixtureStatusBadge status={fx.status} />
-              <span style={{ color: "var(--accent-primary)", fontWeight: 600 }}>
-                Completează foaia →
-              </span>
-            </Link>
-          ))
+          <div className="team-directory">
+            {fixtures.map((fx) => (
+              <Link
+                key={fx.id}
+                href={`/capitan/foaie-meci/${fx.id}`}
+                className="team-dir-link"
+                style={{ padding: "12px var(--space-4)" }}
+              >
+                <span style={{ display: "inline-flex", alignItems: "center", gap: "12px", flex: 1, minWidth: 0 }}>
+                  <span className="demo-pill tabular">Etapa {fx.roundNumber}</span>
+                  <span className="team-name" style={{ fontWeight: 600 }}>
+                    {fx.homeTeam.name} – {fx.awayTeam.name}
+                  </span>
+                </span>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: "12px", flexShrink: 0 }}>
+                  <FixtureStatusBadge status={fx.status} />
+                  <span className="detail-link">Completează foaia →</span>
+                </span>
+              </Link>
+            ))}
+          </div>
         )}
       </section>
     </main>

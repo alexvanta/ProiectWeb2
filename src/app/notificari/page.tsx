@@ -24,14 +24,15 @@ export default async function NotificationsPage() {
   });
 
   return (
-    <main className="p19-container" style={{ display: "grid", gap: "var(--space-5)" }}>
-      <div>
-        <h1 className="font-display" style={{ margin: 0, fontSize: "28px" }}>
-          Centru notificări in-app
-        </h1>
-        <p style={{ margin: "4px 0 0", color: "var(--text-secondary)", fontSize: "13px" }}>
-          Notificări automate primite la reprogramarea meciurilor echipei tale ({user.name}).
-        </p>
+    <main className="container">
+      <div className="page-head animate-enter">
+        <div>
+          <h1 className="page-title">Centru notificări in-app</h1>
+          <p className="page-meta">
+            Notificări automate primite la reprogramarea meciurilor echipei tale ({user.name}).
+          </p>
+        </div>
+        <span className="demo-pill tabular">{notifications.length} notificări</span>
       </div>
 
       <NotificationsClient
