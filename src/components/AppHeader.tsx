@@ -156,26 +156,6 @@ export function AppHeader({ seasons, user, unreadCount }: AppHeaderProps) {
             </select>
           ) : null}
 
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className="btn btn-secondary"
-            aria-pressed={theme === "dark"}
-            aria-label={theme === "dark" ? "Comută pe tema deschisă" : "Comută pe tema întunecată"}
-          >
-            <span
-              className="theme-icon"
-              style={{
-                display: "inline-flex",
-                transform: `rotate(${iconRotation}deg)`,
-              }}
-              aria-hidden="true"
-            >
-              {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
-            </span>
-            <span>{theme === "dark" ? "Light" : "Dark"}</span>
-          </button>
-
           {user ? (
             <>
               <Link
@@ -233,6 +213,26 @@ export function AppHeader({ seasons, user, unreadCount }: AppHeaderProps) {
             </Link>
           )}
         </div>
+
+        <button
+          type="button"
+          onClick={toggleTheme}
+          className="btn btn-secondary theme-toggle-btn"
+          aria-pressed={theme === "dark"}
+          aria-label={theme === "dark" ? "Comută pe tema deschisă" : "Comută pe tema întunecată"}
+        >
+          <span
+            className="theme-icon"
+            style={{
+              display: "inline-flex",
+              transform: `rotate(${iconRotation}deg)`,
+            }}
+            aria-hidden="true"
+          >
+            {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+          </span>
+          <span>{theme === "dark" ? "Light" : "Dark"}</span>
+        </button>
       </div>
     </header>
   );
