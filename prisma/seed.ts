@@ -664,7 +664,11 @@ async function main() {
     matchDurationMinutes: 90,
   });
 
-  // Seed Season 2 fixtures; mark rounds 1..3 as PLAYED with deterministic demo scores so Season 2 is visibly live
+  // Seed Season 2 fixtures; mark rounds 1..11 as PLAYED with deterministic demo scores
+  // so Season 2 has full 5-match FORMA strips, rich top scorers, and Round 12 as current SCHEDULED round
+  const SEASON2_PLAYED_ROUNDS = 11;
+  const SEASON2_CURRENT_ROUND = SEASON2_PLAYED_ROUNDS + 1;
+
   const season2Fixtures: Array<{
     id: string;
     roundNumber: number;
@@ -677,9 +681,13 @@ async function main() {
 
   for (let idx = 0; idx < generated.matches.length; idx++) {
     const gm = generated.matches[idx]!;
-    const isPlayed = gm.roundNumber <= 3;
-    const homeGoals = isPlayed ? (idx * 3 + gm.roundNumber) % 4 : null;
-    const awayGoals = isPlayed ? (idx * 2 + gm.roundNumber) % 3 : null;
+    const isPlayed = gm.roundNumber <= SEASON2_PLAYED_ROUNDS;
+    const homeGoals = isPlayed
+      ? (idx * 3 + gm.roundNumber + (idx % 5 === 0 ? 1 : 0)) % 4
+      : null;
+    const awayGoals = isPlayed
+      ? (idx * 2 + gm.roundNumber + (idx % 7 === 0 ? 1 : 0)) % 3
+      : null;
     const scheduledAt = new Date(gm.scheduledAt);
 
     const fx = await prisma.fixture.create({
@@ -709,14 +717,14 @@ async function main() {
     });
   }
 
-  // Seed GOAL events for Season 2 played fixtures (rounds 1..3), matching exact scores
+  // Seed GOAL events for Season 2 played fixtures (rounds 1..11), matching exact scores
   // and strictly excluding suspended players (transferredBannedPlayer, craiovaBannedPlayer)
   const season2SuspendedIds = new Set<string>([
     transferredBannedPlayer.id,
     craiovaBannedPlayer.id,
   ]);
 
-  for (const fx of season2Fixtures.filter((f) => f.roundNumber <= 3)) {
+  for (const fx of season2Fixtures.filter((f) => f.roundNumber <= SEASON2_PLAYED_ROUNDS)) {
     const homeEligible = (season2SquadByTeamId.get(fx.homeTeamId) ?? []).filter(
       (p) => !season2SuspendedIds.has(p.id),
     );
@@ -736,7 +744,8 @@ async function main() {
     }> = [];
 
     for (let g = 0; g < (fx.homeGoals ?? 0); g++) {
-      const scorer = homeAttackers[(g + (fx.roundNumber % 2)) % homeAttackers.length]!;
+      const attackerIdx = g === 0 ? 0 : (g + fx.roundNumber) % homeAttackers.length;
+      const scorer = homeAttackers[attackerIdx]!;
       eventsToCreate.push({
         fixtureId: fx.id,
         teamId: fx.homeTeamId,
@@ -747,7 +756,8 @@ async function main() {
     }
 
     for (let g = 0; g < (fx.awayGoals ?? 0); g++) {
-      const scorer = awayAttackers[(g + (fx.roundNumber % 2)) % awayAttackers.length]!;
+      const attackerIdx = g === 0 ? 0 : (g + fx.roundNumber) % awayAttackers.length;
+      const scorer = awayAttackers[attackerIdx]!;
       eventsToCreate.push({
         fixtureId: fx.id,
         teamId: fx.awayTeamId,
@@ -767,20 +777,20 @@ async function main() {
     (f) => f.roundNumber === 1 && (f.homeTeamId === craiovaTeam.id || f.awayTeamId === craiovaTeam.id),
   );
   if (samplePlayedFx) {
+    const craiovaSeason2Eligible = (season2SquadByTeamId.get(craiovaTeam.id) ?? []).filter(
+      (p) => !season2SuspendedIds.has(p.id),
+    );
     await prisma.matchSheet.create({
       data: {
         fixtureId: samplePlayedFx.id,
         teamId: craiovaTeam.id,
         submittedById: captainUser.id,
         entries: {
-          create: craiovaPlayers
-            .filter((p) => p.id !== craiovaBannedPlayer.id)
-            .slice(0, 11)
-            .map((p) => ({
-              playerId: p.id,
-              isStarter: true,
-              shirtNumber: p.shirtNumber,
-            })),
+          create: craiovaSeason2Eligible.slice(0, 11).map((p) => ({
+            playerId: p.id,
+            isStarter: true,
+            shirtNumber: p.shirtNumber,
+          })),
         },
       },
     });
@@ -790,14 +800,24 @@ async function main() {
         fixtureId: samplePlayedFx.id,
         actorId: refereeUser.id,
         reason: "Corecție minut marcator conform raportului suplimentar al arbitrului de rezervă.",
-        beforeSnapshot: { homeGoals: 2, awayGoals: 1, note: "Minut gol 67" },
-        afterSnapshot: { homeGoals: 2, awayGoals: 1, note: "Minut gol 68" },
+        beforeSnapshot: {
+          homeGoals: samplePlayedFx.homeGoals ?? 0,
+          awayGoals: samplePlayedFx.awayGoals ?? 0,
+          note: "Minut gol 67",
+        },
+        afterSnapshot: {
+          homeGoals: samplePlayedFx.homeGoals ?? 0,
+          awayGoals: samplePlayedFx.awayGoals ?? 0,
+          note: "Minut gol 68",
+        },
       },
     });
   }
 
   const upcomingCraiovaFx = season2Fixtures.find(
-    (f) => f.roundNumber === 4 && (f.homeTeamId === craiovaTeam.id || f.awayTeamId === craiovaTeam.id),
+    (f) =>
+      f.roundNumber === SEASON2_CURRENT_ROUND &&
+      (f.homeTeamId === craiovaTeam.id || f.awayTeamId === craiovaTeam.id),
   );
   if (upcomingCraiovaFx) {
     const newTime = new Date(upcomingCraiovaFx.scheduledAt.getTime() + 2 * 3_600_000);
@@ -809,7 +829,7 @@ async function main() {
         newScheduledAt: newTime,
         oldPitchName: "Stadion Ion Oblemenco",
         newPitchName: "Stadion Ion Oblemenco",
-        message: "Meciul din Etapa 4 a fost reprogramat cu 2 ore mai târziu din motive de televizare.",
+        message: `Meciul din Etapa ${SEASON2_CURRENT_ROUND} a fost reprogramat cu 2 ore mai târziu din motive de televizare.`,
       })),
     });
   }
