@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Bell, LogOut, Moon, Shield, Sun } from "lucide-react";
 import type { SeasonOption } from "@/server/queries/publicQueries";
 import type { SessionUser } from "@/server/auth/session";
@@ -27,6 +27,15 @@ export function AppHeader({ seasons, user, unreadCount }: AppHeaderProps) {
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [iconRotation, setIconRotation] = useState(0);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [logoFailed, setLogoFailed] = useState(false);
+  const logoRef = useRef<HTMLImageElement | null>(null);
+
+  useEffect(() => {
+    const img = logoRef.current;
+    if (!logoFailed && img && img.complete && img.naturalWidth === 0) {
+      setLogoFailed(true);
+    }
+  }, [logoFailed]);
 
   const selectedSeason =
     searchParams.get("season") ??
@@ -116,14 +125,28 @@ export function AppHeader({ seasons, user, unreadCount }: AppHeaderProps) {
         <Link
           href={`/${seasonQuery}`}
           className="brand-group"
-          aria-label="SuperLiga României P19 — Acasă"
+          aria-label="SuperLiga României — Acasă"
         >
-          <span className="brand-mark" aria-hidden="true">
-            P19
-          </span>
+          {logoFailed ? (
+            <span className="brand-mark" aria-hidden="true">
+              SL
+            </span>
+          ) : (
+            <span className="brand-logo-wrap" aria-hidden="true">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                ref={logoRef}
+                src="/superliga-logo.svg"
+                alt=""
+                className="brand-logo-img"
+                decoding="async"
+                onError={() => setLogoFailed(true)}
+              />
+            </span>
+          )}
           <span>
             <span className="brand-title">SuperLiga României</span>
-            <span className="brand-sub">Sezon regular · ROAF FRF</span>
+            <span className="brand-sub">Sezon regular</span>
           </span>
         </Link>
 
