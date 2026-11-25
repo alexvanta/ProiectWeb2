@@ -32,6 +32,17 @@ const COLUMN_TIPS: Record<string, string> = {
   Pct: "Puncte",
 };
 
+const CRITERION_TIPS: Record<string, string> = {
+  OVERALL_GD: "Golaveraj general",
+  OVERALL_GF: "Numărul total de goluri marcate",
+  H2H_POINTS: "Puncte în meciuri directe",
+  H2H_GD: "Golaveraj în meciuri directe",
+  H2H_GF: "Goluri marcate în directe",
+  H2H_AWAY_GF: "Goluri în deplasare (directe)",
+  WINS: "Număr de victorii",
+  ALPHABETICAL: "Ordine alfabetică",
+};
+
 interface HeaderTooltipState {
   label: string;
   left: number;
@@ -144,9 +155,7 @@ export function StandingsPanel({
       );
   }, [standings.rows]);
 
-  const showHeaderTip = (el: HTMLElement, key: string) => {
-    const label = COLUMN_TIPS[key];
-    if (!label) return;
+  const showTooltip = (el: HTMLElement, label: string) => {
     const rect = el.getBoundingClientRect();
     const approxWidth = Math.max(96, label.length * 7.2 + 24);
     const pad = 10;
@@ -156,6 +165,12 @@ export function StandingsPanel({
     const top = rect.bottom + 8;
     const arrowX = Math.max(12, Math.min(approxWidth - 12, centerX - left));
     setHeaderTip({ label, left, top, arrowX });
+  };
+
+  const showHeaderTip = (el: HTMLElement, key: string) => {
+    const label = COLUMN_TIPS[key];
+    if (!label) return;
+    showTooltip(el, label);
   };
 
   const hideHeaderTip = () => setHeaderTip(null);
@@ -395,7 +410,7 @@ export function StandingsPanel({
                                 onClick={() => jumpToTieBreak(row.tieBreakGroupId!, row.teamId)}
                                 aria-label={`Vezi departajarea ROAF pentru ${row.teamName}`}
                               >
-                                D3
+                                Departajare
                               </button>
                             ) : null}
                           </div>
@@ -438,7 +453,7 @@ export function StandingsPanel({
                     <span className="legend-pos legend-pos-tied" aria-hidden="true">
                       2
                     </span>
-                    Departajare ROAF Art. 27 ({standings.mode === "final" ? "meciuri directe" : "golaveraj general"})
+                    Departajare
                   </span>
                 ) : null}
               </div>
@@ -565,16 +580,33 @@ export function StandingsPanel({
           </p>
 
           <div style={{ display: "grid", gap: "var(--space-3)" }}>
-            {d3Groups.map((g) => (
-              <div key={g.groupId} className="mini-grid">
-                <div className="mini-grid-row mini-grid-head">
-                  <div className="mini-grid-cell">
-                    Egalitate la {g.points} pct · Criteriu: {g.resolvedBy}
+            {d3Groups.map((g) => {
+              const criterionTip = CRITERION_TIPS[g.resolvedBy];
+              return (
+                <div key={g.groupId} className="mini-grid">
+                  <div className="mini-grid-row mini-grid-head">
+                    <div className="mini-grid-cell">
+                      Egalitate la {g.points} pct · Criteriu:{" "}
+                      {criterionTip ? (
+                        <span
+                          tabIndex={0}
+                          title={criterionTip}
+                          className="criterion-code"
+                          onMouseEnter={(e) => showTooltip(e.currentTarget, criterionTip)}
+                          onMouseLeave={hideHeaderTip}
+                          onFocus={(e) => showTooltip(e.currentTarget, criterionTip)}
+                          onBlur={hideHeaderTip}
+                        >
+                          {g.resolvedBy}
+                        </span>
+                      ) : (
+                        g.resolvedBy
+                      )}
+                    </div>
+                    <div className="mini-grid-cell">MJ</div>
+                    <div className="mini-grid-cell">DG</div>
+                    <div className="mini-grid-cell">Pct</div>
                   </div>
-                  <div className="mini-grid-cell">MJ</div>
-                  <div className="mini-grid-cell">DG</div>
-                  <div className="mini-grid-cell">Pct</div>
-                </div>
                 {g.teamIds.map((tid) => {
                   const r = rowById.get(tid);
                   if (!r) return null;
@@ -611,8 +643,9 @@ export function StandingsPanel({
                     </div>
                   );
                 })}
-              </div>
-            ))}
+                </div>
+              );
+            })}
           </div>
         </div>
       ) : null}
