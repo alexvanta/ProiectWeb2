@@ -59,7 +59,7 @@ export default async function HomePage({
             SuperLiga României · {data.current.name}
           </h1>
           <p className="page-meta">
-            Format tur–retur (16 echipe, {data.totalRounds} etape) · Regulament ROAF FRF &amp; RD FRF · Etapa curentă: {data.currentRound}
+            Format tur–retur (16 echipe, {data.totalRounds} etape) · Etapa curentă: {data.currentRound}
           </p>
         </div>
         <span className="demo-pill">
