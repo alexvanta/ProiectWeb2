@@ -244,15 +244,29 @@ export function StandingsPanel({
         {/* Panel Header with Flashscore-style sliding segmented tabs */}
         <div className="panel-header">
           <div className="panel-header-left">
-            <h2 id="standings-heading" className="panel-title">
-              {tab === "CLASAMENT" ? (
-                <span
-                  className={`pulse-dot${seasonStatus !== "ACTIVE" ? " pulse-dot-muted" : ""}`}
-                  aria-hidden="true"
-                />
-              ) : null}
-              <span>{panelTitle}</span>
-            </h2>
+            <div className="inline-grid items-center max-w-full">
+              <span
+                className="panel-title col-start-1 row-start-1 invisible pointer-events-none select-none"
+                aria-hidden="true"
+              >
+                <span className="pulse-dot pulse-dot-muted" />
+                <span>
+                  {seasonStatus === "COMPLETED" ? "Clasament final" : "Clasament live"}
+                </span>
+              </span>
+              <h2
+                id="standings-heading"
+                className="panel-title col-start-1 row-start-1 justify-self-start"
+              >
+                {tab === "CLASAMENT" ? (
+                  <span
+                    className={`pulse-dot${seasonStatus !== "ACTIVE" ? " pulse-dot-muted" : ""}`}
+                    aria-hidden="true"
+                  />
+                ) : null}
+                <span>{panelTitle}</span>
+              </h2>
+            </div>
 
             <div
               ref={tabListRef}

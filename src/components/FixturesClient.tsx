@@ -88,6 +88,11 @@ export function FixturesClient({
     return Array.from(new Set(fixtures.map((f) => f.roundNumber))).sort((a, b) => a - b);
   }, [fixtures]);
 
+  const activeRoundNumber = useMemo(() => {
+    const firstScheduled = fixtures.find((f) => f.status === "SCHEDULED");
+    return firstScheduled?.roundNumber ?? null;
+  }, [fixtures]);
+
   const filtered = useMemo(() => {
     return fixtures.filter((f) => {
       if (roundFilter && String(f.roundNumber) !== roundFilter) return false;
@@ -261,6 +266,15 @@ export function FixturesClient({
                     Etapa {roundNum} {roundNum <= 15 ? "· Tur" : "· Retur"}
                   </span>
                   <span className="round-tag">{items.length} meciuri</span>
+                  {activeRoundNumber === roundNum ? (
+                    <span className="round-active-pill">
+                      <span className="ping-indicator ping-indicator-live" aria-hidden="true">
+                        <span className="ping-ring animate-ping" />
+                        <span className="ping-core" />
+                      </span>
+                      Etapa curentă
+                    </span>
+                  ) : null}
                 </h2>
                 <span className="round-dates tabular">{formatRoundDateSpan(items)}</span>
               </div>

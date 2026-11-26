@@ -42,6 +42,8 @@ export function AppHeader({ seasons, user, unreadCount }: AppHeaderProps) {
     seasons.find((s) => s.isActive)?.slug ??
     seasons[0]?.slug ??
     "";
+  const selectedSeasonObj = seasons.find((s) => s.slug === selectedSeason) ?? seasons[0];
+  const isSelectedSeasonActive = selectedSeasonObj?.status === "ACTIVE";
 
   useEffect(() => {
     const current = document.documentElement.dataset.theme;
@@ -165,18 +167,26 @@ export function AppHeader({ seasons, user, unreadCount }: AppHeaderProps) {
 
         <div className="header-actions">
           {seasons.length > 0 ? (
-            <select
-              aria-label="Selectează sezon"
-              className="select-control"
-              value={selectedSeason}
-              onChange={(e) => handleSeasonChange(e.target.value)}
-            >
-              {seasons.map((s) => (
-                <option key={s.id} value={s.slug}>
-                  {s.name} ({s.status === "COMPLETED" ? "Încheiat" : s.status === "ACTIVE" ? "Activ" : "Draft"})
-                </option>
-              ))}
-            </select>
+            <div className="season-select-wrap">
+              {isSelectedSeasonActive ? (
+                <span className="ping-indicator ping-indicator-live" aria-hidden="true">
+                  <span className="ping-ring animate-ping" />
+                  <span className="ping-core" />
+                </span>
+              ) : null}
+              <select
+                aria-label="Selectează sezon"
+                className="select-control"
+                value={selectedSeason}
+                onChange={(e) => handleSeasonChange(e.target.value)}
+              >
+                {seasons.map((s) => (
+                  <option key={s.id} value={s.slug}>
+                    {s.name} ({s.status === "COMPLETED" ? "Încheiat" : s.status === "ACTIVE" ? "Activ" : "Draft"})
+                  </option>
+                ))}
+              </select>
+            </div>
           ) : null}
 
           {user ? (

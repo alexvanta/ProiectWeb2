@@ -63,6 +63,12 @@ export default async function HomePage({
           </p>
         </div>
         <span className="demo-pill">
+          {data.current.status === "ACTIVE" ? (
+            <span className="ping-indicator ping-indicator-live" aria-hidden="true">
+              <span className="ping-ring animate-ping" />
+              <span className="ping-core" />
+            </span>
+          ) : null}
           {data.current.status === "COMPLETED"
             ? "Sezon încheiat · Clasament oficial"
             : "Sezon activ · Clasament live"}
