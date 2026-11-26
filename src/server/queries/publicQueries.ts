@@ -159,7 +159,7 @@ export async function getHomePageData(seasonSlug?: string) {
       orderBy: [{ roundNumber: "asc" }, { scheduledAt: "asc" }],
     }),
     prisma.suspension.findMany({
-      where: { remainingRounds: { gt: 0 } },
+      where: { originSeasonId: current.id, remainingRounds: { gt: 0 } },
       include: {
         player: {
           include: {

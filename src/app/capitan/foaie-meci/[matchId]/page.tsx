@@ -61,7 +61,9 @@ export default async function MatchSheetPage({
     include: {
       player: {
         include: {
-          suspensions: { where: { remainingRounds: { gt: 0 } } },
+          suspensions: {
+            where: { originSeasonId: fixture.seasonId, remainingRounds: { gt: 0 } },
+          },
         },
       },
     },

@@ -37,7 +37,7 @@ export default async function StatisticsPage({
   const [scorers, activeSuspensions] = await Promise.all([
     getSeasonTopScorers(current.id),
     prisma.suspension.findMany({
-      where: { remainingRounds: { gt: 0 } },
+      where: { originSeasonId: current.id, remainingRounds: { gt: 0 } },
       include: {
         player: {
           include: {
@@ -76,7 +76,7 @@ export default async function StatisticsPage({
         <div>
           <h1 className="page-title">Statistici &amp; Suspendări active · {current.name}</h1>
           <p className="page-meta">
-            Top marcatori, situația cartonașelor și jucătorii suspendați activ (inclusiv suspendări reportate între sezoane).
+            Top marcatori, situația cartonașelor și jucătorii suspendați activ.
           </p>
         </div>
         <span className="demo-pill tabular">
