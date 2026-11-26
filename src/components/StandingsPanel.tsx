@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { StandingsResult } from "@/domain/types";
 import type { TopScorerItem } from "@/server/queries/publicQueries";
@@ -70,6 +70,8 @@ export function StandingsPanel({
   }>({ groupId: null, teamId: null });
   const [headerTip, setHeaderTip] = useState<HeaderTooltipState | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [highlightedTeamId, setHighlightedTeamId] = useState<string | null>(null);
+  const [pendingScrollTeamId, setPendingScrollTeamId] = useState<string | null>(null);
 
   const tabListRef = useRef<HTMLDivElement | null>(null);
   const tabBtnRefs = useRef<Record<ActiveTab, HTMLButtonElement | null>>({
@@ -86,9 +88,16 @@ export function StandingsPanel({
     animated: boolean;
   }>({ left: 0, top: 0, width: 0, height: 0, ready: false, animated: false });
   const d3PanelRef = useRef<HTMLDivElement | null>(null);
+  const rowRefs = useRef<Record<string, HTMLTableRowElement | null>>({});
+  const highlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     setMounted(true);
+    return () => {
+      if (highlightTimerRef.current) {
+        clearTimeout(highlightTimerRef.current);
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -180,6 +189,39 @@ export function StandingsPanel({
     d3PanelRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
+  const scrollToAndHighlightTeam = useCallback((teamId: string) => {
+    if (highlightTimerRef.current) {
+      clearTimeout(highlightTimerRef.current);
+      highlightTimerRef.current = null;
+    }
+    const targetRow =
+      rowRefs.current[teamId] ?? document.getElementById(`standings-team-${teamId}`);
+    targetRow?.scrollIntoView({ behavior: "smooth", block: "center" });
+    setHighlightedTeamId(teamId);
+    highlightTimerRef.current = setTimeout(() => {
+      setHighlightedTeamId(null);
+      highlightTimerRef.current = null;
+    }, 1800);
+  }, []);
+
+  useEffect(() => {
+    if (tab === "CLASAMENT" && pendingScrollTeamId) {
+      scrollToAndHighlightTeam(pendingScrollTeamId);
+      setPendingScrollTeamId(null);
+    }
+  }, [tab, pendingScrollTeamId, scrollToAndHighlightTeam]);
+
+  const jumpToStandingsTeam = (teamId: string) => {
+    setHoveredMatch({ teamId: null, opponentId: null });
+    setHoveredTie({ groupId: null, teamId: null });
+    if (tab !== "CLASAMENT") {
+      setTab("CLASAMENT");
+      setPendingScrollTeamId(teamId);
+      return;
+    }
+    scrollToAndHighlightTeam(teamId);
+  };
+
   const panelTitle =
     tab === "CLASAMENT"
       ? seasonStatus === "COMPLETED"
@@ -244,6 +286,12 @@ export function StandingsPanel({
                       setTab(t);
                       setHoveredMatch({ teamId: null, opponentId: null });
                       setHoveredTie({ groupId: null, teamId: null });
+                      setPendingScrollTeamId(null);
+                      setHighlightedTeamId(null);
+                      if (highlightTimerRef.current) {
+                        clearTimeout(highlightTimerRef.current);
+                        highlightTimerRef.current = null;
+                      }
                     }}
                   >
                     {t}
@@ -352,10 +400,15 @@ export function StandingsPanel({
                       !isTieActive &&
                       row.tieBreakGroupId === hoveredTie.groupId;
 
+                    const isJumpHighlighted =
+                      tab === "CLASAMENT" && highlightedTeamId === row.teamId;
+
                     const classes = [
+                      tab === "CLASAMENT" ? "scroll-mt-24" : "",
                       isLeader ? "rank-leader" : hasTieBreak ? "rank-tied" : "",
                       isSelf ? "form-pair-self" : isOpp ? "form-pair-opp" : "",
                       isTieActive ? "d3-team-active" : isTieGroupHover ? "d3-group-hover" : "",
+                      isJumpHighlighted ? "standings-row-jump-highlight" : "",
                     ]
                       .filter(Boolean)
                       .join(" ");
@@ -372,6 +425,12 @@ export function StandingsPanel({
                     return (
                       <tr
                         key={row.teamId}
+                        id={tab === "CLASAMENT" ? `standings-team-${row.teamId}` : undefined}
+                        ref={(el) => {
+                          if (tab === "CLASAMENT") {
+                            rowRefs.current[row.teamId] = el;
+                          }
+                        }}
                         data-team={row.teamId}
                         className={classes || undefined}
                         onMouseEnter={() => {
@@ -576,7 +635,7 @@ export function StandingsPanel({
             </span>
           </div>
           <p className="tiebreak-desc">
-            Treci cu mouse-ul pe un rând pentru a evidenția echipele implicate în clasamentul general.
+            Treci cu mouse-ul pe un rând pentru a evidenția echipele implicate sau fă click pentru a merge direct la echipă în clasament.
           </p>
 
           <div style={{ display: "grid", gap: "var(--space-3)" }}>
@@ -613,13 +672,18 @@ export function StandingsPanel({
                   const meta = teamMeta[tid];
                   const isActive = hoveredTie.teamId === tid;
                   return (
-                    <div
+                    <button
                       key={tid}
-                      className={`mini-grid-row mini-grid-body${isActive ? " d3-team-active" : ""}`}
+                      type="button"
+                      className={`mini-grid-row mini-grid-body cursor-pointer${isActive ? " d3-team-active" : ""}`}
                       onMouseEnter={() => setHoveredTie({ groupId: g.groupId, teamId: tid })}
                       onMouseLeave={() => setHoveredTie({ groupId: null, teamId: null })}
+                      onFocus={() => setHoveredTie({ groupId: g.groupId, teamId: tid })}
+                      onBlur={() => setHoveredTie({ groupId: null, teamId: null })}
+                      onClick={() => jumpToStandingsTeam(tid)}
+                      aria-label={`Mergi la ${r.teamName} în clasament`}
                     >
-                      <div className="mini-grid-cell">
+                      <span className="mini-grid-cell">
                         <span className="team-cell">
                           <TeamCrest
                             slug={meta?.slug}
@@ -628,19 +692,19 @@ export function StandingsPanel({
                             colorB={meta?.crestColorB ?? "#0F5132"}
                             size="xs"
                           />
-                          <span>
+                          <span className="tiebreak-team-name">
                             {r.position}. {r.teamName}
                           </span>
                         </span>
-                      </div>
-                      <div className="mini-grid-cell tabular">{r.played}</div>
-                      <div className="mini-grid-cell tabular">
+                      </span>
+                      <span className="mini-grid-cell tabular">{r.played}</span>
+                      <span className="mini-grid-cell tabular">
                         {r.goalDifference > 0 ? `+${r.goalDifference}` : r.goalDifference}
-                      </div>
-                      <div className="mini-grid-cell tabular">
+                      </span>
+                      <span className="mini-grid-cell tabular">
                         <strong>{r.points}</strong>
-                      </div>
-                    </div>
+                      </span>
+                    </button>
                   );
                 })}
                 </div>
